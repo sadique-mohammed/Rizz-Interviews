@@ -266,7 +266,7 @@ export default function Features() {
                   layout
                   className="rounded-2xl border border-gray-200 bg-gradient-to-b from-gray-50 to-white p-6 md:p-8 shadow-sm"
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex gap-3 items-center">
                     <activeTab.icon className="h-5 w-5 text-brand" />
                     <h3 className="text-xl md:text-2xl font-semibold text-gray-900">
                       {activeTab.title}

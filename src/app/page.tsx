@@ -1,7 +1,7 @@
 import Navbar from "@/components/landing/navbar";
-// import Hero from "@/components/landing/hero";
-// import Features from "@/components/landing/features";
-// import LogoMarquee from "@/components/landing/logo-marquee";
+import Hero from "@/components/landing/hero";
+import Features from "@/components/landing/features";
+import LogoMarquee from "@/components/landing/logo-marquee";
 // import Testimonials from "@/components/landing/testimonials";
 // import Pricing from "@/components/landing/pricing";
 import Footer from "@/components/landing/footer";
@@ -10,11 +10,12 @@ export default function Home() {
   return (
     <main className="font-sans">
       <Navbar />
-      {/*<Hero />
-      <Features />
+      <Hero />
       <LogoMarquee />
-      <Testimonials />
-      <Pricing /> */}
+      <Features />
+      {/* 
+         <Testimonials />
+         <Pricing /> */}
       <EmailSignup />
       <Footer />
     </main>
