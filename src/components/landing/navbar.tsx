@@ -28,7 +28,7 @@ export default function Navbar() {
               height={32}
               className="inline-block mr-2"
             />
-            Code Nexus
+            Nexus AI
           </Link>
 
           <div className="hidden md:flex items-center gap-6">
