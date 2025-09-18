@@ -239,5 +239,5 @@
   /* white text */
   box-shadow: 0 6px 18px rgba(0, 165, 207, 0.15);
   /* bright blue glow */
-  transform: translateY(-1px);
+  /* transform: translateY(-1px); */
 }

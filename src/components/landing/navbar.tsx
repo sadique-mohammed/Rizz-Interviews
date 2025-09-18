@@ -43,12 +43,17 @@ export default function Navbar() {
             ))} */}
           </div>
 
-          <div className="flex items-center gap-4 border-2 rounded-md border-blue-100">
-            <Link
-              href="/auth"
-              className="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold text-gradient"
-            >
-              Sign Up/ Login
+          <div className="flex items-center ">
+            <Link href="/auth" passHref>
+              <motion.div
+                className="inline-flex items-center justify-center rounded-xl px-10 py-2 text-sm font-semibold btn-invert"
+                whileHover={{
+                  backgroundColor: "rgb(17, 24, 39)",
+                  color: "#ffffff",
+                }}
+              >
+                Get Started
+              </motion.div>
             </Link>
           </div>
         </nav>
