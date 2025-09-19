@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 type Tab = {
   id: string;
@@ -71,13 +72,7 @@ const TABS: Tab[] = [
 ];
 
 // DemoCard component
-function DemoCard({
-  tone = "red",
-  pulse = false,
-}: {
-  tone?: "red" | "purple" | "blue";
-  pulse?: boolean;
-}) {
+function DemoCard({ pulse = false }: { pulse?: boolean }) {
   const color = "bg-brand/10 text-brand";
   const prefersReducedMotion = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
@@ -118,37 +113,46 @@ function DemoCard({
         rotateY: prefersReducedMotion ? 0 : rY,
         transformPerspective: 900,
       }}
-      className="relative overflow-hidden rounded-2xl border h-fit border-gray-200 bg-white p-4 shadow-sm"
+      className="relative overflow-hidden rounded-2xl border border-gray-200/60 bg-gradient-to-br from-white to-gray-50/50 p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 h-fit"
     >
       {/* shimmer sweep */}
       {pulse && !prefersReducedMotion && (
         <motion.div
           initial={{ x: "-120%" }}
           animate={{ x: "120%" }}
-          transition={{ duration: 1.1, ease: "easeInOut" }}
-          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent"
+          transition={{ duration: 1.2, ease: "easeInOut", repeat: 1 }}
+          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
         />
       )}
       <div className={cn("rounded-xl p-3 w-fit", color)}>
         <span className="text-xs font-semibold">Get ready for your interview</span>
       </div>
-      <div className="mt-3 rounded-xl border border-gray-200 p-4">
+      <div className="mt-4 rounded-xl border border-gray-200/60 p-4 bg-white/80 backdrop-blur-sm">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-md bg-gray-100" />
-          <div className="flex-1">
-            <div className="h-3 w-28 bg-gray-200 rounded" />
-            <div className="mt-2 h-2.5 w-40 bg-gray-200 rounded" />
+          <div className="h-9 w-9 rounded-md bg-gradient-to-br from-brand/20 to-brand/10 flex items-center justify-center">
+            <Image src="/favicon.svg" alt="Nexus AI" width={24} height={24} className="absolute" />
           </div>
-          <div className="h-6 w-6 rounded-full bg-gray-100" />
+          <div className="flex-1">
+            <div className="text-sm font-medium text-gray-900">Nexus AI Interviewer</div>
+            <div className="text-xs text-gray-500">Ready to begin your session</div>
+          </div>
+          <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center">
+            <div className="h-2 w-2 rounded-full bg-green-500 animate-ping" />
+          </div>
         </div>
         <div className="mt-4 flex items-center justify-between">
-          <div className="h-2.5 w-24 bg-gray-200 rounded" />
-          <div className="h-8 w-28 rounded-full bg-gray-900/90" />
+          <div className="text-xs text-gray-500">Estimated time: 10-15 mins</div>
+          <Button
+            size="sm"
+            className="h-8 px-4 bg-brand hover:bg-brand/90 text-white text-xs rounded-full"
+          >
+            Start Interview
+          </Button>
         </div>
       </div>
       <div className="mt-4 flex items-center gap-2 text-[11px] text-gray-500">
-        <div className="h-4 w-4 rounded-full bg-gray-100" />
-        <span>Session will take ~10–15 mins</span>
+        <Shield className="h-4 w-4 text-green-500" />
+        <span>Secure & private session</span>
       </div>
     </motion.div>
   );
@@ -199,15 +203,15 @@ export default function Features() {
   };
 
   return (
-    <section id="features" className="py-20 px-6 md:px-12 bg-white relative">
+    <section id="features" className="py-24 px-6 md:px-12 bg-white relative overflow-hidden">
       <div
-        className="absolute inset-0 opacity-30"
+        className="absolute inset-0 opacity-20"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(156, 163, 175, 0.3) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(156, 163, 175, 0.3) 1px, transparent 1px)
+            linear-gradient(rgba(156, 163, 175, 0.2) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(156, 163, 175, 0.2) 1px, transparent 1px)
           `,
-          backgroundSize: "20px 20px",
+          backgroundSize: "24px 24px",
         }}
       />
 
@@ -220,21 +224,21 @@ export default function Features() {
         />
 
         {/* Pill Tabs */}
-        <Tabs value={active} onValueChange={setActive} className="mt-2">
+        <Tabs value={active} onValueChange={setActive} className="mt-4">
           <div className="flex justify-center">
-            <TabsList className="relative flex max-w-full overflow-x-auto no-scrollbar p-1.5 md:p-2 bg-gray-100/80 backdrop-blur ring-1 ring-gray-200 shadow-sm h-auto w-full gap-0 items-start flex-row tracking-normal leading-5 rounded-full my-1 mx-0">
+            <TabsList className="relative flex max-w-full overflow-x-auto no-scrollbar p-2 md:p-2.5 bg-gray-100/60 backdrop-blur-sm ring-1 ring-gray-200/60 shadow-lg h-auto w-full gap-0 items-start flex-row tracking-normal leading-5 rounded-full my-2 mx-0">
               {TABS.map((t) => (
                 <TabsTrigger
                   key={t.id}
                   value={t.id}
                   className={cn(
-                    "relative isolate mx-0.5 rounded-full px-3.5 md:px-4 py-1.5 md:py-2 text-gray-600 transition-colors hover:text-gray-900 data-[state=active]:text-gray-900"
+                    "relative isolate mx-0.5 rounded-full px-3.5 md:px-4 py-1.5 md:py-2 text-gray-600 transition-all duration-200 hover:text-gray-900 hover:bg-white/50 data-[state=active]:text-gray-900"
                   )}
                 >
                   {active === t.id && (
                     <motion.span
                       layoutId="tab-pill"
-                      className="absolute inset-0 z-0 rounded-full bg-white shadow-sm"
+                      className="absolute inset-0 z-0 rounded-full bg-white shadow-md"
                       transition={{ type: "spring", stiffness: 500, damping: 40 }}
                     />
                   )}
@@ -248,23 +252,23 @@ export default function Features() {
           </div>
 
           {/* Content */}
-          <div className="mt-8">
+          <div className="mt-10">
             <AnimatePresence mode="wait">
               <motion.div
                 key={active}
-                initial={{ opacity: 0, y: 8 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.35 }}
-                className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8"
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12"
               >
                 {/* Demo card */}
-                <DemoCard tone={tabColors[active]} pulse={pulse} />
+                <DemoCard pulse={pulse} />
 
                 {/* Copy panel */}
                 <motion.div
                   layout
-                  className="rounded-2xl border border-gray-200 bg-gradient-to-b from-gray-50 to-white p-6 md:p-8 shadow-sm"
+                  className="rounded-2xl border border-gray-200/60 bg-gradient-to-br from-gray-50/50 to-white p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow duration-300"
                 >
                   <div className="flex gap-3 items-center">
                     <activeTab.icon className="h-5 w-5 text-brand" />
@@ -275,14 +279,35 @@ export default function Features() {
                   <p className="mt-3 text-sm text-gray-600">{activeTab.copy}</p>
 
                   {activeTab.bullets?.length && (
-                    <ul className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-6">
+                    <motion.ul
+                      initial="hidden"
+                      animate="visible"
+                      variants={{
+                        hidden: { opacity: 0 },
+                        visible: {
+                          opacity: 1,
+                          transition: {
+                            staggerChildren: 0.1,
+                          },
+                        },
+                      }}
+                      className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-6"
+                    >
                       {activeTab.bullets.map((b) => (
-                        <li key={b} className="flex items-center gap-2 text-sm text-gray-700">
+                        <motion.li
+                          key={b}
+                          variants={{
+                            hidden: { opacity: 0, x: -10 },
+                            visible: { opacity: 1, x: 0 },
+                          }}
+                          transition={{ duration: 0.3 }}
+                          className="flex items-center gap-2 text-sm text-gray-700"
+                        >
                           <CheckCircle2 className="h-4 w-4 text-brand" />
                           {b}
-                        </li>
+                        </motion.li>
                       ))}
-                    </ul>
+                    </motion.ul>
                   )}
 
                   {/* Stats */}
@@ -300,25 +325,34 @@ export default function Features() {
                   </div>
 
                   {/* CTA row */}
-                  <div className="mt-6 flex flex-wrap items-center gap-3">
-                    <Button
-                      className="h-9 rounded-full px-4 bg-brand hover:bg-brand/90 text-white"
-                      onClick={() => {
-                        setPulse(false);
-                        requestAnimationFrame(() => {
-                          setPulse(true);
-                          setTimeout(() => setPulse(false), 1150);
-                        });
-                      }}
-                    >
-                      <PlayCircle className="mr-2 h-4 w-4" />
-                      See it in action
-                    </Button>
-                    <Button variant="outline" className="h-9 rounded-full px-4 bg-transparent">
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      Read docs
-                    </Button>
-                  </div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3, duration: 0.3 }}
+                    className="mt-6 flex flex-wrap items-center gap-3"
+                  >
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button
+                        className="h-9 rounded-full px-4 bg-brand hover:bg-brand/90 text-white"
+                        onClick={() => {
+                          setPulse(false);
+                          requestAnimationFrame(() => {
+                            setPulse(true);
+                            setTimeout(() => setPulse(false), 1150);
+                          });
+                        }}
+                      >
+                        <PlayCircle className="mr-2 h-4 w-4" />
+                        See it in action
+                      </Button>
+                    </motion.div>
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button variant="outline" className="h-9 rounded-full px-4 bg-transparent">
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        Read docs
+                      </Button>
+                    </motion.div>
+                  </motion.div>
                 </motion.div>
               </motion.div>
             </AnimatePresence>

@@ -213,14 +213,14 @@ function Logo({ label, Icon }: { label: string; Icon: React.FC<React.SVGProps<SV
       aria-label={label}
       title={label}
       className={cn(
-        "group shrink-0 rounded-xl border bg-white/80",
-        "border-gray-200/70 px-5 py-3 shadow-[0_1px_0_rgba(0,0,0,0.03)]",
-        "grayscale hover:grayscale-0 transition-all duration-300",
-        "hover:shadow-md"
+        "group shrink-0 rounded-xl border bg-white/90 backdrop-blur-sm",
+        "border-gray-200/70 px-4 py-2 md:px-5 md:py-3 shadow-sm hover:shadow-lg",
+        "grayscale hover:grayscale-0 transition-all duration-500",
+        "hover:scale-105 transform"
       )}
     >
       <Icon
-        className="h-6 w-auto text-gray-500 group-hover:text-gray-900 transition-colors duration-300"
+        className="h-6 w-auto text-gray-500 group-hover:text-gray-900 transition-colors duration-500"
         aria-hidden
       />
       <span className="sr-only">{label}</span>
@@ -228,8 +228,9 @@ function Logo({ label, Icon }: { label: string; Icon: React.FC<React.SVGProps<SV
   );
 }
 
-function Rail({ reverse, speed = 28 }: { reverse?: boolean; speed?: number }) {
+function Rail({ reverse, speed = 10 }: { reverse?: boolean; speed?: number }) {
   const railRef = useRef<HTMLDivElement>(null);
+  const animationRef = useRef<gsap.core.Timeline | gsap.core.Tween | null>(null);
 
   useLayoutEffect(() => {
     const el = railRef.current;
@@ -238,12 +239,25 @@ function Rail({ reverse, speed = 28 }: { reverse?: boolean; speed?: number }) {
     if (prefersReduced) return;
 
     const ctx = gsap.context(() => {
-      gsap.to(el, {
-        xPercent: reverse ? 50 : -50,
-        ease: "none",
-        repeat: -1,
-        duration: speed,
-      });
+      if (reverse) {
+        animationRef.current = gsap.fromTo(
+          el,
+          { xPercent: -50 },
+          {
+            xPercent: 0,
+            ease: "none",
+            repeat: -1,
+            duration: speed,
+          }
+        );
+      } else {
+        animationRef.current = gsap.to(el, {
+          xPercent: -50,
+          ease: "none",
+          repeat: -1,
+          duration: speed,
+        });
+      }
     }, railRef);
 
     return () => ctx.revert();
@@ -254,11 +268,9 @@ function Rail({ reverse, speed = 28 }: { reverse?: boolean; speed?: number }) {
   return (
     <div
       ref={railRef}
-      className={cn(
-        "flex items-center gap-12 min-w-max will-change-transform",
-        reverse ? "direction-rtl" : ""
-      )}
-      style={{ direction: reverse ? ("rtl" as any) : "ltr" }}
+      className={cn("flex items-center gap-8 md:gap-12 min-w-max will-change-transform")}
+      onMouseEnter={() => animationRef.current?.pause()}
+      onMouseLeave={() => animationRef.current?.resume()}
     >
       {content.map((b, i) => (
         <Logo key={`${b.name}-${i}`} label={b.name} Icon={b.Icon} />
@@ -283,8 +295,8 @@ export default function LogoMarquee() {
           <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-white to-transparent" />
 
           <div className="flex flex-col gap-10">
-            <Rail speed={30} />
-            <Rail reverse speed={32} />
+            <Rail />
+            <Rail reverse />
           </div>
         </div>
       </div>
