@@ -1,0 +1,47 @@
+Table users {
+  id serial [primary key]
+  name varchar(100) not null
+  email varchar(100) unique not null
+  auth_provider varchar(20) // clerk, oauth, jwt
+  created_at timestamp default now()
+  updated_at timestamp default now()
+  last_sign_in_at timestamp
+}
+
+Table interviews {
+  id uuid [primary key]
+  user_id int [ref: > users.id]
+  domain varchar(50) // DSA, Web Dev
+  difficulty varchar(20) // easy, medium, hard
+  duration int // in minutes
+  started_at timestamp default now()
+  ended_at timestamp // null if in-progress
+  status varchar(20) default 'in_progress' // in_progress, completed
+  total_score int // nullable until completed
+}
+
+Table questions {
+  id uuid [primary key]
+  interview_id uuid [ref: > interviews.id]
+  ai_question text
+  created_at timestamp default now()
+}
+
+Table answer_attempts {
+  id uuid [primary key]
+  question_id uuid [ref: > questions.id]
+  user_id int [ref: > users.id]
+  code text // optional for theoretical questions
+  explanation text
+  ai_feedback text
+  score int // 0-10 points, null until scored
+  created_at timestamp default now()
+}
+
+Table recordings {
+  id uuid [primary key]
+  interview_id uuid [ref: > interviews.id]
+  video_url text
+  transcript_url text
+  created_at timestamp default now()
+}

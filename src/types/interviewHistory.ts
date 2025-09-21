@@ -13,10 +13,6 @@ export enum Status {
   InProgress = "in_progress",
   Completed = "completed",
 }
-export enum Sender {
-  Candidate = "candidate",
-  Interviewer = "interviewer",
-}
 
 export interface Interview {
   id: string;
@@ -24,9 +20,9 @@ export interface Interview {
   domain: Domain;
   difficulty: Difficulty;
   startedAt: string;
-  endedAt: string | null; // null for ongoing interview
+  endedAt: string | null; // null while in-progress
   duration: number; // in minutes
-  score: number | null; // null until completed; total score
+  totalScore: number | null; // null until completed
   status: Status;
 }
 
@@ -41,18 +37,9 @@ export interface AnswerAttempt {
   id: string;
   questionId: string;
   userId: string;
-  code?: string; // nullable for theoretical questions
+  code?: string; // optional for theoretical questions
   explanation?: string;
-  totalAttempts: number; // 1, 2, 3...
   aiFeedback?: string;
-  score: number; // 0-10 points
-  createdAt: string;
-}
-
-export interface Conversation {
-  id: string;
-  attemptId: string; // answer_attempts.id
-  sender: Sender;
-  message: string;
+  score: number | null; // null until AI scores
   createdAt: string;
 }

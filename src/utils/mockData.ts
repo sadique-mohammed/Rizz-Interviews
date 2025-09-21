@@ -5,8 +5,6 @@ import {
   Interview,
   Question,
   AnswerAttempt,
-  Conversation,
-  Sender,
 } from "@/types/interviewHistory";
 import { User } from "@/types/user";
 import { Recording } from "@/types/recording";
@@ -36,22 +34,6 @@ export const users: User[] = [
     updatedAt: "2025-09-03T11:00:00Z",
     lastSignInAt: "2025-09-21T10:45:00Z",
   },
-  {
-    id: "u4",
-    name: "Deepak Kumar",
-    email: "deepak.k@example.com",
-    createdAt: "2025-09-04T08:00:00Z",
-    updatedAt: "2025-09-04T08:00:00Z",
-    lastSignInAt: "2025-09-21T09:50:00Z",
-  },
-  {
-    id: "u5",
-    name: "Elena Garcia",
-    email: "elena.garcia@example.com",
-    createdAt: "2025-09-05T14:00:00Z",
-    updatedAt: "2025-09-05T14:00:00Z",
-    lastSignInAt: "2025-09-21T08:30:00Z",
-  },
 ];
 
 export const interviews: Interview[] = [
@@ -63,7 +45,7 @@ export const interviews: Interview[] = [
     startedAt: "2025-09-20T10:00:00Z",
     endedAt: "2025-09-20T10:45:00Z",
     duration: 45,
-    score: 8,
+    totalScore: 8,
     status: Status.Completed,
   },
   {
@@ -74,7 +56,7 @@ export const interviews: Interview[] = [
     startedAt: "2025-09-21T12:00:00Z",
     endedAt: null, // ongoing
     duration: 30,
-    score: null,
+    totalScore: null,
     status: Status.InProgress,
   },
   {
@@ -85,34 +67,11 @@ export const interviews: Interview[] = [
     startedAt: "2025-09-19T14:00:00Z",
     endedAt: "2025-09-19T14:50:00Z",
     duration: 50,
-    score: 5,
-    status: Status.Completed,
-  },
-  {
-    id: "i4",
-    userId: "u4",
-    domain: Domain.WebDev,
-    difficulty: Difficulty.Easy,
-    startedAt: "2025-09-21T09:30:00Z",
-    endedAt: null,
-    duration: 20,
-    score: null,
-    status: Status.InProgress,
-  },
-  {
-    id: "i5",
-    userId: "u5",
-    domain: Domain.DSA,
-    difficulty: Difficulty.Medium,
-    startedAt: "2025-09-18T15:00:00Z",
-    endedAt: "2025-09-18T15:45:00Z",
-    duration: 45,
-    score: 9,
+    totalScore: 5,
     status: Status.Completed,
   },
 ];
 
-// Questions, AnswerAttempts, Conversations, Recordings follow similarly...
 export const questions: Question[] = [
   {
     id: "q1",
@@ -135,7 +94,6 @@ export const answerAttempts: AnswerAttempt[] = [
     userId: "u1",
     code: "function reverseStr(s){return s.split('').reverse().join('');}",
     explanation: "Used split, reverse, join.",
-    totalAttempts: 1,
     aiFeedback: "Correct and efficient.",
     score: 10,
     createdAt: "2025-09-20T10:15:00Z",
@@ -144,7 +102,6 @@ export const answerAttempts: AnswerAttempt[] = [
     id: "aa2",
     questionId: "q2",
     userId: "u2",
-    totalAttempts: 3,
     explanation: "Tried map but forgot key props",
     aiFeedback: "You need unique keys in list items",
     score: 5,
@@ -152,19 +109,24 @@ export const answerAttempts: AnswerAttempt[] = [
   },
 ];
 
-export const conversations: Conversation[] = [
+export const recordings: Recording[] = [
   {
-    id: "c1",
-    attemptId: "aa2",
-    sender: Sender.Candidate,
-    message: "I tried mapping items but keys missing?",
-    createdAt: "2025-09-21T12:11:00Z",
+    id: "r1",
+    interviewId: "i1",
+    videoUrl: "https://example.com/recordings/i1.mp4",
+    transcriptUrl: "https://example.com/recordings/i1_transcript.txt",
+    recordingStatus: "completed",
   },
   {
-    id: "c2",
-    attemptId: "aa2",
-    sender: Sender.Interviewer,
-    message: "Correct, keys are required to avoid warnings.",
-    createdAt: "2025-09-21T12:12:00Z",
+    id: "r2",
+    interviewId: "i3",
+    videoUrl: "https://example.com/recordings/i3.mp4",
+    transcriptUrl: "https://example.com/recordings/i3_transcript.txt",
+    recordingStatus: "completed",
+  },
+  {
+    id: "r3",
+    interviewId: "i2",
+    recordingStatus: "pending",
   },
 ];
