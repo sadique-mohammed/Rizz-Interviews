@@ -163,7 +163,7 @@ export default function Hero() {
                         {/* Voice bars */}
                         <motion.span
                           className="w-1.5 h-4 rounded bg-[#2563eb] origin-bottom"
-                          animate={{ scaleY: [1, 1.8, 1] }}
+                          animate={{ scaleY: [1, 2, 1] }}
                           transition={{
                             repeat: Number.POSITIVE_INFINITY,
                             duration: 1.1,
@@ -171,33 +171,33 @@ export default function Hero() {
                           }}
                         />
                         <motion.span
-                          className="w-1.5 h-6 rounded bg-[#9333ea] origin-bottom"
-                          animate={{ scaleY: [1.2, 2, 1.2] }}
+                          className="w-1.5 h-5 rounded bg-[#9333ea] origin-bottom"
+                          animate={{ scaleY: [1, 2, 1] }}
                           transition={{
                             repeat: Number.POSITIVE_INFINITY,
                             duration: 1.3,
-                            ease: "easeInOut",
-                            delay: 0.1,
-                          }}
-                        />
-                        <motion.span
-                          className="w-1.5 h-5 rounded bg-[#14b8a6] origin-bottom"
-                          animate={{ scaleY: [1, 1.6, 1] }}
-                          transition={{
-                            repeat: Number.POSITIVE_INFINITY,
-                            duration: 1.2,
                             ease: "easeInOut",
                             delay: 0.2,
                           }}
                         />
                         <motion.span
-                          className="w-1.5 h-7 rounded bg-[#2563eb] origin-bottom"
-                          animate={{ scaleY: [1.3, 2.1, 1.3] }}
+                          className="w-1.5 h-4 rounded bg-[#14b8a6] origin-bottom"
+                          animate={{ scaleY: [1, 2, 1] }}
                           transition={{
                             repeat: Number.POSITIVE_INFINITY,
-                            duration: 1.35,
+                            duration: 1.1,
                             ease: "easeInOut",
-                            delay: 0.05,
+                            delay: 0.3,
+                          }}
+                        />
+                        <motion.span
+                          className="w-1.5 h-5 rounded bg-[#2563eb] origin-bottom"
+                          animate={{ scaleY: [1, 2, 1] }}
+                          transition={{
+                            repeat: Number.POSITIVE_INFINITY,
+                            duration: 1.3,
+                            ease: "easeInOut",
+                            delay: 0.5,
                           }}
                         />
                       </div>
