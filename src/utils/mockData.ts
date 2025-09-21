@@ -1,109 +1,170 @@
-// utils/mockData.ts
+import {
+  Domain,
+  Difficulty,
+  Status,
+  Interview,
+  Question,
+  AnswerAttempt,
+  Conversation,
+  Sender,
+} from "@/types/interviewHistory";
+import { User } from "@/types/user";
+import { Recording } from "@/types/recording";
 
-// 1. Single current user (from Clerk, extended into DB)
-export const mockUser = {
-  id: 1,
-  username: "Aditi Rao",
-  email: "aditi.rao@example.com",
-  auth_provider: "clerk_google",
-  created_at: "2025-09-01T09:00:00Z",
-};
-
-// 2. Interviews (list for the user)
-export const mockInterviews = [
+export const users: User[] = [
   {
-    id: "int_001",
-    user_id: 1,
-    domain: "DSA",
-    difficulty: "easy",
-    duration: 45,
-    start_time: "2025-09-15T10:00:00Z",
-    end_time: "2025-09-15T10:45:00Z",
-    status: "completed",
-    score: 78,
+    id: "u1",
+    name: "Aditi Rao",
+    email: "aditi.rao@example.com",
+    createdAt: "2025-09-01T09:00:00Z",
+    updatedAt: "2025-09-01T09:00:00Z",
+    lastSignInAt: "2025-09-21T12:00:00Z",
   },
   {
-    id: "int_002",
-    user_id: 1,
-    domain: "Web Dev",
-    difficulty: "medium",
-    duration: 60,
-    start_time: "2025-09-17T12:00:00Z",
-    end_time: null,
-    status: "in_progress",
-    score: null,
+    id: "u2",
+    name: "Brian Ng",
+    email: "brian.ng@example.com",
+    createdAt: "2025-09-02T10:00:00Z",
+    updatedAt: "2025-09-02T10:00:00Z",
+    lastSignInAt: "2025-09-21T11:30:00Z",
+  },
+  {
+    id: "u3",
+    name: "Carmen Lee",
+    email: "carmen.lee@example.com",
+    createdAt: "2025-09-03T11:00:00Z",
+    updatedAt: "2025-09-03T11:00:00Z",
+    lastSignInAt: "2025-09-21T10:45:00Z",
+  },
+  {
+    id: "u4",
+    name: "Deepak Kumar",
+    email: "deepak.k@example.com",
+    createdAt: "2025-09-04T08:00:00Z",
+    updatedAt: "2025-09-04T08:00:00Z",
+    lastSignInAt: "2025-09-21T09:50:00Z",
+  },
+  {
+    id: "u5",
+    name: "Elena Garcia",
+    email: "elena.garcia@example.com",
+    createdAt: "2025-09-05T14:00:00Z",
+    updatedAt: "2025-09-05T14:00:00Z",
+    lastSignInAt: "2025-09-21T08:30:00Z",
   },
 ];
 
-// 3. One interview expanded with nested Q&A and recording
-export const mockInterviewDetail = {
-  id: "int_002",
-  user_id: 1,
-  domain: "Web Dev",
-  difficulty: "medium",
-  duration: 60,
-  start_time: "2025-09-17T12:00:00Z",
-  end_time: null,
-  status: "in_progress",
-  score: null,
-  questions: [
-    {
-      id: "q001",
-      ai_prompt: "Build a responsive navbar using HTML, CSS, and JS.",
-      created_at: "2025-09-17T12:05:00Z",
-      attempts: [
-        {
-          id: "a001",
-          user_id: 1,
-          code: "<nav>...</nav>",
-          explanation: "Used flexbox for layout.",
-          ai_feedback: "Good, but navbar is not responsive yet.",
-          points: 5,
-          created_at: "2025-09-17T12:10:00Z",
-          conversations: [
-            {
-              id: "c001",
-              sender: "user",
-              message: "I added flexbox, is that enough?",
-              created_at: "2025-09-17T12:11:00Z",
-            },
-            {
-              id: "c002",
-              sender: "ai",
-              message: "Flexbox is a good start, but you need media queries for responsiveness.",
-              created_at: "2025-09-17T12:12:00Z",
-            },
-          ],
-        },
-        {
-          id: "a002",
-          user_id: 1,
-          code: "<nav class='responsive'>...</nav>",
-          explanation: "Added media queries for smaller screens.",
-          ai_feedback: "Perfect! Now it’s responsive.",
-          points: 10,
-          created_at: "2025-09-17T12:20:00Z",
-          conversations: [
-            {
-              id: "c003",
-              sender: "user",
-              message: "I added media queries, does it look fine?",
-              created_at: "2025-09-17T12:21:00Z",
-            },
-            {
-              id: "c004",
-              sender: "ai",
-              message: "Yes, that solves it. Well done!",
-              created_at: "2025-09-17T12:22:00Z",
-            },
-          ],
-        },
-      ],
-    },
-  ],
-  recording: {
-    id: "rec001",
-    video_url: "/mock/recordings/int_002.mp4",
-    transcript_url: "/mock/transcripts/int_002.txt",
+export const interviews: Interview[] = [
+  {
+    id: "i1",
+    userId: "u1",
+    domain: Domain.DSA,
+    difficulty: Difficulty.Easy,
+    startedAt: "2025-09-20T10:00:00Z",
+    endedAt: "2025-09-20T10:45:00Z",
+    duration: 45,
+    score: 8,
+    status: Status.Completed,
   },
-};
+  {
+    id: "i2",
+    userId: "u2",
+    domain: Domain.WebDev,
+    difficulty: Difficulty.Medium,
+    startedAt: "2025-09-21T12:00:00Z",
+    endedAt: null, // ongoing
+    duration: 30,
+    score: null,
+    status: Status.InProgress,
+  },
+  {
+    id: "i3",
+    userId: "u3",
+    domain: Domain.DSA,
+    difficulty: Difficulty.Hard,
+    startedAt: "2025-09-19T14:00:00Z",
+    endedAt: "2025-09-19T14:50:00Z",
+    duration: 50,
+    score: 5,
+    status: Status.Completed,
+  },
+  {
+    id: "i4",
+    userId: "u4",
+    domain: Domain.WebDev,
+    difficulty: Difficulty.Easy,
+    startedAt: "2025-09-21T09:30:00Z",
+    endedAt: null,
+    duration: 20,
+    score: null,
+    status: Status.InProgress,
+  },
+  {
+    id: "i5",
+    userId: "u5",
+    domain: Domain.DSA,
+    difficulty: Difficulty.Medium,
+    startedAt: "2025-09-18T15:00:00Z",
+    endedAt: "2025-09-18T15:45:00Z",
+    duration: 45,
+    score: 9,
+    status: Status.Completed,
+  },
+];
+
+// Questions, AnswerAttempts, Conversations, Recordings follow similarly...
+export const questions: Question[] = [
+  {
+    id: "q1",
+    interviewId: "i1",
+    aiQuestion: "Reverse a string.",
+    createdAt: "2025-09-20T10:05:00Z",
+  },
+  {
+    id: "q2",
+    interviewId: "i2",
+    aiQuestion: "Build a React component for a todo list.",
+    createdAt: "2025-09-21T12:05:00Z",
+  },
+];
+
+export const answerAttempts: AnswerAttempt[] = [
+  {
+    id: "aa1",
+    questionId: "q1",
+    userId: "u1",
+    code: "function reverseStr(s){return s.split('').reverse().join('');}",
+    explanation: "Used split, reverse, join.",
+    totalAttempts: 1,
+    aiFeedback: "Correct and efficient.",
+    score: 10,
+    createdAt: "2025-09-20T10:15:00Z",
+  },
+  {
+    id: "aa2",
+    questionId: "q2",
+    userId: "u2",
+    totalAttempts: 3,
+    explanation: "Tried map but forgot key props",
+    aiFeedback: "You need unique keys in list items",
+    score: 5,
+    createdAt: "2025-09-21T12:10:00Z",
+  },
+];
+
+export const conversations: Conversation[] = [
+  {
+    id: "c1",
+    attemptId: "aa2",
+    sender: Sender.Candidate,
+    message: "I tried mapping items but keys missing?",
+    createdAt: "2025-09-21T12:11:00Z",
+  },
+  {
+    id: "c2",
+    attemptId: "aa2",
+    sender: Sender.Interviewer,
+    message: "Correct, keys are required to avoid warnings.",
+    createdAt: "2025-09-21T12:12:00Z",
+  },
+];
