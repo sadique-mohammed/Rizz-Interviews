@@ -70,6 +70,17 @@ export const interviews: Interview[] = [
     totalScore: 5,
     status: Status.Completed,
   },
+  {
+    id: "i4",
+    userId: "u2",
+    domain: Domain.WebDev,
+    difficulty: Difficulty.Medium,
+    startedAt: "2025-09-18T09:00:00Z",
+    endedAt: "2025-09-18T09:40:00Z",
+    duration: 40,
+    totalScore: 7,
+    status: Status.Completed,
+  },
 ];
 
 export const questions: Question[] = [
