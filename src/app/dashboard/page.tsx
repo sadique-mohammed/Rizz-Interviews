@@ -1,23 +1,14 @@
+"use client";
 import React from "react";
 import Navbar from "@/components/dashboard/navbar";
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+import InterviewSessionCard from "@/components/dashboard/interview-session-card";
+import { useUserStore } from "@/store/userStore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, Award, Calendar, ChevronRight, Settings, BookOpen } from "lucide-react";
-import InterviewSessionCard from "@/components/dashboard/interview-session-card";
 
-// Ensure this page is rendered dynamically per-request (auth-dependent)
-export const dynamic = "force-dynamic";
-
-export default async function DashboardPage() {
-  const { userId } = await auth();
-  if (!userId) {
-    redirect(process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL || "/auth");
-  }
-
-  const user = await currentUser();
-
+export default function DashboardPage() {
+  const user = useUserStore((state) => state.user);
   const recentInterviews = [
     {
       id: "1",
