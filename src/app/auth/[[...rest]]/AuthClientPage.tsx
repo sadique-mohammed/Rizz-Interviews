@@ -13,7 +13,8 @@ export default function AuthClientPage() {
 
   useEffect(() => {
     if (user) {
-      setUser(user); // store in client-side Zustand
+      console.log("use effect from auth client");
+      setUser(user);
       router.push("/dashboard");
     }
   }, [user, setUser, router]);
