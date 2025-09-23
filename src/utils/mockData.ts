@@ -73,7 +73,7 @@ export const interviews: Interview[] = [
   {
     id: "i4",
     userId: "u2",
-    domain: Domain.WebDev,
+    domain: Domain.DSA,
     difficulty: Difficulty.Medium,
     startedAt: "2025-09-18T09:00:00Z",
     endedAt: "2025-09-18T09:40:00Z",
