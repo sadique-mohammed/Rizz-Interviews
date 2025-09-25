@@ -23,7 +23,7 @@ export default function RecentHistoryCard() {
 
   React.useEffect(() => {
     const fetchInterviews = async () => {
-      const res = await fetch("http://localhost:3000/api/dashboard");
+      const res = await fetch("/api/dashboard");
       const data = await res.json();
 
       if (data.interviews && Array.isArray(data.interviews)) {
