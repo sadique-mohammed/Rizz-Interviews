@@ -334,7 +334,9 @@ export const answerAttempts: AnswerAttempt[] = [
     id: "aa1",
     questionId: "q1",
     userId: "u1",
-    code: "function reverseStr(s){return s.split('').reverse().join('');}",
+    code: `function reverseStr(s) {
+  return s.split('').reverse().join('');
+}`,
     explanation: "Used split, reverse, join.",
     aiFeedback: "Correct and efficient.",
     score: 10,
@@ -353,7 +355,9 @@ export const answerAttempts: AnswerAttempt[] = [
     id: "aa3",
     questionId: "q3",
     userId: "u2",
-    code: "function intersection(a, b) { return a.filter(x => b.includes(x)); }",
+    code: `function intersection(a, b) {
+  return a.filter(x => b.includes(x));
+}`,
     explanation: "Used filter and includes.",
     aiFeedback: "Efficient for small arrays.",
     score: 9,
@@ -372,7 +376,13 @@ export const answerAttempts: AnswerAttempt[] = [
     id: "aa5",
     questionId: "q5",
     userId: "u2",
-    code: "function debounce(fn, delay) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), delay); }; }",
+    code: `function debounce(fn, delay) {
+  let t;
+  return (...a) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...a), delay);
+  };
+}`,
     explanation: "Implemented debounce using closures and setTimeout.",
     aiFeedback: "Correct and concise.",
     score: 10,
@@ -382,7 +392,9 @@ export const answerAttempts: AnswerAttempt[] = [
     id: "aa6",
     questionId: "q6",
     userId: "u2",
-    code: "function isPalindrome(s) { return s === s.split('').reverse().join(''); }",
+    code: `function isPalindrome(s) {
+  return s === s.split('').reverse().join('');
+}`,
     explanation: "Compared string to its reverse.",
     aiFeedback: "Works for simple cases.",
     score: 9,

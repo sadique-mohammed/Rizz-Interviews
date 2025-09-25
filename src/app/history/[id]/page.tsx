@@ -68,7 +68,7 @@ export default function InterviewDetailPage() {
     try {
       await navigator.clipboard.writeText(code);
       setCopiedCode(attemptId);
-      setTimeout(() => setCopiedCode(null), 2000);
+      setTimeout(() => setCopiedCode(null), 1000);
     } catch (err) {
       console.error("Failed to copy code:", err);
     }
@@ -221,7 +221,7 @@ export default function InterviewDetailPage() {
                             )}
                           </div>
                           {attempt.code && (
-                            <div className="mb-3">
+                            <div className="mb-3 ">
                               <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
                                   <Code2 className="h-4 w-4 text-gray-500" />
@@ -234,7 +234,7 @@ export default function InterviewDetailPage() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleCopyCode(attempt.code, attempt.id)}
-                                  className="h-8 px-2"
+                                  className="h-8 px-2 cursor-pointer"
                                 >
                                   {copiedCode === attempt.id ? (
                                     <Check className="h-3 w-3 text-green-600" />
@@ -243,15 +243,15 @@ export default function InterviewDetailPage() {
                                   )}
                                 </Button>
                               </div>
-                              <div className="relative rounded-lg border">
+                              <div className="rounded-lg border ">
                                 <SyntaxHighlighter
                                   language={detectLanguage(attempt.code)}
                                   customStyle={{
                                     margin: 0,
-                                    fontSize: "10px",
+                                    fontSize: "13px",
                                     lineHeight: "1.5",
                                   }}
-                                  showLineNumbers={attempt.code.split("\n").length > 5}
+                                  showLineNumbers={true}
                                 >
                                   {attempt.code}
                                 </SyntaxHighlighter>
