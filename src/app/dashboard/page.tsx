@@ -23,7 +23,7 @@ export default function DashboardPage() {
   React.useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/dashboard");
+        const res = await fetch("/api/dashboard");
         const data = await res.json();
         setUser({
           id: data.user.id,
