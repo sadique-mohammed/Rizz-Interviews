@@ -1,6 +1,6 @@
 export enum Domain {
-  DSA = "dsa",
-  WebDev = "webdev",
+  DSA = "DSA",
+  WebDev = "Web Dev",
 }
 
 export enum Difficulty {

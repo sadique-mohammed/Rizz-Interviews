@@ -45,7 +45,7 @@ export const interviews: Interview[] = [
     startedAt: "2025-09-20T10:00:00Z",
     endedAt: "2025-09-20T10:45:00Z",
     duration: 45,
-    totalScore: 8,
+    totalScore: 81,
     status: Status.Completed,
   },
   {
@@ -67,7 +67,7 @@ export const interviews: Interview[] = [
     startedAt: "2025-09-19T14:00:00Z",
     endedAt: "2025-09-19T14:50:00Z",
     duration: 50,
-    totalScore: 5,
+    totalScore: 75,
     status: Status.Completed,
   },
   {
@@ -78,7 +78,7 @@ export const interviews: Interview[] = [
     startedAt: "2025-09-18T09:00:00Z",
     endedAt: "2025-09-18T09:40:00Z",
     duration: 40,
-    totalScore: 7,
+    totalScore: 97,
     status: Status.Completed,
   },
 ];
