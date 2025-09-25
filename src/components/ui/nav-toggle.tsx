@@ -20,7 +20,7 @@ export default function NavToggle() {
     setSelectedValue(pathname);
   }, [pathname]);
 
-  const selectedIndex = navLinks.findIndex((l) => l.href === selectedValue);
+  const selectedIndex = navLinks.findIndex((l) => selectedValue.startsWith(l.href));
 
   const handleChange = (value: string) => {
     setSelectedValue(value);

@@ -1,52 +1,17 @@
-"use client";
-
-import React from "react";
+import Link from "next/link";
+import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { ChevronRight, History } from "lucide-react";
-import { useRouter } from "next/navigation";
+import type { Interview } from "@/types/interviewHistory";
 
-type Interview = {
-  id: string;
-  domain: string;
-  difficulty: string;
-  startedAt: string;
-  endedAt: string | null;
-  duration: number;
-  totalScore: number | null;
-  status: string;
+type Props = {
+  interviews: Interview[];
 };
 
-export default function RecentHistoryCard() {
-  const [recentInterviews, setRecentInterviews] = React.useState<Interview[]>([]);
-  const router = useRouter();
-
-  React.useEffect(() => {
-    const fetchInterviews = async () => {
-      const res = await fetch("/api/dashboard");
-      const data = await res.json();
-
-      if (data.interviews && Array.isArray(data.interviews)) {
-        const lastTwo = data.interviews
-          .sort(
-            (a: Interview, b: Interview) =>
-              new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
-          )
-          .slice(0, 2);
-        setRecentInterviews(lastTwo);
-      }
-    };
-
-    fetchInterviews();
-  }, []);
-
-  const handleInterviewClick = (id: string) => {
-    router.push(`/history/?id=${id}`);
-  };
-
-  const handleViewAllClick = () => {
-    router.push("/history");
-  };
+export default function RecentHistoryCard({ interviews }: Props) {
+  const recentInterviews = [...interviews]
+    .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
+    .slice(0, 3);
 
   return (
     <Card className="border-2 border-blue-100 bg-blue-50/30 h-full">
@@ -63,10 +28,10 @@ export default function RecentHistoryCard() {
         {recentInterviews.length > 0 ? (
           <div className="space-y-2">
             {recentInterviews.map((interview) => (
-              <div
+              <Link
                 key={interview.id}
-                onClick={() => handleInterviewClick(interview.id)}
-                className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors cursor-pointer bg-gray-50/50"
+                href={`/history/${interview.id}`}
+                className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors bg-gray-50/50"
               >
                 <div className="flex items-center space-x-4">
                   <div className="flex-shrink-0">
@@ -101,16 +66,17 @@ export default function RecentHistoryCard() {
                   </div>
                 </div>
                 <ChevronRight className="h-4 w-4 text-gray-400" />
-              </div>
+              </Link>
             ))}
             <div className="flex justify-end mt-4">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleViewAllClick}
                 className="text-blue-600 hover:text-blue-700 cursor-pointer hover:bg-blue-50"
               >
-                View All
+                <Link href="/history" className="text-blue-600 hover:text-blue-700 text-sm ">
+                  View All
+                </Link>
               </Button>
             </div>
           </div>

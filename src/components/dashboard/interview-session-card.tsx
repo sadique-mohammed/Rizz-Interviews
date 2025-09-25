@@ -155,18 +155,4 @@ const interviewTypes = [
     description: "React, APIs, Performance, etc.",
     estimatedTime: "30-45 min",
   },
-  {
-    id: "system-design",
-    name: "System Design",
-    icon: Target,
-    description: "Scalability, Architecture, Trade-offs, etc.",
-    estimatedTime: "45-60 min",
-  },
-  {
-    id: "behavioral",
-    name: "Behavioral",
-    icon: BookOpen,
-    description: "Leadership, Conflict Resolution, Teamwork, etc.",
-    estimatedTime: "20-30 min",
-  },
 ];
