@@ -5,6 +5,7 @@ import InterviewSessionCard from "@/components/dashboard/interview-session-card"
 // import { useUser } from "@clerk/nextjs";
 import RecentHistoryCard from "@/components/dashboard/recent-history-card";
 import Loading from "@/components/dashboard/loader";
+import Footer from "@/components/dashboard/footer";
 
 type ApiUser = {
   id: string;
@@ -67,6 +68,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+        <Footer />
       </>
     );
 }
