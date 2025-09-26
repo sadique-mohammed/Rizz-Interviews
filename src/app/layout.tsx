@@ -1,6 +1,10 @@
+import React from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
 import "./globals.css";
+
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ClerkProvider } from "@clerk/nextjs";
 
 const geistSans = Geist({
@@ -50,7 +54,13 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.svg" />
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           {children}
+          <SpeedInsights />
         </body>
+        <script src="https://elfsightcdn.com/platform.js" async></script>
+        <div
+          className="elfsight-app-c8a685b7-ca54-4fd3-9eda-0f22fb2e9203"
+          data-elfsight-app-lazy
+        ></div>
       </html>
     </ClerkProvider>
   );

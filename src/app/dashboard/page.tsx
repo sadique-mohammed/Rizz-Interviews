@@ -2,7 +2,6 @@ import Navbar from "@/components/dashboard/navbar";
 import InterviewSessionCard from "@/components/dashboard/interview-session-card";
 import RecentHistoryCard from "@/components/dashboard/recent-history-card";
 import Footer from "@/components/landing/footer";
-
 async function fetchDashboardData() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/dashboard`, {
     cache: "no-store",

@@ -34,6 +34,14 @@ export const users: User[] = [
     updatedAt: "2025-09-03T11:00:00Z",
     lastSignInAt: "2025-09-21T10:45:00Z",
   },
+  {
+    id: "u5",
+    name: "David Kim",
+    email: "david.kim@example.com",
+    createdAt: "2025-09-04T12:00:00Z",
+    updatedAt: "2025-09-04T12:00:00Z",
+    lastSignInAt: "2025-09-21T09:30:00Z",
+  },
 ];
 
 // export const interviews: Interview[] = [
