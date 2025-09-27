@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { useRef, useState } from "react";
 import { useMotionValue, useSpring, useTransform, useReducedMotion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Hero() {
   const prefersReducedMotion = useReducedMotion();
@@ -143,11 +144,15 @@ export default function Hero() {
 
                 {/* Video stage */}
                 <div className="relative">
-                  <img
+                  <Image
                     src="/interview.png"
                     alt="Candidate video preview"
+                    width={800}
+                    height={450}
+                    priority
                     className="block w-full h-[300px] md:h-[360px] object-cover bg-gray-100"
                   />
+
                   {/* Candidate name */}
                   <div className="absolute left-4 bottom-4 rounded-full bg-white/85 backdrop-blur px-3 py-1 text-xs text-gray-700 shadow-sm">
                     Candidate

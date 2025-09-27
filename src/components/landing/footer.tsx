@@ -60,6 +60,11 @@ export default function Footer() {
           </div>
         </div>
       </div>
+      <script src="https://elfsightcdn.com/platform.js" async></script>
+      <div
+        className="elfsight-app-c8a685b7-ca54-4fd3-9eda-0f22fb2e9203"
+        data-elfsight-app-lazy
+      ></div>
     </footer>
   );
 }
