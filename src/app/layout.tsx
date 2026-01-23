@@ -73,7 +73,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider signInFallbackRedirectUrl='/dashboard' signUpFallbackRedirectUrl='/dashboard'>
       <html lang='en' suppressHydrationWarning>
         <head>
           <link rel='icon' href='/favicon.svg' />
