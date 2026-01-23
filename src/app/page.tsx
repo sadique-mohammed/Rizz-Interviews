@@ -1,7 +1,7 @@
-import { Navbar, Hero, Features, LogoMarquee, EmailSignup, Footer } from "@/components/landing/";
+import { Navbar, Hero, Features, LogoMarquee, EmailSignup, Footer } from '@/components/landing/';
 export default function Home() {
   return (
-    <main className="font-sans">
+    <main className='font-sans'>
       <Navbar />
       <Hero />
       <LogoMarquee />

@@ -241,3 +241,45 @@
   /* bright blue glow */
   /* transform: translateY(-1px); */
 }
+
+/* Marquee animations for logo carousel */
+@keyframes marquee-forward {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-reverse {
+  from {
+    transform: translateX(-50%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-marquee-forward {
+  animation: marquee-forward linear infinite;
+}
+
+.animate-marquee-reverse {
+  animation: marquee-reverse linear infinite;
+}
+
+.animate-marquee-forward:hover,
+.animate-marquee-reverse:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .animate-marquee-forward,
+  .animate-marquee-reverse {
+    animation: none;
+  }
+}

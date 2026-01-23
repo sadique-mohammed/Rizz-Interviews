@@ -1,25 +1,25 @@
-import { users, interviews, questions, answerAttempts, recordings } from "@/utils/mockData";
-import { NextResponse } from "next/server";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { users, interviews, questions, answerAttempts, recordings } from '@/utils/mockData';
+import { NextResponse } from 'next/server';
+import { currentUser } from '@clerk/nextjs/server';
 export async function GET() {
-  //   const { isAuthenticated } = await auth();
-  //   const user = await currentUser();
-  //   console.log("Is Authenticated:", isAuthenticated);
-  //   console.log("User:", user);
-  //   if (!isAuthenticated || !user) {
-  //     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  //   }
-  // Later: replace with Clerk
-  const user = { id: "u2" };
+  const user = await currentUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const email = user.emailAddresses?.[0]?.emailAddress;
+  if (!email) {
+    return NextResponse.json({ error: 'Missing email' }, { status: 400 });
+  }
 
   // Find user
-  const userData = users.find((u) => u.id === user.id);
+  const userData = users.find((u) => u.email === email);
   if (!userData) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
 
   // Get user's interviews
-  const userInterviews = interviews.filter((i) => i.userId === user.id);
+  const userInterviews = interviews.filter((i) => i.userId === userData.id);
 
   // Nest questions + answerAttempts under each interview
   const interviewsWithDetails = userInterviews.map((interview) => {
@@ -41,6 +41,6 @@ export async function GET() {
       user: userData,
       interviews: interviewsWithDetails,
     },
-    { status: 200 }
+    { status: 200 },
   );
 }
