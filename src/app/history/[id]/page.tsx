@@ -20,11 +20,12 @@ import {
 } from 'lucide-react';
 import Loading from '@/components/dashboard/loader';
 import dynamic from 'next/dynamic';
+import type { PrismLight as PrismType } from 'react-syntax-highlighter';
 
-const SyntaxHighlighter = dynamic(
-  () => import('react-syntax-highlighter').then((mod) => mod.Prism as any),
+const SyntaxHighlighter = dynamic<React.ComponentProps<typeof PrismType>>(
+  () => import('react-syntax-highlighter').then((mod) => mod.Prism),
   { ssr: false, loading: () => <div className='animate-pulse bg-gray-200 h-32 rounded' /> },
-);
+) as typeof PrismType;
 
 export default function InterviewDetailPage() {
   const params = useParams();
