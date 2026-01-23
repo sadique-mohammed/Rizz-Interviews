@@ -38,7 +38,7 @@ export default function InterviewDetailPage() {
     const fetchInterviewDetail = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/dashboard`, {
+        const res = await fetch(`/api/dashboard`, {
           cache: 'no-store',
           credentials: 'include',
         });
