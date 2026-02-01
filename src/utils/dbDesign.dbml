@@ -1,7 +1,9 @@
 Table users {
   id serial [primary key]
+  clerk_id varchar(255) unique not null
   name varchar(100) not null
   email varchar(100) unique not null
+  image_url text
   auth_provider varchar(20) // clerk, oauth, jwt
   created_at timestamp default now()
   updated_at timestamp default now()

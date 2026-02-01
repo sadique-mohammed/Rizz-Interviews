@@ -1,22 +1,22 @@
 export enum Domain {
-  DSA = "DSA",
-  WebDev = "Web Dev",
+  DSA = 'DSA',
+  WebDev = 'Web Dev',
 }
 
 export enum Difficulty {
-  Easy = "easy",
-  Medium = "medium",
-  Hard = "hard",
+  Easy = 'easy',
+  Medium = 'medium',
+  Hard = 'hard',
 }
 
 export enum Status {
-  InProgress = "in_progress",
-  Completed = "completed",
+  InProgress = 'in_progress',
+  Completed = 'completed',
 }
 
 export interface Interview {
   id: string;
-  userId: string;
+  userId: number;
   domain: Domain;
   difficulty: Difficulty;
   startedAt: string;
@@ -36,7 +36,7 @@ export interface Question {
 export interface AnswerAttempt {
   id: string;
   questionId: string;
-  userId: string;
+  userId: number;
   code?: string; // optional for theoretical questions
   explanation?: string;
   aiFeedback?: string;
