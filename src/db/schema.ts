@@ -1,9 +1,8 @@
-import { pgTable, serial, text, timestamp, integer, uuid, varchar } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, uuid, varchar, integer } from 'drizzle-orm/pg-core';
 
-// Users
+// Users - clerk_id is the primary key (permanent identifier from Clerk)
 export const users = pgTable('users', {
-  id: serial('id').primaryKey(),
-  clerkId: varchar('clerk_id', { length: 255 }).notNull().unique(),
+  id: varchar('id', { length: 255 }).primaryKey(), // This IS the clerk_id
   name: varchar('name', { length: 100 }).notNull(),
   email: varchar('email', { length: 100 }).notNull().unique(),
   imageUrl: text('image_url'),
@@ -16,7 +15,7 @@ export const users = pgTable('users', {
 // Interviews
 export const interviews = pgTable('interviews', {
   id: uuid('id').defaultRandom().primaryKey(),
-  userId: integer('user_id')
+  userId: varchar('user_id', { length: 255 })
     .references(() => users.id)
     .notNull(),
   domain: varchar('domain', { length: 50 }).notNull(),
@@ -44,7 +43,7 @@ export const answerAttempts = pgTable('answer_attempts', {
   questionId: uuid('question_id')
     .references(() => questions.id)
     .notNull(),
-  userId: integer('user_id')
+  userId: varchar('user_id', { length: 255 })
     .references(() => users.id)
     .notNull(),
   code: text('code'),

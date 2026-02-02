@@ -11,7 +11,7 @@ import { Recording } from '@/types/recording';
 
 export const users: User[] = [
   {
-    id: 1,
+    id: 'user_mock_aditi_rao_001',
     name: 'Aditi Rao',
     email: 'aditi.rao@example.com',
     createdAt: '2025-09-01T09:00:00Z',
@@ -19,7 +19,7 @@ export const users: User[] = [
     lastSignInAt: '2025-09-21T12:00:00Z',
   },
   {
-    id: 2,
+    id: 'user_mock_brian_ng_002',
     name: 'Brian Ng',
     email: 'brian.ng@example.com',
     createdAt: '2025-09-02T10:00:00Z',
@@ -27,7 +27,7 @@ export const users: User[] = [
     lastSignInAt: '2025-09-21T11:30:00Z',
   },
   {
-    id: 3,
+    id: 'user_mock_carmen_lee_003',
     name: 'Carmen Lee',
     email: 'carmen.lee@example.com',
     createdAt: '2025-09-03T11:00:00Z',
@@ -35,7 +35,7 @@ export const users: User[] = [
     lastSignInAt: '2025-09-21T10:45:00Z',
   },
   {
-    id: 4,
+    id: 'user_mock_david_kim_004',
     name: 'David Kim',
     email: 'david.kim@example.com',
     createdAt: '2025-09-04T12:00:00Z',
@@ -70,7 +70,7 @@ export const recordings: Recording[] = [
 export const interviews: Interview[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440010',
-    userId: 1,
+    userId: 'user_mock_aditi_rao_001',
     domain: Domain.DSA,
     difficulty: Difficulty.Easy,
     startedAt: '2025-09-20T10:00:00Z',
@@ -81,7 +81,7 @@ export const interviews: Interview[] = [
   },
   {
     id: '550e8400-e29b-41d4-a716-446655440011',
-    userId: 2,
+    userId: 'user_mock_brian_ng_002',
     domain: Domain.WebDev,
     difficulty: Difficulty.Medium,
     startedAt: '2025-09-21T12:00:00Z',
@@ -92,7 +92,7 @@ export const interviews: Interview[] = [
   },
   {
     id: '550e8400-e29b-41d4-a716-446655440012',
-    userId: 3,
+    userId: 'user_mock_carmen_lee_003',
     domain: Domain.DSA,
     difficulty: Difficulty.Hard,
     startedAt: '2025-09-19T14:00:00Z',
@@ -103,7 +103,7 @@ export const interviews: Interview[] = [
   },
   {
     id: '550e8400-e29b-41d4-a716-446655440013',
-    userId: 2,
+    userId: 'user_mock_brian_ng_002',
     domain: Domain.DSA,
     difficulty: Difficulty.Medium,
     startedAt: '2025-09-18T09:00:00Z',
@@ -114,7 +114,7 @@ export const interviews: Interview[] = [
   },
   {
     id: '550e8400-e29b-41d4-a716-446655440014',
-    userId: 2,
+    userId: 'user_mock_brian_ng_002',
     domain: Domain.WebDev,
     difficulty: Difficulty.Hard,
     startedAt: '2025-09-17T13:00:00Z',
@@ -125,7 +125,7 @@ export const interviews: Interview[] = [
   },
   {
     id: '550e8400-e29b-41d4-a716-446655440015',
-    userId: 2,
+    userId: 'user_mock_brian_ng_002',
     domain: Domain.DSA,
     difficulty: Difficulty.Easy,
     startedAt: '2025-09-16T15:00:00Z',
@@ -179,7 +179,7 @@ export const answerAttempts: AnswerAttempt[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440030',
     questionId: '550e8400-e29b-41d4-a716-446655440020',
-    userId: 1,
+    userId: 'user_mock_aditi_rao_001',
     code: `function reverseStr(s) {
   return s.split('').reverse().join('');
 }`,
@@ -191,7 +191,7 @@ export const answerAttempts: AnswerAttempt[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440031',
     questionId: '550e8400-e29b-41d4-a716-446655440021',
-    userId: 2,
+    userId: 'user_mock_brian_ng_002',
     explanation: 'Tried map but forgot key props',
     aiFeedback: 'You need unique keys in list items',
     score: 5,
@@ -200,7 +200,7 @@ export const answerAttempts: AnswerAttempt[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440032',
     questionId: '550e8400-e29b-41d4-a716-446655440022',
-    userId: 2,
+    userId: 'user_mock_brian_ng_002',
     code: `function intersection(a, b) {
   return a.filter(x => b.includes(x));
 }`,
@@ -212,7 +212,7 @@ export const answerAttempts: AnswerAttempt[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440033',
     questionId: '550e8400-e29b-41d4-a716-446655440023',
-    userId: 2,
+    userId: 'user_mock_brian_ng_002',
     explanation: 'Described how React uses a virtual DOM to optimize updates.',
     aiFeedback: 'Good explanation, could mention reconciliation.',
     score: 8,
@@ -221,7 +221,7 @@ export const answerAttempts: AnswerAttempt[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440034',
     questionId: '550e8400-e29b-41d4-a716-446655440024',
-    userId: 2,
+    userId: 'user_mock_brian_ng_002',
     code: `function debounce(fn, delay) {
   let t;
   return (...a) => {
@@ -237,7 +237,7 @@ export const answerAttempts: AnswerAttempt[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440035',
     questionId: '550e8400-e29b-41d4-a716-446655440025',
-    userId: 2,
+    userId: 'user_mock_brian_ng_002',
     code: `function isPalindrome(s) {
   return s === s.split('').reverse().join('');
 }`,

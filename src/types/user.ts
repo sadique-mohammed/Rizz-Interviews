@@ -1,5 +1,5 @@
 export interface User {
-  id: number;
+  id: string; // clerk_id - permanent identifier from Clerk
   name: string;
   email: string;
   createdAt: string;
@@ -8,7 +8,7 @@ export interface User {
 }
 
 export interface UserInsert {
-  clerkId: string;
+  id: string; // clerk_id
   name: string;
   email: string;
   imageUrl?: string | null;

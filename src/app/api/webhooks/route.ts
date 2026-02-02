@@ -31,12 +31,12 @@ const clerkSessionSchema = z.object({
 async function syncUserToDatabase(userData: UserInsert & { updatedAt: Date }) {
   await db.transaction(async (tx) => {
     const existingUser = await tx.query.users.findFirst({
-      where: eq(users.clerkId, userData.clerkId),
+      where: eq(users.id, userData.id),
     });
 
     if (existingUser) {
       // Update existing user
-      await tx.update(users).set(userData).where(eq(users.clerkId, userData.clerkId));
+      await tx.update(users).set(userData).where(eq(users.id, userData.id));
       console.log(`[Webhook] Updated user: ${userData.email}`);
     } else {
       // Insert new user
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
 
       // Prepare typed user data
       const userData: UserInsert & { updatedAt: Date } = {
-        clerkId,
+        id: clerkId, // clerk_id is now the primary key
         name: `${first_name || ''} ${last_name || ''}`.trim() || 'User',
         email: primaryEmail.email_address,
         imageUrl: image_url || null,
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
 
       // Check if user already exists in our database
       const existingUser = await db.query.users.findFirst({
-        where: eq(users.clerkId, clerkId),
+        where: eq(users.id, clerkId),
       });
 
       if (existingUser) {
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
         await db
           .update(users)
           .set({ lastSignInAt: new Date(), updatedAt: new Date() })
-          .where(eq(users.clerkId, clerkId));
+          .where(eq(users.id, clerkId));
 
         console.log(`[Webhook] Updated sign-in time for: ${existingUser.email}`);
         return NextResponse.json(
@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
       }
 
       const userData: UserInsert & { updatedAt: Date } = {
-        clerkId: clerkUser.id,
+        id: clerkUser.id, // clerk_id is now the primary key
         name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || 'User',
         email: primaryEmail.emailAddress,
         imageUrl: clerkUser.imageUrl || null,

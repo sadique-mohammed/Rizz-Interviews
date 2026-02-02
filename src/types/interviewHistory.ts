@@ -16,7 +16,7 @@ export enum Status {
 
 export interface Interview {
   id: string;
-  userId: number;
+  userId: string; // clerk_id
   domain: Domain;
   difficulty: Difficulty;
   startedAt: string;
@@ -36,7 +36,7 @@ export interface Question {
 export interface AnswerAttempt {
   id: string;
   questionId: string;
-  userId: number;
+  userId: string; // clerk_id
   code?: string; // optional for theoretical questions
   explanation?: string;
   aiFeedback?: string;
