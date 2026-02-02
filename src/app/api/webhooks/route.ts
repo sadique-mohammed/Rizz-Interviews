@@ -27,23 +27,27 @@ const clerkSessionSchema = z.object({
   user_id: z.string(),
 });
 
-// Helper function to sync user to database
+// Helper function to sync user to database using atomic upsert
+// Note: neon-http driver doesn't support transactions, so we use onConflictDoUpdate
 async function syncUserToDatabase(userData: UserInsert & { updatedAt: Date }) {
-  await db.transaction(async (tx) => {
-    const existingUser = await tx.query.users.findFirst({
-      where: eq(users.id, userData.id),
-    });
+  const result = await db
+    .insert(users)
+    .values(userData)
+    .onConflictDoUpdate({
+      target: users.id,
+      set: {
+        name: userData.name,
+        email: userData.email,
+        imageUrl: userData.imageUrl,
+        lastSignInAt: userData.lastSignInAt,
+        updatedAt: userData.updatedAt,
+      },
+    })
+    .returning({ id: users.id });
 
-    if (existingUser) {
-      // Update existing user
-      await tx.update(users).set(userData).where(eq(users.id, userData.id));
-      console.log(`[Webhook] Updated user: ${userData.email}`);
-    } else {
-      // Insert new user
-      await tx.insert(users).values(userData);
-      console.log(`[Webhook] Created user: ${userData.email}`);
-    }
-  });
+  // Log based on whether this was likely an insert or update
+  // (we can't know for sure with upsert, but the operation succeeded)
+  console.log(`[Webhook] Synced user: ${userData.email} (id: ${result[0]?.id})`);
 }
 
 export async function POST(req: NextRequest) {
