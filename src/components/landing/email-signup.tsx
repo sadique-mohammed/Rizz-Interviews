@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 
 export default function EmailSignup() {
@@ -30,12 +29,7 @@ export default function EmailSignup() {
   return (
     <section id='contact' className='py-20 px-6 md:px-12 bg-gray-50'>
       <div className='mx-auto max-w-4xl text-center'>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
+        <div className='animate-fade-in-up' style={{ animationDelay: '0ms' }}>
           <h2 className='text-3xl md:text-4xl font-bold text-gray-900'>
             Start Practicing with Nexus Today
           </h2>
@@ -43,15 +37,9 @@ export default function EmailSignup() {
             Join thousands of developers and professionals who trust Nexus for seamless AI-powered
             interview preparation.
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className='mt-8'
-        >
+        <div className='mt-8 animate-fade-in-up' style={{ animationDelay: '100ms' }}>
           {!isSubmitted ? (
             <form
               onSubmit={handleSubmit}
@@ -115,17 +103,14 @@ export default function EmailSignup() {
               </p>
             </div>
           )}
-        </motion.div>
+        </div>
 
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className='mt-4 text-sm text-gray-500'
+        <p
+          className='mt-4 text-sm text-gray-500 animate-fade-in-up'
+          style={{ animationDelay: '200ms' }}
         >
           No credit card required • Free practice sessions • 14-day trial
-        </motion.p>
+        </p>
       </div>
     </section>
   );

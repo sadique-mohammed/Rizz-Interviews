@@ -1,37 +1,25 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import Image from "next/image";
-import { motion } from "framer-motion";
-
-// const navLinks = [
-//   { href: "#features", label: "Features" },
-//   { href: "#pricing", label: "Pricing" },
-//   { href: "#contact", label: "Contact" },
-// ];
+import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Navbar() {
   return (
-    <motion.header
-      initial={{ opacity: 0, y: -16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-white/70 bg-white/60 border-b border-gray-100"
-    >
-      <div className="mx-auto max-w-7xl py-4 px-6 md:px-12">
-        <nav className="flex items-center justify-between">
-          <Link href="/" className="font-bold text-lg tracking-tight text-gray-900">
+    <header className='sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-white/70 bg-white/60 border-b border-gray-100 animate-fade-in-down'>
+      <div className='mx-auto max-w-7xl py-4 px-6 md:px-12'>
+        <nav className='flex items-center justify-between'>
+          <Link href='/' className='font-bold text-lg tracking-tight text-gray-900'>
             <Image
-              src="/favicon.svg"
-              alt="Nexus Logo"
+              src='/favicon.svg'
+              alt='Nexus Logo'
               width={32}
               height={32}
-              className="inline-block mr-2"
+              className='inline-block mr-2'
             />
             Nexus AI
           </Link>
 
-          <div className="hidden md:flex items-center gap-6">
+          <div className='hidden md:flex items-center gap-6'>
             {/* {navLinks.map((l) => (
               <a
                 key={l.href}
@@ -43,21 +31,15 @@ export default function Navbar() {
             ))} */}
           </div>
 
-          <div className="flex items-center ">
-            <Link href="/auth" passHref>
-              <motion.div
-                className="inline-flex items-center justify-center rounded-xl px-10 py-2 text-sm font-semibold btn-invert"
-                whileHover={{
-                  backgroundColor: "rgb(17, 24, 39)",
-                  color: "#ffffff",
-                }}
-              >
+          <div className='flex items-center '>
+            <Link href='/auth' passHref>
+              <div className='inline-flex items-center justify-center rounded-xl px-10 py-2 text-sm font-semibold btn-invert hover:bg-gray-900 hover:text-white transition-all duration-200'>
                 Get Started
-              </motion.div>
+              </div>
             </Link>
           </div>
         </nav>
       </div>
-    </motion.header>
+    </header>
   );
 }
