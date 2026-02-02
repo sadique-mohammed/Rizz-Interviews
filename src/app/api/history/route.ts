@@ -1,26 +1,27 @@
-import { interviews, users } from '@/utils/mockData';
 import { NextResponse } from 'next/server';
-import { currentUser } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
+import { db } from '@/db';
+import { interviews } from '@/db/schema';
+import { eq, desc } from 'drizzle-orm';
 
 export async function GET() {
-  const user = await currentUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-  const email = user.emailAddresses?.[0]?.emailAddress;
-  if (!email) {
-    return NextResponse.json({ error: 'Missing email' }, { status: 400 });
-  }
+    // Get user's 3 most recent interviews (FK constraint ensures user exists)
+    const userInterviews = await db
+      .select()
+      .from(interviews)
+      .where(eq(interviews.userId, userId))
+      .orderBy(desc(interviews.startedAt))
+      .limit(3);
 
-  const userData = users.find((u) => u.email === email);
-  if (!userData) {
-    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    return NextResponse.json(userInterviews);
+  } catch (error) {
+    console.error('History API error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-
-  const userInterviews = interviews
-    .filter((i) => i.userId === userData.id)
-    .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
-    .slice(0, 3);
-  return NextResponse.json(userInterviews);
 }

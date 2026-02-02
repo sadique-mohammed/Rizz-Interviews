@@ -38,26 +38,25 @@ export default function InterviewDetailPage() {
     const fetchInterviewDetail = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/dashboard`, {
+        const res = await fetch(`/api/history/${params.id}`, {
           cache: 'no-store',
           credentials: 'include',
         });
-        if (!res.ok) throw new Error('Failed to fetch dashboard data');
 
-        const data = await res.json();
-
-        const interviewData = data.interviews.find((i: any) => i.id === params.id);
-
-        if (!interviewData) {
+        if (!res.ok) {
           router.push('/history');
           return;
         }
 
+        const interviewData = await res.json();
+
         // Map answerAttempts → attempts
-        interviewData.questions = interviewData.questions.map((q: any) => ({
-          ...q,
-          attempts: q.answerAttempts || [],
-        }));
+        if (interviewData.questions) {
+          interviewData.questions = interviewData.questions.map((q: any) => ({
+            ...q,
+            attempts: q.answerAttempts || [],
+          }));
+        }
 
         setInterview(interviewData);
       } catch (error) {

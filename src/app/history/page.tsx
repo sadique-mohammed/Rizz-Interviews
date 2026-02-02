@@ -15,7 +15,7 @@ async function fetchHistory(): Promise<Interview[]> {
   const host = headerList.get('x-forwarded-host') ?? headerList.get('host');
   const protocol = headerList.get('x-forwarded-proto') ?? 'http';
   const origin = host ? `${protocol}://${host}` : process.env.NEXT_PUBLIC_BASE_URL;
-  const url = new URL('/api/dashboard', origin);
+  const url = new URL('/api/history', origin);
 
   const res = await fetch(url, {
     cache: 'no-store',
@@ -36,8 +36,7 @@ async function fetchHistory(): Promise<Interview[]> {
     throw new Error('Failed to fetch interview history');
   }
 
-  const data = await res.json();
-  return Array.isArray(data?.interviews) ? data.interviews : [];
+  return res.json();
 }
 
 export default async function HistoryPage() {

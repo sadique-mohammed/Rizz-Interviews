@@ -1,49 +1,55 @@
-import { users, interviews, questions, answerAttempts, recordings } from '@/utils/mockData';
 import { NextResponse } from 'next/server';
-import { currentUser } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
+import { db } from '@/db';
+import { users, interviews } from '@/db/schema';
+import { eq, desc } from 'drizzle-orm';
+
 export async function GET() {
-  const user = await currentUser();
-  console.log('------------------------------');
-  console.log('Current User:', user);
-  console.log('------------------------------');
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // 1. Get only needed user fields (name, email for greeting)
+    const dbUsers = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    if (dbUsers.length === 0) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // 2. Get only needed interview fields for RecentHistoryCard (3 most recent)
+    const recentInterviews = await db
+      .select({
+        id: interviews.id,
+        domain: interviews.domain,
+        difficulty: interviews.difficulty,
+        duration: interviews.duration,
+        startedAt: interviews.startedAt,
+        totalScore: interviews.totalScore,
+      })
+      .from(interviews)
+      .where(eq(interviews.userId, userId))
+      .orderBy(desc(interviews.startedAt))
+      .limit(3);
+
+    return NextResponse.json(
+      {
+        user: dbUsers[0],
+        interviews: recentInterviews,
+      },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error('Dashboard API error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-
-  const email = user.emailAddresses?.[0]?.emailAddress;
-  if (!email) {
-    return NextResponse.json({ error: 'Missing email' }, { status: 400 });
-  }
-
-  // Find user
-  const userData = users.find((u) => u.email === email);
-  if (!userData) {
-    return NextResponse.json({ error: 'User not found' }, { status: 404 });
-  }
-
-  // Get user's interviews
-  const userInterviews = interviews.filter((i) => i.userId === userData.id);
-
-  // Nest questions + answerAttempts under each interview
-  const interviewsWithDetails = userInterviews.map((interview) => {
-    const qs = questions.filter((q) => q.interviewId === interview.id);
-    const qsWithAttempts = qs.map((q) => ({
-      ...q,
-      answerAttempts: answerAttempts.filter((a) => a.questionId === q.id),
-    }));
-
-    return {
-      ...interview,
-      questions: qsWithAttempts,
-      recordings: recordings.filter((r) => r.interviewId === interview.id),
-    };
-  });
-
-  return NextResponse.json(
-    {
-      user: userData,
-      interviews: interviewsWithDetails,
-    },
-    { status: 200 },
-  );
 }
