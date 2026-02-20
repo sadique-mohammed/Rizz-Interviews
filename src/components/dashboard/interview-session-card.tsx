@@ -27,12 +27,12 @@ const interviewTypes = [
     icon: Globe,
     description: 'React, APIs, Performance, etc.',
   },
-  {
-    id: 'System Design',
-    name: 'System Design',
-    icon: Target,
-    description: 'Scalability, Databases, Caching, etc.',
-  },
+  // {
+  //   id: 'System Design',
+  //   name: 'System Design',
+  //   icon: Target,
+  //   description: 'Scalability, Databases, Caching, etc.',
+  // },
 ];
 
 export default function InterviewSessionCard() {
@@ -62,7 +62,7 @@ export default function InterviewSessionCard() {
         const errorData = await res.json();
         if (res.status === 409 && errorData?.sessionId) {
           toast.info('Resuming your existing interview session...');
-          await new Promise(resolve => setTimeout(resolve, 3000));
+          await new Promise((resolve) => setTimeout(resolve, 3000));
           router.push(`/interview/${errorData.sessionId}`);
           return;
         }
