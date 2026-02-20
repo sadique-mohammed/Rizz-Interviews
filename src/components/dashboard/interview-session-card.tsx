@@ -10,24 +10,69 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Play, Code, Globe, Target, BookOpen } from 'lucide-react';
+import { Play, Code, Globe, Target, BookOpen, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+
+const interviewTypes = [
+  {
+    id: 'DSA',
+    name: 'Data Structures & Algorithms',
+    icon: Code,
+    description: 'Arrays, Strings, Trees, Graphs etc.',
+  },
+  {
+    id: 'Web Dev',
+    name: 'Web Development',
+    icon: Globe,
+    description: 'React, APIs, Performance, etc.',
+  },
+  {
+    id: 'System Design',
+    name: 'System Design',
+    icon: Target,
+    description: 'Scalability, Databases, Caching, etc.',
+  },
+];
 
 export default function InterviewSessionCard() {
   const router = useRouter();
 
-  const [selectedType, setSelectedType] = React.useState('dsa');
+  const [selectedType, setSelectedType] = React.useState('DSA');
   const [selectedDifficulty, setSelectedDifficulty] = React.useState('easy');
   const [selectedDuration, setSelectedDuration] = React.useState('15');
+  const [isLoading, setIsLoading] = React.useState(false);
 
-  const handleStartInterview = () => {
-    const params = new URLSearchParams({
-      type: selectedType,
-      difficulty: selectedDifficulty,
-      duration: selectedDuration,
-    });
-    console.log('Starting interview with params:', params.toString());
-    router.push(`/interview?${params.toString()}`);
+  const handleStartInterview = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+
+    try {
+      const res = await fetch('/api/interviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domain: selectedType,
+          difficulty: selectedDifficulty,
+          duration: selectedDuration,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error('Failed to start interview:', errorData);
+        toast.error(errorData?.error ?? 'Failed to start interview. Please try again.');
+        return;
+      }
+
+      const data = await res.json();
+      router.push(`/interview/${data.id}`);
+    } catch (error) {
+      console.error('Error starting interview session:', error);
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
   return (
     <Card className='border-2 border-blue-100 bg-blue-50/30 h-full'>
@@ -138,30 +183,19 @@ export default function InterviewSessionCard() {
         <div className='pt-4 border-t border-gray-100'>
           <Button
             onClick={handleStartInterview}
+            disabled={isLoading}
             variant='outline'
-            className='p-4 rounded-lg border cursor-pointer transition-colors border-gray-200 hover:border-blue-500 hover:bg-blue-50'
+            className='p-4 rounded-lg border cursor-pointer transition-colors border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed'
           >
-            <Play className='h-4 w-4' />
-            Start Interview
+            {isLoading ? (
+              <Loader2 className='h-4 w-4 animate-spin' />
+            ) : (
+              <Play className='h-4 w-4' />
+            )}
+            {isLoading ? 'Starting...' : 'Start Interview'}
           </Button>
         </div>
       </CardContent>
     </Card>
   );
 }
-const interviewTypes = [
-  {
-    id: 'dsa',
-    name: 'Data Structures & Algorithms',
-    icon: Code,
-    description: 'Arrays, Strings, Trees, Graphs etc.',
-    estimatedTime: '25-30 min',
-  },
-  {
-    id: 'webdev',
-    name: 'Web Development',
-    icon: Globe,
-    description: 'React, APIs, Performance, etc.',
-    estimatedTime: '30-45 min',
-  },
-];

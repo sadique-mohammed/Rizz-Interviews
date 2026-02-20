@@ -1,34 +1,43 @@
-"use client";
+'use client';
 
-import React from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import React from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+
+const INTERVIEW_HREF = '/interview';
 
 const navLinks = [
-  { href: "/dashboard", label: "Home" },
-  { href: "/interview", label: "Start Interview" },
-  { href: "/history", label: "History" },
+  { href: '/dashboard', label: 'Home' },
+  { href: INTERVIEW_HREF, label: 'Start Interview' },
+  { href: '/history', label: 'History' },
 ];
 
-export default function NavToggle() {
+interface NavToggleProps {
+  onInterviewClick?: () => void;
+}
+
+export default function NavToggle({ onInterviewClick }: NavToggleProps) {
   const id = React.useId();
   const pathname = usePathname();
   const router = useRouter();
-  const [selectedValue, setSelectedValue] = React.useState(pathname);
-
-  React.useEffect(() => {
-    setSelectedValue(pathname);
+  // since it's not a real route (it opens a modal instead)
+  const selectedValue = React.useMemo(() => {
+    const match = navLinks.find((l) => l.href !== INTERVIEW_HREF && pathname.startsWith(l.href));
+    return match?.href ?? '/dashboard';
   }, [pathname]);
 
-  const selectedIndex = navLinks.findIndex((l) => selectedValue.startsWith(l.href));
+  const selectedIndex = navLinks.findIndex((l) => l.href === selectedValue);
 
   const handleChange = (value: string) => {
-    setSelectedValue(value);
+    if (value === INTERVIEW_HREF) {
+      onInterviewClick?.();
+      return;
+    }
     router.push(value);
   };
 
   return (
-    <nav className="bg-input/50 md:inline-flex h-8 rounded-md p-0.5 hidden">
+    <nav className='bg-input/50 md:inline-flex h-8 rounded-md p-0.5 hidden'>
       <RadioGroup
         value={selectedValue}
         onValueChange={handleChange}
@@ -38,20 +47,20 @@ export default function NavToggle() {
     after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]
     ${
       selectedIndex === 1
-        ? "after:translate-x-full"
+        ? 'after:translate-x-full'
         : selectedIndex === 2
-        ? "after:translate-x-[200%]"
-        : "after:translate-x-0"
+          ? 'after:translate-x-[200%]'
+          : 'after:translate-x-0'
     }
   `}
       >
         {navLinks.map((link, index) => (
           <label
             key={link.href}
-            className="relative z-10 inline-flex h-full min-w-8 cursor-pointer items-center justify-center px-3 select-none transition-colors text-gray-700 hover:text-gray-900"
+            className='relative z-10 inline-flex h-full min-w-8 cursor-pointer items-center justify-center px-3 select-none transition-colors text-gray-700 hover:text-gray-900'
           >
             {link.label}
-            <RadioGroupItem id={`${id}-${index}`} value={link.href} className="sr-only" />
+            <RadioGroupItem id={`${id}-${index}`} value={link.href} className='sr-only' />
           </label>
         ))}
       </RadioGroup>
