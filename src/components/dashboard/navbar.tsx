@@ -3,12 +3,24 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import React from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { UserButton } from '@clerk/nextjs';
 import NavToggle from '@/components/ui/nav-toggle';
 import InterviewDrawer from '@/components/interview/interview-drawer';
 
 export default function Navbar() {
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Auto-open drawer when ?startInterview=true is in the URL
+  React.useEffect(() => {
+    if (searchParams.get('startInterview') === 'true') {
+      setIsDrawerOpen(true);
+      // Clear the param so back-navigation doesn't re-trigger
+      router.replace(window.location.pathname, { scroll: false });
+    }
+  }, [searchParams, router]);
 
   const openDrawer = React.useCallback(() => setIsDrawerOpen(true), []);
   const closeDrawer = React.useCallback(() => setIsDrawerOpen(false), []);
