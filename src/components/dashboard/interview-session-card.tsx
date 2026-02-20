@@ -60,7 +60,11 @@ export default function InterviewSessionCard() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        console.error('Failed to start interview:', errorData);
+        if (res.status === 409 && errorData?.sessionId) {
+          toast.info('Resuming your existing interview session...');
+          router.push(`/interview/${errorData.sessionId}`);
+          return;
+        }
         toast.error(errorData?.error ?? 'Failed to start interview. Please try again.');
         return;
       }

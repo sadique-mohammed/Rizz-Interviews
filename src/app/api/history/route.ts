@@ -11,13 +11,12 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user's 3 most recent interviews (FK constraint ensures user exists)
+    // FK constraint ensures user exists
     const userInterviews = await db
       .select()
       .from(interviews)
       .where(eq(interviews.userId, userId))
-      .orderBy(desc(interviews.startedAt))
-      .limit(3);
+      .orderBy(desc(interviews.startedAt));
 
     return NextResponse.json(userInterviews);
   } catch (error) {
