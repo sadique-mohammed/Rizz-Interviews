@@ -62,6 +62,7 @@ export default function InterviewSessionCard() {
         const errorData = await res.json();
         if (res.status === 409 && errorData?.sessionId) {
           toast.info('Resuming your existing interview session...');
+          await new Promise(resolve => setTimeout(resolve, 3000));
           router.push(`/interview/${errorData.sessionId}`);
           return;
         }
