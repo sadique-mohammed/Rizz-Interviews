@@ -220,14 +220,18 @@ export default function InterviewCanvas({
   const languages = domain === 'DSA' ? DSA_LANGUAGES : WEBDEV_LANGUAGES;
 
   const [language, setLanguage] = React.useState(languages[0].value);
-  const [code, setCode] = React.useState(question.starterCode?.[languages[0].value] ?? '');
+  const [codeMap, setCodeMap] = React.useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    languages.forEach((l) => (initial[l.value] = question.starterCode?.[l.value] ?? ''));
+    return initial;
+  });
   const [explanation, setExplanation] = React.useState('');
   const [timeLeft, setTimeLeft] = React.useState(duration * 60);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [validationError, setValidationError] = React.useState('');
 
-  const hasEditedCode = React.useRef(false);
-  const starterForCurrentLang = React.useRef(question.starterCode?.[languages[0].value] ?? '');
+  const currentCode = codeMap[language] ?? '';
+  const starterForCurrentLang = question.starterCode?.[language] ?? '';
   const intervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
   React.useEffect(() => {
@@ -245,26 +249,19 @@ export default function InterviewCanvas({
     };
   }, []);
 
-  const handleLanguageChange = React.useCallback(
-    (newLang: string) => {
-      setLanguage(newLang);
-      if (!hasEditedCode.current) {
-        const newStarter = question.starterCode?.[newLang] ?? '';
-        setCode(newStarter);
-        starterForCurrentLang.current = newStarter;
-      }
-    },
-    [question.starterCode],
-  );
-
-  const handleCodeChange = React.useCallback((value: string | undefined) => {
-    const newVal = value ?? '';
-    setCode(newVal);
-    if (newVal !== starterForCurrentLang.current) {
-      hasEditedCode.current = true;
-    }
+  const handleLanguageChange = React.useCallback((newLang: string) => {
+    setLanguage(newLang);
     setValidationError('');
   }, []);
+
+  const handleCodeChange = React.useCallback(
+    (value: string | undefined) => {
+      const newVal = value ?? '';
+      setCodeMap((prev) => ({ ...prev, [language]: newVal }));
+      setValidationError('');
+    },
+    [language],
+  );
 
   const handleExplanationChange = React.useCallback((value: string) => {
     setExplanation(value);
@@ -274,7 +271,7 @@ export default function InterviewCanvas({
   const validateSubmission = React.useCallback((): boolean => {
     if (requiresCode) {
       const codeIsEmpty =
-        !code.trim() || code.trim() === (starterForCurrentLang.current ?? '').trim();
+        !currentCode.trim() || currentCode.trim() === starterForCurrentLang.trim();
 
       if (codeIsEmpty && !explanation.trim()) {
         setValidationError('Please write your code and explain your approach before submitting.');
@@ -295,19 +292,43 @@ export default function InterviewCanvas({
 
     setValidationError('');
     return true;
-  }, [requiresCode, code, explanation]);
-
-  const handleSubmit = React.useCallback(async () => {
-    if (!validateSubmission()) return;
-    setIsSubmitting(true);
-    console.log('Submit:', { sessionId, code, language, explanation });
-    setTimeout(() => setIsSubmitting(false), 1000);
-  }, [sessionId, code, language, explanation, validateSubmission]);
+  }, [requiresCode, currentCode, explanation, starterForCurrentLang]);
 
   const handleEnd = React.useCallback(() => {
-    //ToDO: DB call marking interview as completed, then redirect to history page, when user clicks on end button or when timer runs out, add a loader of 15 seconds simulating the evaluation time, then redirect to history page
+    //ToDO: DB call marking interview as completed, then redirect to history page
     router.push('/history');
   }, [router]);
+
+  const handleSubmit = React.useCallback(
+    async (forceOrEvent?: boolean | React.MouseEvent) => {
+      const force = forceOrEvent === true;
+      if (!force && !validateSubmission()) return;
+      setIsSubmitting(true);
+      console.log('Submit:', { sessionId, code: currentCode, language, explanation, force });
+
+      setTimeout(() => {
+        setIsSubmitting(false);
+        if (force) {
+          handleEnd();
+        }
+      }, 1000);
+    },
+    [sessionId, currentCode, language, explanation, validateSubmission, handleEnd],
+  );
+
+  const handleSubmitRef = React.useRef(handleSubmit);
+  React.useEffect(() => {
+    handleSubmitRef.current = handleSubmit;
+  }, [handleSubmit]);
+
+  const hasAutoSubmitted = React.useRef(false);
+  React.useEffect(() => {
+    if (timeLeft === 0 && !hasAutoSubmitted.current && !isSubmitting) {
+      hasAutoSubmitted.current = true;
+      setValidationError('Time is up! Auto-submitting and ending interview...');
+      handleSubmitRef.current(true);
+    }
+  }, [timeLeft, isSubmitting]);
 
   const totalSeconds = duration * 60;
   const progressPercent = ((totalSeconds - timeLeft) / totalSeconds) * 100;
@@ -341,7 +362,7 @@ export default function InterviewCanvas({
                   languages={languages}
                   language={language}
                   onLanguageChange={handleLanguageChange}
-                  code={code}
+                  code={currentCode}
                   onCodeChange={handleCodeChange}
                   explanation={explanation}
                   onExplanationChange={handleExplanationChange}
@@ -388,7 +409,7 @@ export default function InterviewCanvas({
                       <MonacoEditor
                         height='100%'
                         language={language}
-                        value={code}
+                        value={currentCode}
                         onChange={handleCodeChange}
                         theme='vs-dark'
                         options={{

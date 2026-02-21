@@ -33,7 +33,7 @@ export default function Hero() {
             className={`mt-8 flex items-center gap-3 ${fadeInUp}`}
             style={{ animationDelay: '100ms' }}
           >
-            <Link href='/auth' passHref>
+            <Link href='/dashboard' passHref>
               <div className='inline-flex items-center justify-center rounded-xl px-10 py-2 text-sm font-semibold btn-invert hover:bg-gray-900 hover:text-white hover:shadow-lg transition-all duration-200'>
                 Get Started
               </div>
