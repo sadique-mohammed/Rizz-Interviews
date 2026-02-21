@@ -22,6 +22,7 @@ import Loading from '@/components/dashboard/loader';
 import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
 import { QUESTIONS, questionToMarkdown } from '@/lib/questions';
+import { MOCK_INTERVIEW_QUESTIONS } from '@/lib/mockInterviewResults';
 import type { PrismLight as PrismType } from 'react-syntax-highlighter';
 
 const SyntaxHighlighter = dynamic<React.ComponentProps<typeof PrismType>>(
@@ -217,40 +218,11 @@ export default function InterviewDetailPage() {
             </div>
           </div>
           {interview.questions.length === 0 && interview.status !== 'completed' ? (
-            // DEV PREVIEW: show all hardcoded questions when session is in-progress with no DB questions yet
-            <div className='space-y-4'>
-              <div className='flex items-center gap-2 px-1 py-2 rounded-lg bg-amber-50 border border-amber-200'>
-                <span className='text-xs font-semibold text-amber-700 uppercase tracking-wide px-2'>
-                  Dev Preview — Hardcoded Question Bank
-                </span>
-              </div>
-              {QUESTIONS.map((q, idx) => (
-                <Card key={q.id} className='border border-slate-200/80 shadow-sm opacity-80'>
-                  <CardContent className='p-6'>
-                    <div className='flex gap-4'>
-                      <div className='flex-shrink-0'>
-                        <div className='h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center'>
-                          <Bot className='h-4 w-4 text-white' />
-                        </div>
-                      </div>
-                      <div className='flex-1'>
-                        <div className='bg-blue-50/80 border border-blue-100 rounded-xl p-4'>
-                          <div className='flex items-center gap-2 mb-2'>
-                            <p className='text-xs uppercase font-semibold tracking-wide text-blue-600'>
-                              Question #{idx + 1}
-                            </p>
-                            <span className='text-xs text-gray-400'>({q.domain} · {q.difficulty})</span>
-                          </div>
-                          <div className='text-gray-900 leading-relaxed [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mb-1 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-4 [&_li]:mt-0.5'>
-                            <ReactMarkdown>{questionToMarkdown(q)}</ReactMarkdown>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <MockInterviewQuestions
+              detectLanguage={detectLanguage}
+              handleCopyCode={handleCopyCode}
+              copiedCode={copiedCode}
+            />
           ) : interview.questions.length === 0 ? (
             <Card>
               <CardContent className='text-center py-8'>
@@ -259,123 +231,12 @@ export default function InterviewDetailPage() {
               </CardContent>
             </Card>
           ) : (
-            interview.questions.map((q: any, idx: number) => (
-              <Card key={q.id} className='border border-slate-200/80 shadow-sm'>
-                <CardContent className='p-6 space-y-6'>
-                  {/* AI Question */}
-                  <div className='flex gap-4'>
-                    <div className='flex-shrink-0'>
-                      <div className='h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center'>
-                        <Bot className='h-4 w-4 text-white' />
-                      </div>
-                    </div>
-                    <div className='flex-1'>
-                      <div className='bg-blue-50/80 border border-blue-100 rounded-xl p-4'>
-                        <p className='text-xs uppercase font-semibold tracking-wide text-blue-600 mb-2'>
-                          Nexus AI Question #{idx + 1}
-                        </p>
-                        <div className='text-gray-900 leading-relaxed [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mb-1 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-4 [&_li]:mt-0.5'>
-                          <ReactMarkdown>{q.aiQuestion}</ReactMarkdown>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* User Attempts */}
-                  {q.attempts.map((attempt: any, aIdx: number) => (
-                    <div key={attempt.id} className='flex gap-4 mb-4'>
-                      <div className='flex-shrink-0'>
-                        <div className='h-9 w-9 rounded-lg bg-gray-200 flex items-center justify-center'>
-                          <User className='h-4 w-4 text-gray-600' />
-                        </div>
-                      </div>
-                      <div className='flex-1 space-y-3'>
-                        <div className='bg-white border border-slate-200 rounded-xl p-4 shadow-xs'>
-                          <div className='flex items-center justify-between mb-3'>
-                            <p className='text-sm font-semibold text-gray-900'>
-                              Your Answer #{aIdx + 1}
-                            </p>
-                            {attempt.score !== null && (
-                              <Badge variant='outline'>
-                                <Trophy className='h-3 w-3 mr-1' />
-                                {attempt.score}/10
-                              </Badge>
-                            )}
-                          </div>
-                          {attempt.code && (
-                            <div className='mb-3 '>
-                              <div className='flex items-center justify-between mb-2'>
-                                <div className='flex items-center gap-2'>
-                                  <Code2 className='h-4 w-4 text-gray-500' />
-                                  <span className='text-sm font-medium text-gray-700'>Code</span>
-                                  <Badge variant='secondary' className='text-xs capitalize'>
-                                    {detectLanguage(attempt.code)}
-                                  </Badge>
-                                </div>
-                                <Button
-                                  variant='ghost'
-                                  size='sm'
-                                  onClick={() => handleCopyCode(attempt.code, attempt.id)}
-                                  className='h-8 px-2 cursor-pointer'
-                                >
-                                  {copiedCode === attempt.id ? (
-                                    <Check className='h-3 w-3 text-green-600' />
-                                  ) : (
-                                    <Copy className='h-3 w-3 cursor-pointer' />
-                                  )}
-                                </Button>
-                              </div>
-                              <div className='rounded-lg border '>
-                                <SyntaxHighlighter
-                                  language={detectLanguage(attempt.code)}
-                                  customStyle={{
-                                    margin: 0,
-                                    fontSize: '13px',
-                                    lineHeight: '1.5',
-                                  }}
-                                  showLineNumbers={true}
-                                >
-                                  {attempt.code}
-                                </SyntaxHighlighter>
-                              </div>
-                            </div>
-                          )}
-                          {attempt.explanation && (
-                            <div>
-                              <p className='text-sm font-medium text-gray-700 mb-1'>Explanation:</p>
-                              <p className='text-sm text-gray-900'>{attempt.explanation}</p>
-                            </div>
-                          )}
-                        </div>
-                        {attempt.aiFeedback && (
-                          <div className='bg-blue-50 border border-blue-200 rounded-lg p-4'>
-                            <p className='text-sm font-medium text-blue-700 mb-1'>
-                              Nexus AI Feedback
-                            </p>
-                            <p className='text-sm text-blue-800'>{attempt.aiFeedback}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-
-                  {q.attempts.length === 0 && (
-                    <div className='flex gap-4'>
-                      <div className='flex-shrink-0'>
-                        <div className='h-9 w-9 rounded-lg bg-gray-200 flex items-center justify-center'>
-                          <User className='h-4 w-4 text-gray-400' />
-                        </div>
-                      </div>
-                      <div className='flex-1'>
-                        <div className='bg-slate-50 border border-dashed border-slate-200 rounded-xl p-4 text-center'>
-                          <p className='text-sm text-slate-500'>No response recorded</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))
+            <RealInterviewQuestions
+              questions={interview.questions}
+              detectLanguage={detectLanguage}
+              handleCopyCode={handleCopyCode}
+              copiedCode={copiedCode}
+            />
           )}
         </div>
       </div>
@@ -403,3 +264,146 @@ const formatDate = (dateString: string) =>
     month: 'long',
     day: 'numeric',
   });
+
+const RealInterviewQuestions = ({ questions, detectLanguage, handleCopyCode, copiedCode }: any) => {
+  return (
+    <>
+      {questions.map((q: any, idx: number) => (
+        <Card key={q.id} className='border border-slate-200/80 shadow-sm'>
+          <CardContent className='p-6 space-y-6'>
+            {/* AI Question */}
+            <div className='flex gap-4'>
+              <div className='flex-shrink-0'>
+                <div className='h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center'>
+                  <Bot className='h-4 w-4 text-white' />
+                </div>
+              </div>
+              <div className='flex-1'>
+                <div className='bg-blue-50/80 border border-blue-100 rounded-xl p-4'>
+                  <p className='text-xs uppercase font-semibold tracking-wide text-blue-600 mb-2'>
+                    Nexus AI Question #{idx + 1}
+                  </p>
+                  <div className='text-gray-900 leading-relaxed [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mb-1 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-4 [&_li]:mt-0.5'>
+                    <ReactMarkdown>{q.aiQuestion}</ReactMarkdown>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* User Attempts */}
+            {q.attempts.map((attempt: any, aIdx: number) => (
+              <div key={attempt.id} className='flex gap-4 mb-4'>
+                <div className='flex-shrink-0'>
+                  <div className='h-9 w-9 rounded-lg bg-gray-200 flex items-center justify-center'>
+                    <User className='h-4 w-4 text-gray-600' />
+                  </div>
+                </div>
+                <div className='flex-1 space-y-3'>
+                  <div className='bg-white border border-slate-200 rounded-xl p-4 shadow-xs'>
+                    <div className='flex items-center justify-between mb-3'>
+                      <p className='text-sm font-semibold text-gray-900'>
+                        Your Answer #{aIdx + 1}
+                      </p>
+                      {attempt.score !== null && (
+                        <Badge variant='outline'>
+                          <Trophy className='h-3 w-3 mr-1' />
+                          {attempt.score}/10
+                        </Badge>
+                      )}
+                    </div>
+                    {attempt.code && (
+                      <div className='mb-3 '>
+                        <div className='flex items-center justify-between mb-2'>
+                          <div className='flex items-center gap-2'>
+                            <Code2 className='h-4 w-4 text-gray-500' />
+                            <span className='text-sm font-medium text-gray-700'>Code</span>
+                            <Badge variant='secondary' className='text-xs capitalize'>
+                              {detectLanguage(attempt.code)}
+                            </Badge>
+                          </div>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            onClick={() => handleCopyCode(attempt.code, attempt.id)}
+                            className='h-8 px-2 cursor-pointer'
+                          >
+                            {copiedCode === attempt.id ? (
+                              <Check className='h-3 w-3 text-green-600' />
+                            ) : (
+                              <Copy className='h-3 w-3 cursor-pointer' />
+                            )}
+                          </Button>
+                        </div>
+                        <div className='rounded-lg border '>
+                          <SyntaxHighlighter
+                            language={detectLanguage(attempt.code)}
+                            customStyle={{
+                              margin: 0,
+                              fontSize: '13px',
+                              lineHeight: '1.5',
+                            }}
+                            showLineNumbers={true}
+                          >
+                            {attempt.code}
+                          </SyntaxHighlighter>
+                        </div>
+                      </div>
+                    )}
+                    {attempt.explanation && (
+                      <div>
+                        <p className='text-sm font-medium text-gray-700 mb-1'>Explanation:</p>
+                        <p className='text-sm text-gray-900'>{attempt.explanation}</p>
+                      </div>
+                    )}
+                  </div>
+                  {attempt.aiFeedback && (
+                    <div className='bg-blue-50 border border-blue-200 rounded-lg p-4'>
+                      <p className='text-sm font-medium text-blue-700 mb-1'>
+                        Nexus AI Feedback
+                      </p>
+                      <p className='text-sm text-blue-800'>{attempt.aiFeedback}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {q.attempts.length === 0 && (
+              <div className='flex gap-4'>
+                <div className='flex-shrink-0'>
+                  <div className='h-9 w-9 rounded-lg bg-gray-200 flex items-center justify-center'>
+                    <User className='h-4 w-4 text-gray-400' />
+                  </div>
+                </div>
+                <div className='flex-1'>
+                  <div className='bg-slate-50 border border-dashed border-slate-200 rounded-xl p-4 text-center'>
+                    <p className='text-sm text-slate-500'>No response recorded</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      ))}
+    </>
+  );
+};
+
+const MockInterviewQuestions = ({ detectLanguage, handleCopyCode, copiedCode }: any) => {
+  return (
+    <div className='space-y-4'>
+      <div className='flex items-center gap-2 px-1 py-2 rounded-lg bg-amber-50 border border-amber-200 mb-6'>
+        <span className='text-xs font-semibold text-amber-700 uppercase tracking-wide px-2'>
+          Dev Preview — Mock Session Data
+        </span>
+      </div>
+      <RealInterviewQuestions 
+        questions={MOCK_INTERVIEW_QUESTIONS} 
+        detectLanguage={detectLanguage} 
+        handleCopyCode={handleCopyCode} 
+        copiedCode={copiedCode} 
+      />
+    </div>
+  );
+};
+
