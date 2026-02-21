@@ -37,11 +37,32 @@ export default function InterviewDetailPage() {
   const [copiedCode, setCopiedCode] = React.useState<string | null>(null);
 
   React.useEffect(() => {
+    const CACHE_KEY = `interview_${params.id}`;
+    const IN_PROGRESS_TTL = 15_000; // 15s for in-progress sessions
+
     const fetchInterviewDetail = async () => {
+      // Check sessionStorage before hitting the network
+      try {
+        const cached = sessionStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const { data, status, cachedAt } = JSON.parse(cached);
+          const isCompleted = status === 'completed';
+          const isStillFresh = Date.now() - cachedAt < IN_PROGRESS_TTL;
+
+          // Completed = immutable, serve forever. In-progress = serve within TTL.
+          if (isCompleted || isStillFresh) {
+            setInterview(data);
+            setLoading(false);
+            return;
+          }
+        }
+      } catch {
+        // sessionStorage unavailable or parse error — fall through to network
+      }
+
       try {
         setLoading(true);
         const res = await fetch(`/api/history/${params.id}`, {
-          cache: 'no-store',
           credentials: 'include',
         });
 
@@ -61,6 +82,20 @@ export default function InterviewDetailPage() {
         }
 
         setInterview(interviewData);
+
+        // Cache in sessionStorage — completed interviews cached indefinitely
+        try {
+          sessionStorage.setItem(
+            CACHE_KEY,
+            JSON.stringify({
+              data: interviewData,
+              status: interviewData.status,
+              cachedAt: Date.now(),
+            }),
+          );
+        } catch {
+          // sessionStorage full or unavailable — silently skip
+        }
       } catch (error) {
         console.error(error);
         router.push('/history');

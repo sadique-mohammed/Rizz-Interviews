@@ -18,7 +18,7 @@ async function fetchHistory(): Promise<Interview[]> {
   const url = new URL('/api/history', origin);
 
   const res = await fetch(url, {
-    cache: 'no-store',
+    next: { revalidate: 15 },
     headers: {
       cookie: cookieStore.toString(),
     },

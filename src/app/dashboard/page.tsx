@@ -13,7 +13,7 @@ async function fetchDashboardData() {
   const url = new URL('/api/dashboard', origin);
 
   const res = await fetch(url, {
-    cache: 'no-store',
+    next: { revalidate: 15 },
     headers: {
       cookie: cookieStore.toString(),
     },
