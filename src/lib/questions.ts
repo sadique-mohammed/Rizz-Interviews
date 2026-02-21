@@ -7,6 +7,7 @@ export type Question = {
   examples: string[];
   constraints: string[];
   requiresCode?: boolean;
+  starterCode?: Record<string, string>;
 };
 
 export const QUESTIONS: Question[] = [
@@ -31,6 +32,12 @@ export const QUESTIONS: Question[] = [
       'Exactly one valid answer exists',
     ],
     requiresCode: true,
+    starterCode: {
+      javascript: 'function twoSum(nums, target) {\n  // Write your solution\n}',
+      python: 'def two_sum(nums: list[int], target: int) -> list[int]:\n    pass',
+      java: 'class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        \n    }\n}',
+      cpp: 'class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        \n    }\n};',
+    },
   },
 
   {
@@ -49,6 +56,12 @@ export const QUESTIONS: Question[] = [
     ],
     constraints: ['1 ≤ s.length ≤ 10^4', 's consists only of the characters ()[]{}'],
     requiresCode: true,
+    starterCode: {
+      javascript: 'function isValid(s) {\n  // Write your solution\n}',
+      python: 'def is_valid(s: str) -> bool:\n    pass',
+      java: 'class Solution {\n    public boolean isValid(String s) {\n        \n    }\n}',
+      cpp: 'class Solution {\npublic:\n    bool isValid(string s) {\n        \n    }\n};',
+    },
   },
 
   {
@@ -64,6 +77,12 @@ export const QUESTIONS: Question[] = [
     ],
     constraints: ['2 ≤ height.length ≤ 10^5', '0 ≤ height[i] ≤ 10^4'],
     requiresCode: true,
+    starterCode: {
+      javascript: 'function maxArea(height) {\n  // Write your solution\n}',
+      python: 'def max_area(height: list[int]) -> int:\n    pass',
+      java: 'class Solution {\n    public int maxArea(int[] height) {\n        \n    }\n}',
+      cpp: 'class Solution {\npublic:\n    int maxArea(vector<int>& height) {\n        \n    }\n};',
+    },
   },
 
   // ---------------- WebDev (discussion / design) ----------------
@@ -126,6 +145,11 @@ export const QUESTIONS: Question[] = [
       'Do not use the built-in Promise.all',
     ],
     requiresCode: true,
+    starterCode: {
+      javascript: 'function promiseAll(promises) {\n  // Write your solution\n}',
+      typescript:
+        'function promiseAll<T>(promises: Array<T | Promise<T>>): Promise<T[]> {\n  // Write your solution\n}',
+    },
   },
 
   // ---------------- Theory ----------------

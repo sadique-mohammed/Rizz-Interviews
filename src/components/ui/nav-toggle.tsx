@@ -14,22 +14,33 @@ const navLinks = [
 
 interface NavToggleProps {
   onInterviewClick?: () => void;
+  selectedValueOverride?: string;
+  interviewHref?: string;
 }
 
-export default function NavToggle({ onInterviewClick }: NavToggleProps) {
+export default function NavToggle({
+  onInterviewClick,
+  selectedValueOverride,
+  interviewHref,
+}: NavToggleProps) {
   const id = React.useId();
   const pathname = usePathname();
   const router = useRouter();
   // since it's not a real route (it opens a modal instead)
   const selectedValue = React.useMemo(() => {
+    if (selectedValueOverride) return selectedValueOverride;
     const match = navLinks.find((l) => l.href !== INTERVIEW_HREF && pathname.startsWith(l.href));
     return match?.href ?? '/dashboard';
-  }, [pathname]);
+  }, [pathname, selectedValueOverride]);
 
   const selectedIndex = navLinks.findIndex((l) => l.href === selectedValue);
 
   const handleChange = (value: string) => {
     if (value === INTERVIEW_HREF) {
+      if (interviewHref) {
+        router.push(interviewHref);
+        return;
+      }
       onInterviewClick?.();
       return;
     }

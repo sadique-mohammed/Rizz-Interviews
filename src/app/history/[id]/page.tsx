@@ -19,6 +19,8 @@ import {
   Check,
 } from 'lucide-react';
 import Loading from '@/components/dashboard/loader';
+import { formatDateFull } from '@/lib/formatters';
+import { getDifficultyBadgeClass } from '@/lib/styles';
 import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
 import { QUESTIONS, questionToMarkdown } from '@/lib/questions';
@@ -162,10 +164,10 @@ export default function InterviewDetailPage() {
                 <CardTitle className='text-3xl font-semibold text-gray-900'>
                   {interview.domain} Interview
                 </CardTitle>
-                <p className='text-sm text-gray-500 mt-1'>{formatDate(interview.startedAt)}</p>
+                <p className='text-sm text-gray-500 mt-1'>{formatDateFull(interview.startedAt)}</p>
               </div>
               <div className='flex gap-2'>
-                <Badge className={getDifficultyColor(interview.difficulty)}>
+                <Badge className={getDifficultyBadgeClass(interview.difficulty)}>
                   {interview.difficulty}
                 </Badge>
                 <Badge variant={interview.status === 'completed' ? 'default' : 'secondary'}>
@@ -244,27 +246,6 @@ export default function InterviewDetailPage() {
   );
 }
 
-const getDifficultyColor = (difficulty: string) => {
-  switch (difficulty) {
-    case 'easy':
-      return 'text-green-600 bg-green-50';
-    case 'medium':
-      return 'text-yellow-600 bg-yellow-50';
-    case 'hard':
-      return 'text-red-600 bg-red-50';
-    default:
-      return 'text-gray-600 bg-gray-50';
-  }
-};
-
-const formatDate = (dateString: string) =>
-  new Date(dateString).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-
 const RealInterviewQuestions = ({ questions, detectLanguage, handleCopyCode, copiedCode }: any) => {
   return (
     <>
@@ -301,9 +282,7 @@ const RealInterviewQuestions = ({ questions, detectLanguage, handleCopyCode, cop
                 <div className='flex-1 space-y-3'>
                   <div className='bg-white border border-slate-200 rounded-xl p-4 shadow-xs'>
                     <div className='flex items-center justify-between mb-3'>
-                      <p className='text-sm font-semibold text-gray-900'>
-                        Your Answer #{aIdx + 1}
-                      </p>
+                      <p className='text-sm font-semibold text-gray-900'>Your Answer #{aIdx + 1}</p>
                       {attempt.score !== null && (
                         <Badge variant='outline'>
                           <Trophy className='h-3 w-3 mr-1' />
@@ -358,9 +337,7 @@ const RealInterviewQuestions = ({ questions, detectLanguage, handleCopyCode, cop
                   </div>
                   {attempt.aiFeedback && (
                     <div className='bg-blue-50 border border-blue-200 rounded-lg p-4'>
-                      <p className='text-sm font-medium text-blue-700 mb-1'>
-                        Nexus AI Feedback
-                      </p>
+                      <p className='text-sm font-medium text-blue-700 mb-1'>Nexus AI Feedback</p>
                       <p className='text-sm text-blue-800'>{attempt.aiFeedback}</p>
                     </div>
                   )}
@@ -397,13 +374,12 @@ const MockInterviewQuestions = ({ detectLanguage, handleCopyCode, copiedCode }: 
           Dev Preview — Mock Session Data
         </span>
       </div>
-      <RealInterviewQuestions 
-        questions={MOCK_INTERVIEW_QUESTIONS} 
-        detectLanguage={detectLanguage} 
-        handleCopyCode={handleCopyCode} 
-        copiedCode={copiedCode} 
+      <RealInterviewQuestions
+        questions={MOCK_INTERVIEW_QUESTIONS}
+        detectLanguage={detectLanguage}
+        handleCopyCode={handleCopyCode}
+        copiedCode={copiedCode}
       />
     </div>
   );
 };
-
