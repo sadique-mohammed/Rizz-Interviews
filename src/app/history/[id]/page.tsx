@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import Loading from '@/components/dashboard/loader';
 import dynamic from 'next/dynamic';
+import ReactMarkdown from 'react-markdown';
+import { QUESTIONS, questionToMarkdown } from '@/lib/questions';
 import type { PrismLight as PrismType } from 'react-syntax-highlighter';
 
 const SyntaxHighlighter = dynamic<React.ComponentProps<typeof PrismType>>(
@@ -179,7 +181,42 @@ export default function InterviewDetailPage() {
               </p>
             </div>
           </div>
-          {interview.questions.length === 0 ? (
+          {interview.questions.length === 0 && interview.status !== 'completed' ? (
+            // DEV PREVIEW: show all hardcoded questions when session is in-progress with no DB questions yet
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2 px-1 py-2 rounded-lg bg-amber-50 border border-amber-200'>
+                <span className='text-xs font-semibold text-amber-700 uppercase tracking-wide px-2'>
+                  Dev Preview — Hardcoded Question Bank
+                </span>
+              </div>
+              {QUESTIONS.map((q, idx) => (
+                <Card key={q.id} className='border border-slate-200/80 shadow-sm opacity-80'>
+                  <CardContent className='p-6'>
+                    <div className='flex gap-4'>
+                      <div className='flex-shrink-0'>
+                        <div className='h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center'>
+                          <Bot className='h-4 w-4 text-white' />
+                        </div>
+                      </div>
+                      <div className='flex-1'>
+                        <div className='bg-blue-50/80 border border-blue-100 rounded-xl p-4'>
+                          <div className='flex items-center gap-2 mb-2'>
+                            <p className='text-xs uppercase font-semibold tracking-wide text-blue-600'>
+                              Question #{idx + 1}
+                            </p>
+                            <span className='text-xs text-gray-400'>({q.domain} · {q.difficulty})</span>
+                          </div>
+                          <div className='text-gray-900 leading-relaxed [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mb-1 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-4 [&_li]:mt-0.5'>
+                            <ReactMarkdown>{questionToMarkdown(q)}</ReactMarkdown>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : interview.questions.length === 0 ? (
             <Card>
               <CardContent className='text-center py-8'>
                 <MessageSquare className='h-12 w-12 text-gray-400 mx-auto mb-4' />
@@ -202,7 +239,9 @@ export default function InterviewDetailPage() {
                         <p className='text-xs uppercase font-semibold tracking-wide text-blue-600 mb-2'>
                           Nexus AI Question #{idx + 1}
                         </p>
-                        <p className='text-gray-900 leading-relaxed'>{q.aiQuestion}</p>
+                        <div className='text-gray-900 leading-relaxed [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mb-1 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-4 [&_li]:mt-0.5'>
+                          <ReactMarkdown>{q.aiQuestion}</ReactMarkdown>
+                        </div>
                       </div>
                     </div>
                   </div>
