@@ -2,7 +2,13 @@
 
 import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
+import dynamic from 'next/dynamic';
+
+const MotionSpan = dynamic(() => import('framer-motion').then((mod) => mod.motion.span), {
+  ssr: false,
+});
 
 const INTERVIEW_HREF = '/interview';
 
@@ -23,17 +29,14 @@ export default function NavToggle({
   selectedValueOverride,
   interviewHref,
 }: NavToggleProps) {
-  const id = React.useId();
   const pathname = usePathname();
   const router = useRouter();
-  // since it's not a real route (it opens a modal instead)
+
   const selectedValue = React.useMemo(() => {
     if (selectedValueOverride) return selectedValueOverride;
     const match = navLinks.find((l) => l.href !== INTERVIEW_HREF && pathname.startsWith(l.href));
     return match?.href ?? '/dashboard';
   }, [pathname, selectedValueOverride]);
-
-  const selectedIndex = navLinks.findIndex((l) => l.href === selectedValue);
 
   const handleChange = (value: string) => {
     if (value === INTERVIEW_HREF) {
@@ -48,33 +51,29 @@ export default function NavToggle({
   };
 
   return (
-    <nav className='bg-input/50 md:inline-flex h-8 rounded-md p-0.5 hidden'>
-      <RadioGroup
-        value={selectedValue}
-        onValueChange={handleChange}
-        className={`
-    group relative inline-grid grid-cols-[repeat(3,1fr)] items-center gap-0 text-sm font-medium
-    after:absolute after:inset-y-0 after:w-1/3 after:rounded-sm after:bg-background after:shadow-xs
-    after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]
-    ${
-      selectedIndex === 1
-        ? 'after:translate-x-full'
-        : selectedIndex === 2
-          ? 'after:translate-x-[200%]'
-          : 'after:translate-x-0'
-    }
-  `}
-      >
-        {navLinks.map((link, index) => (
-          <label
-            key={link.href}
-            className='relative z-10 inline-flex h-full min-w-8 cursor-pointer items-center justify-center px-3 select-none transition-colors text-gray-700 hover:text-gray-900'
-          >
-            {link.label}
-            <RadioGroupItem id={`${id}-${index}`} value={link.href} className='sr-only' />
-          </label>
-        ))}
-      </RadioGroup>
+    <nav className='hidden md:block'>
+      <Tabs value={selectedValue} onValueChange={handleChange}>
+        <TabsList className='relative flex h-10 w-full grid-cols-3 flex-row items-start gap-1 overflow-x-auto rounded-full bg-input/50 p-1 tracking-normal leading-5 no-scrollbar'>
+          {navLinks.map((link) => (
+            <TabsTrigger
+              key={link.href}
+              value={link.href}
+              className={cn(
+                'relative isolate h-full cursor-pointer rounded-full px-3 text-sm font-medium transition-all duration-200 hover:bg-white/50 hover:text-gray-900 data-[state=active]:text-gray-900',
+              )}
+            >
+              {selectedValue === link.href && (
+                <MotionSpan
+                  layoutId='nav-pill'
+                  className='absolute inset-0 z-0 rounded-full bg-white shadow-sm'
+                  transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+                />
+              )}
+              <span className='relative z-10 px-10'>{link.label}</span>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
     </nav>
   );
 }
