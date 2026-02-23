@@ -1,5 +1,4 @@
 // app/history/page.tsx
-import Navbar from '@/components/dashboard/navbar';
 import HistoryList from '@/components/history/history-list';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,7 +52,6 @@ export default async function HistoryPage() {
 
   return (
     <div className='min-h-screen bg-gradient-to-b from-blue-50/30 via-white to-white'>
-      <Navbar />
       <div className='max-w-6xl mx-auto px-6 py-12'>
         <div className='grid gap-6 md:grid-cols-[2fr,1fr] items-start mb-10'>
           <Card className='border border-blue-100 bg-white/90 shadow-sm'>

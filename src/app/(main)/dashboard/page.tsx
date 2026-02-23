@@ -1,4 +1,3 @@
-import Navbar from '@/components/dashboard/navbar';
 import InterviewSessionCard from '@/components/dashboard/interview-session-card';
 import RecentHistoryCard from '@/components/dashboard/recent-history-card';
 import Footer from '@/components/landing/footer';
@@ -41,7 +40,6 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <Navbar />
       <div className='mx-auto max-w-7xl px-6 py-6 mb-20'>
         <div className='mb-20'>
           <h2 className='text-2xl font-bold text-gray-900 mb-1'>
