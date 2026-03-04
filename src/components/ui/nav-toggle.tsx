@@ -53,19 +53,19 @@ export default function NavToggle({
   return (
     <nav className='hidden md:block'>
       <Tabs value={selectedValue} onValueChange={handleChange}>
-        <TabsList className='relative flex h-10 w-full grid-cols-3 flex-row items-start gap-1 overflow-x-auto rounded-full bg-input/50 p-1 tracking-normal leading-5 no-scrollbar'>
+        <TabsList className='relative flex h-full w-full grid-cols-3 flex-row items-start gap-1 overflow-x-auto rounded-sm bg-input/50 p-1 tracking-normal leading-5 no-scrollbar'>
           {navLinks.map((link) => (
             <TabsTrigger
               key={link.href}
               value={link.href}
               className={cn(
-                'relative isolate h-full cursor-pointer rounded-full px-3 text-sm font-medium transition-all duration-200 hover:bg-white/50 hover:text-gray-900 data-[state=active]:text-gray-900',
+                'relative isolate h-full cursor-pointer rounded-sm px-3 text-sm font-medium transition-all duration-200 hover:bg-white/50 hover:text-gray-900 data-[state=active]:text-gray-900',
               )}
             >
               {selectedValue === link.href && (
                 <MotionSpan
                   layoutId='nav-pill'
-                  className='absolute inset-0 z-0 rounded-full bg-white shadow-sm'
+                  className='absolute inset-0 z-0 rounded-sm bg-white shadow-sm'
                   transition={{ type: 'spring', stiffness: 500, damping: 40 }}
                 />
               )}

@@ -1,5 +1,13 @@
 import { QUESTIONS, questionToMarkdown } from '@/lib/questions';
 
+function questionById(id: string) {
+  const question = QUESTIONS.find((item) => item.id === id);
+  if (!question) {
+    throw new Error(`Question not found in bank: ${id}`);
+  }
+  return question;
+}
+
 export type MockAnswerAttempt = {
   id: string;
   questionId: string;
@@ -19,11 +27,11 @@ export type MockQuestion = {
   attempts: MockAnswerAttempt[];
 };
 
-export const MOCK_INTERVIEW_QUESTIONS: MockQuestion[] = [
+const SEEDED_MOCK_INTERVIEW_QUESTIONS: MockQuestion[] = [
   {
     id: 'mock-q-1',
     interviewId: 'mock-interview-1',
-    aiQuestion: questionToMarkdown(QUESTIONS[0]), // Two Sum
+    aiQuestion: questionToMarkdown(questionById('dsa-two-sum')),
     createdAt: new Date().toISOString(),
     attempts: [
       {
@@ -41,16 +49,17 @@ export const MOCK_INTERVIEW_QUESTIONS: MockQuestion[] = [
   }
 }`,
         explanation: 'Used a hashmap to store visited numbers and checked for complement in O(1).',
-        aiFeedback: 'Excellent use of hash map for O(n) time complexity.\nCorrectly avoids reusing the same element.\nClean and readable implementation.',
+        aiFeedback:
+          'Excellent use of hash map for O(n) time complexity.\nCorrectly avoids reusing the same element.\nClean and readable implementation.',
         score: 10,
         createdAt: new Date().toISOString(),
-      }
-    ]
+      },
+    ],
   },
   {
     id: 'mock-q-2',
     interviewId: 'mock-interview-1',
-    aiQuestion: questionToMarkdown(QUESTIONS[1]), // Valid Parentheses
+    aiQuestion: questionToMarkdown(questionById('dsa-valid-parentheses')),
     createdAt: new Date().toISOString(),
     attempts: [
       {
@@ -72,87 +81,105 @@ export const MOCK_INTERVIEW_QUESTIONS: MockQuestion[] = [
   return stack.length === 0;
 }`,
         explanation: 'Used stack to track open brackets and match closing ones.',
-        aiFeedback: 'Correct stack-based approach.\nHandles nesting correctly.\nConsider explicitly checking invalid characters for robustness.',
+        aiFeedback:
+          'Correct stack-based approach.\nHandles nesting correctly.\nConsider explicitly checking invalid characters for robustness.',
         score: 8,
         createdAt: new Date().toISOString(),
-      }
-    ]
+      },
+    ],
   },
   {
     id: 'mock-q-3',
     interviewId: 'mock-interview-1',
-    aiQuestion: questionToMarkdown(QUESTIONS[2]), // Container With Most Water
+    aiQuestion: questionToMarkdown(questionById('dsa-reverse-linked-list')),
     createdAt: new Date().toISOString(),
     attempts: [
       {
         id: 'mock-attempt-3',
         questionId: 'mock-q-3',
         userId: 'mock-user',
-        code: `function maxArea(height) {
-  let left = 0;
-  let right = height.length - 1;
-  let max = 0;
+        code: `function reverseList(head) {
+  let prev = null;
+  let curr = head;
 
-  while (left < right) {
-    const area = Math.min(height[left], height[right]) * (right - left);
-    max = Math.max(max, area);
-
-    if (height[left] < height[right]) {
-      left++;
-    } else {
-      right--;
-    }
+  while (curr !== null) {
+    const next = curr.next;
+    curr.next = prev;
+    prev = curr;
+    curr = next;
   }
 
-  return max;
+  return prev;
 }`,
-        explanation: 'Used two pointers from both ends and moved the smaller height inward.',
-        aiFeedback: 'Good two-pointer optimization.\nCorrect O(n) solution.\nExplanation could be deeper — why moving the shorter line is safe was not clearly justified.',
-        score: 7,
+        explanation:
+          'Iterated once through the list while rewiring next pointers using prev/curr/next pointers.',
+        aiFeedback:
+          'Correct in-place reversal with O(1) extra space.\nGood pointer handling without losing the remaining list.\nEdge case for empty list is handled naturally.',
+        score: 9,
         createdAt: new Date().toISOString(),
-      }
-    ]
+      },
+    ],
   },
   {
     id: 'mock-q-4',
     interviewId: 'mock-interview-1',
-    aiQuestion: questionToMarkdown(QUESTIONS[3]), // Auth API
+    aiQuestion: questionToMarkdown(questionById('web-debounce')),
     createdAt: new Date().toISOString(),
     attempts: [
       {
         id: 'mock-attempt-4',
         questionId: 'mock-q-4',
         userId: 'mock-user',
-        code: null,
-        explanation: 'I would create POST /register and POST /login endpoints.\nPasswords would be hashed using bcrypt before storing in database.\nJWT would be issued on login and stored in HttpOnly cookies.\nI would validate input and return 400 for invalid requests.',
-        aiFeedback: 'Strong understanding of password hashing and token-based authentication.\nGood use of HttpOnly cookies for security.\nCould discuss refresh tokens or token revocation strategy.',
+        code: `function debounce(func, wait) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+}`,
+        explanation: 'Used a closure to retain timeout ID and reset it on every rapid invocation.',
+        aiFeedback:
+          'Solid debounce implementation with correct timer reset behavior.\nPreserves arguments and this-context using apply.\nCan be extended with cancel/flush support for production utility use.',
         score: 9,
         createdAt: new Date().toISOString(),
-      }
-    ]
+      },
+    ],
   },
   {
     id: 'mock-q-5',
     interviewId: 'mock-interview-1',
-    aiQuestion: questionToMarkdown(QUESTIONS[4]), // Rate limited API
+    aiQuestion: questionToMarkdown(questionById('web-throttle')),
     createdAt: new Date().toISOString(),
     attempts: [
       {
         id: 'mock-attempt-5',
         questionId: 'mock-q-5',
         userId: 'mock-user',
-        code: null,
-        explanation: 'I would use Redis to store request counters per user.\nImplement sliding window rate limiting.\nReturn 429 status when limit exceeded.\nUse middleware so logic is reusable.',
-        aiFeedback: 'Correct use of Redis for distributed rate limiting.\nGood understanding of HTTP 429.\nConsider discussing burst traffic handling and monitoring.',
+        code: `function throttle(func, limit) {
+  let inThrottle = false;
+  return function (...args) {
+    if (!inThrottle) {
+      func.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => {
+        inThrottle = false;
+      }, limit);
+    }
+  };
+}`,
+        explanation:
+          'Used a boolean gate to allow execution only once per interval and block intermediate calls.',
+        aiFeedback:
+          'Correct basic throttle pattern with interval gating.\nMaintains this/args correctly.\nCould add trailing-call support depending on product requirements.',
         score: 8,
         createdAt: new Date().toISOString(),
-      }
-    ]
+      },
+    ],
   },
   {
     id: 'mock-q-6',
     interviewId: 'mock-interview-1',
-    aiQuestion: questionToMarkdown(QUESTIONS[5]), // Promise.all
+    aiQuestion: questionToMarkdown(questionById('web-promise-all')),
     createdAt: new Date().toISOString(),
     attempts: [
       {
@@ -176,28 +203,81 @@ export const MOCK_INTERVIEW_QUESTIONS: MockQuestion[] = [
   });
 }`,
         explanation: 'Wrapped everything in new Promise and tracked completion count.',
-        aiFeedback: 'Correct handling of order preservation.\nGood use of Promise.resolve to normalize values.\nEdge case missing: empty array should resolve immediately.',
+        aiFeedback:
+          'Correct handling of order preservation.\nGood use of Promise.resolve to normalize values.\nEdge case missing: empty array should resolve immediately.',
         score: 6,
         createdAt: new Date().toISOString(),
-      }
-    ]
+      },
+    ],
   },
   {
     id: 'mock-q-7',
     interviewId: 'mock-interview-1',
-    aiQuestion: questionToMarkdown(QUESTIONS[6]), // Hoisting
+    aiQuestion: questionToMarkdown(questionById('web-event-delegation')),
     createdAt: new Date().toISOString(),
     attempts: [
       {
         id: 'mock-attempt-7',
         questionId: 'mock-q-7',
         userId: 'mock-user',
-        code: null,
-        explanation: 'Hoisting means variable declarations are moved to top of scope.\nvar is hoisted and initialized as undefined.\nlet and const are hoisted but remain in temporal dead zone until declared.',
-        aiFeedback: 'Correct high-level explanation.\nGood distinction between var and let/const.\nCould further explain execution context creation phase.',
+        code: `const parent = document.getElementById('list');
+parent.addEventListener('click', (event) => {
+  const target = event.target;
+  if (target instanceof HTMLLIElement) {
+    console.log('Item clicked:', target.innerText);
+  }
+});`,
+        explanation:
+          'Attached one listener at parent level and filtered click events to li elements via event target.',
+        aiFeedback:
+          'Correct delegation pattern with a single parent listener.\nWorks for dynamically added children due to bubbling.\nGood use of target narrowing for safer DOM handling.',
         score: 7,
         createdAt: new Date().toISOString(),
-      }
-    ]
-  }
+      },
+    ],
+  },
+];
+
+const SEEDED_QUESTION_IDS = new Set<string>([
+  'dsa-two-sum',
+  'dsa-valid-parentheses',
+  'dsa-reverse-linked-list',
+  'web-debounce',
+  'web-throttle',
+  'web-promise-all',
+  'web-event-delegation',
+]);
+
+const GENERATED_MOCK_INTERVIEW_QUESTIONS: MockQuestion[] = QUESTIONS.filter(
+  (question) => !SEEDED_QUESTION_IDS.has(question.id),
+).map((question, index) => {
+  const questionId = `mock-q-auto-${index + 1}`;
+  const starterCode = question.starterCode?.javascript ?? null;
+
+  return {
+    id: questionId,
+    interviewId: 'mock-interview-1',
+    aiQuestion: questionToMarkdown(question),
+    createdAt: new Date().toISOString(),
+    attempts: [
+      {
+        id: `mock-attempt-auto-${index + 1}`,
+        questionId,
+        userId: 'mock-user',
+        code: question.requiresCode ? starterCode : null,
+        explanation: question.requiresCode
+          ? `Started solving ${question.title} using the provided starter template and outlined the core approach.`
+          : `Explained the key design considerations for ${question.title} and covered trade-offs.`,
+        aiFeedback:
+          'Good initial response structure.\nClear direction and relevant fundamentals.\nAdd more edge-case handling and deeper complexity discussion for a higher score.',
+        score: 7,
+        createdAt: new Date().toISOString(),
+      },
+    ],
+  };
+});
+
+export const MOCK_INTERVIEW_QUESTIONS: MockQuestion[] = [
+  ...SEEDED_MOCK_INTERVIEW_QUESTIONS,
+  ...GENERATED_MOCK_INTERVIEW_QUESTIONS,
 ];

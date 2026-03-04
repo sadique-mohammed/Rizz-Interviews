@@ -238,19 +238,19 @@ export default function Features() {
         {/* Pill Tabs */}
         <Tabs value={active} onValueChange={setActive} className='mt-4'>
           <div className='flex justify-center'>
-            <TabsList className='relative flex max-w-full overflow-x-auto no-scrollbar p-1 bg-input/50 h-auto w-full gap-1 items-start flex-row tracking-normal leading-5 rounded-full my-2 mx-0'>
+            <TabsList className='relative flex max-w-full overflow-x-auto no-scrollbar p-1 bg-input/50 h-auto w-full gap-1 items-start flex-row tracking-normal leading-5 rounded-sm my-2 mx-0'>
               {TABS.map((t) => (
                 <TabsTrigger
                   key={t.id}
                   value={t.id}
                   className={cn(
-                    'relative isolate cursor-pointer rounded-full px-3.5 md:px-4 py-1.5 md:py-2 text-sm font-medium text-gray-600 transition-all duration-200 hover:text-gray-900 hover:bg-white/50 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900',
+                    'relative isolate cursor-pointer rounded-sm px-3.5 md:px-4 py-1.5 md:py-2 text-sm font-medium text-gray-600 transition-all duration-200 hover:text-gray-900 hover:bg-white/50 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900',
                   )}
                 >
                   {active === t.id && (
                     <MotionSpan
                       layoutId='tab-pill'
-                      className='absolute inset-0 z-0 rounded-full bg-white shadow-md'
+                      className='absolute inset-0 z-0 rounded-sm bg-white shadow-md'
                       transition={{ type: 'spring', stiffness: 500, damping: 40 }}
                     />
                   )}
