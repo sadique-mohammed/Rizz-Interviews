@@ -22,7 +22,6 @@ import { formatDateFull } from '@/lib/formatters';
 import { getDifficultyBadgeClass } from '@/lib/styles';
 import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
-import { QUESTIONS, questionToMarkdown } from '@/lib/questions';
 import { MOCK_INTERVIEW_QUESTIONS } from '@/lib/mockInterviewResults';
 import type { PrismLight as PrismType } from 'react-syntax-highlighter';
 
@@ -121,17 +120,71 @@ export default function InterviewDetailPage() {
 
   const detectLanguage = React.useMemo(() => {
     return (code: string): string => {
-      // Simple language detection based on common patterns
-      if (code.includes('function') && code.includes('{') && code.includes('}')) {
-        if (code.includes('const') || code.includes('let') || code.includes('=>')) {
-          return 'javascript';
-        }
+      const source = code.trim();
+
+      if (!source) return 'text';
+
+      if (
+        source.includes('public class') ||
+        source.includes('public static') ||
+        source.includes('System.out') ||
+        source.includes('new HashMap')
+      ) {
+        return 'java';
+      }
+
+      if (
+        source.includes('#include') ||
+        source.includes('std::') ||
+        source.includes('vector<') ||
+        source.includes('using namespace std')
+      ) {
+        return 'cpp';
+      }
+
+      if (/^\s*def\s+\w+\s*\(/m.test(source) || /^\s*class\s+\w+\s*:/m.test(source)) {
+        return 'python';
+      }
+
+      if (
+        source.includes('interface ') ||
+        source.includes('type ') ||
+        source.includes(': unknown') ||
+        source.includes(': string') ||
+        source.includes(' as ')
+      ) {
+        return 'typescript';
+      }
+
+      if (
+        source.includes('function') ||
+        source.includes('const ') ||
+        source.includes('let ') ||
+        source.includes('=>')
+      ) {
         return 'javascript';
       }
-      if (code.includes('public class') || code.includes('public static')) return 'java';
 
-      // Default fallback
-      return '';
+      return 'text';
+    };
+  }, []);
+
+  const getLanguageLabel = React.useMemo(() => {
+    return (language: string): string => {
+      switch (language) {
+        case 'javascript':
+          return 'JavaScript';
+        case 'typescript':
+          return 'TypeScript';
+        case 'java':
+          return 'Java';
+        case 'python':
+          return 'Python';
+        case 'cpp':
+          return 'C++';
+        default:
+          return 'Plain text';
+      }
     };
   }, []);
 
@@ -234,6 +287,7 @@ export default function InterviewDetailPage() {
             <RealInterviewQuestions
               questions={interview.questions}
               detectLanguage={detectLanguage}
+              getLanguageLabel={getLanguageLabel}
               handleCopyCode={handleCopyCode}
               copiedCode={copiedCode}
             />
@@ -244,7 +298,13 @@ export default function InterviewDetailPage() {
   );
 }
 
-const RealInterviewQuestions = ({ questions, detectLanguage, handleCopyCode, copiedCode }: any) => {
+const RealInterviewQuestions = ({
+  questions,
+  detectLanguage,
+  getLanguageLabel,
+  handleCopyCode,
+  copiedCode,
+}: any) => {
   return (
     <>
       {questions.map((q: any, idx: number) => (
@@ -252,17 +312,20 @@ const RealInterviewQuestions = ({ questions, detectLanguage, handleCopyCode, cop
           <CardContent className='p-6 space-y-6'>
             {/* AI Question */}
             <div className='flex gap-4'>
-              <div className='flex-shrink-0'>
-                <div className='h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center'>
-                  <Bot className='h-4 w-4 text-white' />
-                </div>
-              </div>
               <div className='flex-1'>
                 <div className='bg-blue-50/80 border border-blue-100 rounded-xl p-4'>
-                  <p className='text-xs uppercase font-semibold tracking-wide text-blue-600 mb-2'>
-                    Nexus AI Question #{idx + 1}
-                  </p>
-                  <div className='text-gray-900 leading-relaxed [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mb-1 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-4 [&_li]:mt-0.5'>
+                  <div className='flex items-center gap-2'>
+                    <div className='h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center'>
+                      <Bot className='h-4 w-4 text-white' />
+                    </div>
+                    <div className='h-9 flex items-center'>
+                      <p className='text-sm font-semibold tracking-wide text-blue-600 leading-none'>
+                        Nexus AI &mdash; Question #{idx + 1}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className='mt-3 text-gray-900 leading-relaxed [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mb-1 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-4 [&_li]:mt-0.5'>
                     <ReactMarkdown>{q.aiQuestion}</ReactMarkdown>
                   </div>
                 </div>
@@ -270,78 +333,101 @@ const RealInterviewQuestions = ({ questions, detectLanguage, handleCopyCode, cop
             </div>
 
             {/* User Attempts */}
-            {q.attempts.map((attempt: any, aIdx: number) => (
-              <div key={attempt.id} className='flex gap-4 mb-4'>
-                <div className='flex-shrink-0'>
-                  <div className='h-9 w-9 rounded-lg bg-gray-200 flex items-center justify-center'>
-                    <User className='h-4 w-4 text-gray-600' />
-                  </div>
-                </div>
-                <div className='flex-1 space-y-3'>
-                  <div className='bg-white border border-slate-200 rounded-xl p-4 shadow-xs'>
-                    <div className='flex items-center justify-between mb-3'>
-                      <p className='text-sm font-semibold text-gray-900'>Your Answer #{aIdx + 1}</p>
-                      {attempt.score !== null && (
-                        <Badge variant='outline'>
-                          <Trophy className='h-3 w-3 mr-1' />
-                          {attempt.score}/10
-                        </Badge>
+            {q.attempts.map((attempt: any, aIdx: number) => {
+              const language = detectLanguage(attempt.code ?? '');
+
+              return (
+                <div key={attempt.id} className='flex gap-4'>
+                  <div className='flex-1 space-y-3 overflow-x-auto'>
+                    <div className='bg-white border border-slate-200 rounded-xl p-4 shadow-xs'>
+                      <div className='flex items-center justify-between mb-3'>
+                        <div className='flex gap-2 items-center flex-shrink-0'>
+                          <div className='h-9 w-9 rounded-lg bg-gray-200 flex items-center justify-center'>
+                            <User className='h-4 w-4 text-gray-600' />
+                          </div>
+                          <div>
+                            <p className='text-sm font-semibold text-gray-900'>
+                              Your Answer #{aIdx + 1}
+                            </p>
+                          </div>
+                        </div>
+                        {attempt.score !== null && (
+                          <Badge
+                            className={`border gap-1 font-semibold ${
+                              attempt.score >= 8
+                                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                                : attempt.score >= 6
+                                  ? 'border-amber-200 bg-amber-50 text-amber-700'
+                                  : 'border-red-200 bg-red-50 text-red-700'
+                            }`}
+                          >
+                            <Trophy className='h-3 w-3' />
+                            {attempt.score}/10
+                          </Badge>
+                        )}
+                      </div>
+                      {attempt.code && (
+                        <div className='mb-3'>
+                          <div className='flex items-center justify-between mb-2'>
+                            <div className='flex items-center gap-2'>
+                              <Code2 className='h-4 w-4 text-gray-500' />
+                              <span className='text-sm font-medium text-gray-700'>Code</span>
+                              <Badge variant='secondary' className='text-xs'>
+                                {getLanguageLabel(language)}
+                              </Badge>
+                            </div>
+                            <Button
+                              variant='ghost'
+                              size='sm'
+                              onClick={() => handleCopyCode(attempt.code, attempt.id)}
+                              aria-label='Copy code to clipboard'
+                              title='Copy code'
+                              className='h-8 px-2 cursor-pointer'
+                            >
+                              {copiedCode === attempt.id ? (
+                                <Check className='h-3 w-3 text-green-600' />
+                              ) : (
+                                <Copy className='h-3 w-3 cursor-pointer' />
+                              )}
+                            </Button>
+                          </div>
+                          <div className='rounded-lg border border-slate-200'>
+                            <SyntaxHighlighter
+                              language={language}
+                              customStyle={{
+                                margin: 0,
+                                fontSize: '13px',
+                                lineHeight: '1.5',
+                                borderRadius: '0.5rem',
+                              }}
+                              showLineNumbers={true}
+                            >
+                              {attempt.code}
+                            </SyntaxHighlighter>
+                          </div>
+                        </div>
+                      )}
+                      {attempt.explanation && (
+                        <div>
+                          <p className='text-sm font-medium text-gray-700 mb-1'>Explanation:</p>
+                          <p className='text-sm text-gray-900 whitespace-pre-line'>
+                            {attempt.explanation}
+                          </p>
+                        </div>
                       )}
                     </div>
-                    {attempt.code && (
-                      <div className='mb-3 '>
-                        <div className='flex items-center justify-between mb-2'>
-                          <div className='flex items-center gap-2'>
-                            <Code2 className='h-4 w-4 text-gray-500' />
-                            <span className='text-sm font-medium text-gray-700'>Code</span>
-                            <Badge variant='secondary' className='text-xs capitalize'>
-                              {detectLanguage(attempt.code)}
-                            </Badge>
-                          </div>
-                          <Button
-                            variant='ghost'
-                            size='sm'
-                            onClick={() => handleCopyCode(attempt.code, attempt.id)}
-                            className='h-8 px-2 cursor-pointer'
-                          >
-                            {copiedCode === attempt.id ? (
-                              <Check className='h-3 w-3 text-green-600' />
-                            ) : (
-                              <Copy className='h-3 w-3 cursor-pointer' />
-                            )}
-                          </Button>
-                        </div>
-                        <div className='rounded-lg border '>
-                          <SyntaxHighlighter
-                            language={detectLanguage(attempt.code)}
-                            customStyle={{
-                              margin: 0,
-                              fontSize: '13px',
-                              lineHeight: '1.5',
-                            }}
-                            showLineNumbers={true}
-                          >
-                            {attempt.code}
-                          </SyntaxHighlighter>
-                        </div>
-                      </div>
-                    )}
-                    {attempt.explanation && (
-                      <div>
-                        <p className='text-sm font-medium text-gray-700 mb-1'>Explanation:</p>
-                        <p className='text-sm text-gray-900'>{attempt.explanation}</p>
+                    {attempt.aiFeedback && (
+                      <div className='bg-blue-50/60 border border-blue-100 rounded-lg p-4'>
+                        <p className='text-sm font-medium text-blue-600 mb-1'>Nexus AI Feedback</p>
+                        <p className='text-sm text-slate-700 whitespace-pre-line'>
+                          {attempt.aiFeedback}
+                        </p>
                       </div>
                     )}
                   </div>
-                  {attempt.aiFeedback && (
-                    <div className='bg-blue-50 border border-blue-200 rounded-lg p-4'>
-                      <p className='text-sm font-medium text-blue-700 mb-1'>Nexus AI Feedback</p>
-                      <p className='text-sm text-blue-800'>{attempt.aiFeedback}</p>
-                    </div>
-                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             {q.attempts.length === 0 && (
               <div className='flex gap-4'>
@@ -375,6 +461,22 @@ const MockInterviewQuestions = ({ detectLanguage, handleCopyCode, copiedCode }: 
       <RealInterviewQuestions
         questions={MOCK_INTERVIEW_QUESTIONS}
         detectLanguage={detectLanguage}
+        getLanguageLabel={(language: string) => {
+          switch (language) {
+            case 'javascript':
+              return 'JavaScript';
+            case 'typescript':
+              return 'TypeScript';
+            case 'java':
+              return 'Java';
+            case 'python':
+              return 'Python';
+            case 'cpp':
+              return 'C++';
+            default:
+              return 'Plain text';
+          }
+        }}
         handleCopyCode={handleCopyCode}
         copiedCode={copiedCode}
       />
