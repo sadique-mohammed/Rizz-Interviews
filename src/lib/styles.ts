@@ -30,3 +30,29 @@ export function progressColor(seconds: number): string {
   if (seconds <= 300) return 'bg-amber-500';
   return 'bg-brand';
 }
+
+/** Tailwind classes for status badge (border + bg + text) */
+export function getStatusBadgeClass(status: string): string {
+  switch (status.toLowerCase()) {
+    case 'completed':
+      return 'border-green-200 bg-green-50 text-green-700 hover:bg-green-50';
+    case 'abandoned':
+      return 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-50';
+    case 'in_progress':
+    default:
+      return 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-50';
+  }
+}
+
+/** Formatted text for status label */
+export function getStatusLabel(status: string): string {
+  switch (status.toLowerCase()) {
+    case 'completed':
+      return 'Completed';
+    case 'abandoned':
+      return 'Abandoned';
+    case 'in_progress':
+    default:
+      return 'In Progress';
+  }
+}

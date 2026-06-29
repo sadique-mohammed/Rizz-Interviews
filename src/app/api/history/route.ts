@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { interviews } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and, ne } from 'drizzle-orm';
 
 export async function GET() {
   try {
@@ -15,7 +15,7 @@ export async function GET() {
     const userInterviews = await db
       .select()
       .from(interviews)
-      .where(eq(interviews.userId, userId))
+      .where(and(eq(interviews.userId, userId), ne(interviews.status, 'abandoned')))
       .orderBy(desc(interviews.startedAt));
 
     return NextResponse.json(userInterviews);

@@ -7,7 +7,7 @@ import { Panel, Group, Separator } from 'react-resizable-panels';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getQuestion, type Question } from '@/lib/questions';
-import { Send, AlertCircle, Loader2 } from 'lucide-react';
+import { Send, AlertCircle, Loader2, Lightbulb, Bot, User } from 'lucide-react';
 import InterviewModeHeader from '@/components/interview/interview-mode-header';
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
@@ -34,6 +34,8 @@ const WEBDEV_LANGUAGES = [
   { value: 'typescript', label: 'TypeScript' },
 ];
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 interface InterviewCanvasProps {
   sessionId: string;
   domain: 'DSA' | 'Web Dev';
@@ -45,6 +47,35 @@ interface LanguageOption {
   value: string;
   label: string;
 }
+
+interface ChatMessage {
+  role: 'ai' | 'user';
+  text: string;
+}
+
+// ─── Typing Indicator ────────────────────────────────────────────────────────
+
+function TypingIndicator() {
+  return (
+    <div className='flex flex-col items-start animate-fade-in-up'>
+      <div className='flex items-start gap-2'>
+        <div className='mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100'>
+          <Bot className='h-3 w-3 text-blue-600' />
+        </div>
+        <div>
+          <span className='mb-1 block text-[10px] font-semibold text-blue-500'>Nexus AI</span>
+          <div className='flex items-center gap-1 rounded-lg rounded-tl-none border border-blue-100 bg-blue-50 px-3 py-2.5'>
+            <span className='h-1.5 w-1.5 rounded-full bg-blue-400 animate-bounce' style={{ animationDelay: '0ms' }} />
+            <span className='h-1.5 w-1.5 rounded-full bg-blue-400 animate-bounce' style={{ animationDelay: '150ms' }} />
+            <span className='h-1.5 w-1.5 rounded-full bg-blue-400 animate-bounce' style={{ animationDelay: '300ms' }} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Question Panel ──────────────────────────────────────────────────────────
 
 interface QuestionPanelProps {
   question: Question;
@@ -99,6 +130,8 @@ const QuestionPanel = React.memo(function QuestionPanel({ question }: QuestionPa
   );
 });
 
+// ─── Editor Pane ─────────────────────────────────────────────────────────────
+
 interface EditorPaneProps {
   requiresCode: boolean;
   languages: LanguageOption[];
@@ -109,6 +142,10 @@ interface EditorPaneProps {
   explanation: string;
   onExplanationChange: (value: string) => void;
   validationError: string;
+  isSubmitting: boolean;
+  timeLeft: number;
+  onSubmit: () => void;
+  onAskHint: () => void;
 }
 
 const EditorPane = React.memo(function EditorPane({
@@ -121,11 +158,15 @@ const EditorPane = React.memo(function EditorPane({
   explanation,
   onExplanationChange,
   validationError,
+  isSubmitting,
+  timeLeft,
+  onSubmit,
+  onAskHint,
 }: EditorPaneProps) {
   return (
     <div className='h-full flex flex-col'>
       {validationError && (
-        <div className='m-3 mb-0 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700'>
+        <div className='m-3 mb-0 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 animate-fade-in-up'>
           <AlertCircle className='h-4 w-4 shrink-0' />
           {validationError}
         </div>
@@ -200,9 +241,133 @@ const EditorPane = React.memo(function EditorPane({
           spellCheck={false}
         />
       </div>
+
+      {/* Submit bar — hint button + submit button side by side */}
+      <div className='flex shrink-0 items-center justify-between border-t border-gray-200/80 bg-gray-50/50 px-5 py-3'>
+        <button
+          onClick={onAskHint}
+          className='flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3.5 py-2 text-sm font-medium text-blue-600 transition-all hover:bg-blue-100 hover:text-blue-700 hover:scale-[1.02] active:scale-[0.98]'
+        >
+          <Lightbulb className='h-4 w-4' />
+          Ask for hint
+        </button>
+        <Button
+          onClick={onSubmit}
+          disabled={isSubmitting || timeLeft === 0}
+          variant='outline'
+          className='gap-2 cursor-pointer rounded-lg border border-gray-200 px-6 py-2.5 font-medium transition-all hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50'
+        >
+          {isSubmitting ? (
+            <Loader2 className='h-4 w-4 animate-spin' />
+          ) : (
+            <Send className='h-4 w-4' />
+          )}
+          {isSubmitting ? 'Evaluating...' : 'Submit Code'}
+        </Button>
+      </div>
     </div>
   );
 });
+
+// ─── AI Chat Panel ────────────────────────────────────────────────────────────
+
+interface AIChatPanelProps {
+  messages: ChatMessage[];
+  chatInput: string;
+  onChatInputChange: (val: string) => void;
+  onSend: () => void;
+  messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  isAiTyping: boolean;
+}
+
+const AIChatPanel = React.memo(function AIChatPanel({
+  messages,
+  chatInput,
+  onChatInputChange,
+  onSend,
+  messagesEndRef,
+  isAiTyping,
+}: AIChatPanelProps) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      onSend();
+    }
+  };
+
+  return (
+    <div className='flex flex-col h-full bg-gray-50/60 border-l border-gray-100'>
+      {/* Header */}
+      <div className='flex items-center gap-2 border-b border-gray-200 px-4 py-3 bg-white shrink-0'>
+        <Bot className='h-4 w-4 text-blue-500' />
+        <span className='text-sm font-semibold text-gray-900'>AI Interviewer</span>
+        <span className='ml-auto inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-green-600'>
+          <span className='h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse' />
+          live
+        </span>
+      </div>
+
+      {/* Messages */}
+      <div className='flex-1 overflow-y-auto px-3 py-3 space-y-3'>
+        {messages.map((msg, i) =>
+          msg.role === 'ai' ? (
+            <div key={i} className='flex flex-col items-start animate-fade-in-up' style={{ animationDelay: `${Math.min(i * 50, 200)}ms` }}>
+              <div className='flex items-start gap-2'>
+                <div className='mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100'>
+                  <Bot className='h-3 w-3 text-blue-600' />
+                </div>
+                <div>
+                  <span className='mb-1 block text-[10px] font-semibold text-blue-500'>Nexus AI</span>
+                  <div className='rounded-lg rounded-tl-none border border-blue-100 bg-blue-50 px-3 py-2 text-sm leading-relaxed text-gray-800 max-w-[88%]'>
+                    {msg.text}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div key={i} className='flex flex-col items-end animate-fade-in-up' style={{ animationDelay: `${Math.min(i * 50, 200)}ms` }}>
+              <div className='flex items-start gap-2 flex-row-reverse'>
+                <div className='mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-200'>
+                  <User className='h-3 w-3 text-gray-600' />
+                </div>
+                <div className='flex flex-col items-end'>
+                  <span className='mb-1 block text-[10px] font-semibold text-gray-400'>You</span>
+                  <div className='rounded-lg rounded-tr-none border border-gray-200 bg-white px-3 py-2 text-sm leading-relaxed text-gray-800 max-w-[88%] shadow-xs'>
+                    {msg.text}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ),
+        )}
+        {isAiTyping && <TypingIndicator />}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input */}
+      <div className='border-t border-gray-200 bg-white px-3 py-2.5 flex items-center gap-2 shrink-0'>
+        <input
+          type='text'
+          value={chatInput}
+          onChange={(e) => onChatInputChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder='Reply to interviewer…'
+          className='flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-colors'
+        />
+        <button
+          onClick={onSend}
+          disabled={!chatInput.trim()}
+          aria-label='Send message'
+          className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white transition-all hover:bg-blue-700 hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed'
+        >
+          <Send className='h-3.5 w-3.5' />
+        </button>
+      </div>
+    </div>
+  );
+});
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function InterviewCanvas({
   sessionId,
@@ -219,6 +384,7 @@ export default function InterviewCanvas({
   const requiresCode = question.requiresCode !== false;
   const languages = domain === 'DSA' ? DSA_LANGUAGES : WEBDEV_LANGUAGES;
 
+  // ── Editor state ──
   const [language, setLanguage] = React.useState(languages[0].value);
   const [codeMap, setCodeMap] = React.useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
@@ -230,10 +396,22 @@ export default function InterviewCanvas({
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [validationError, setValidationError] = React.useState('');
 
+  // ── Chat state ──
+  const [messages, setMessages] = React.useState<ChatMessage[]>([
+    {
+      role: 'ai',
+      text: `Let's start. Here's ${question.title} — before you code, walk me through your first instinct.`,
+    },
+  ]);
+  const [chatInput, setChatInput] = React.useState('');
+  const [isAiTyping, setIsAiTyping] = React.useState(false);
+  const messagesEndRef = React.useRef<HTMLDivElement | null>(null);
+
   const currentCode = codeMap[language] ?? '';
   const starterForCurrentLang = question.starterCode?.[language] ?? '';
   const intervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // ── Timer ──
   React.useEffect(() => {
     intervalRef.current = setInterval(() => {
       setTimeLeft((prev) => {
@@ -249,6 +427,12 @@ export default function InterviewCanvas({
     };
   }, []);
 
+  // ── Scroll chat to bottom on new message or typing state change ──
+  React.useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isAiTyping]);
+
+  // ── Handlers ──
   const handleLanguageChange = React.useCallback((newLang: string) => {
     setLanguage(newLang);
     setValidationError('');
@@ -267,6 +451,40 @@ export default function InterviewCanvas({
     setExplanation(value);
     setValidationError('');
   }, []);
+
+  // ── Simulated AI reply with typing indicator ──
+  const simulateAiReply = React.useCallback((replyText: string, delay = 800) => {
+    setIsAiTyping(true);
+    setTimeout(() => {
+      setIsAiTyping(false);
+      setMessages((prev) => [...prev, { role: 'ai', text: replyText }]);
+    }, delay);
+  }, []);
+
+  // ── Send a chat message ──
+  const sendChatMessage = React.useCallback(
+    (text: string) => {
+      if (!text.trim()) return;
+      setMessages((prev) => [...prev, { role: 'user', text: text.trim() }]);
+      // Simulated AI reply — replace with real Groq/API call
+      simulateAiReply('Good thinking. Keep going — can you reason about the complexity?');
+    },
+    [simulateAiReply],
+  );
+
+  const handleChatSend = React.useCallback(() => {
+    sendChatMessage(chatInput);
+    setChatInput('');
+  }, [chatInput, sendChatMessage]);
+
+  // ── Ask for hint → injects into chat ──
+  const handleAskHint = React.useCallback(() => {
+    setMessages((prev) => [...prev, { role: 'user', text: 'Can I get a hint?' }]);
+    simulateAiReply(
+      'Hint: Think about what data structure gives you O(1) lookup. What are you looking for each time you visit a number?',
+      600,
+    );
+  }, [simulateAiReply]);
 
   const validateSubmission = React.useCallback((): boolean => {
     if (requiresCode) {
@@ -307,7 +525,24 @@ export default function InterviewCanvas({
       setIsSubmitting(true);
       console.log('Submit:', { sessionId, code: currentCode, language, explanation, force });
 
+      // Inject submission event into chat
+      setMessages((prev) => [
+        ...prev,
+        { role: 'user', text: `[Submitted ${language} solution]` },
+      ]);
+
+      setIsAiTyping(true);
       setTimeout(() => {
+        setIsAiTyping(false);
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'ai',
+            text: force
+              ? "Time's up — let's review what you submitted. Walk me through your approach."
+              : "Got it. Walk me through your solution — what's the time and space complexity?",
+          },
+        ]);
         setIsSubmitting(false);
         if (force) {
           handleEnd();
@@ -347,17 +582,22 @@ export default function InterviewCanvas({
       {/* Main content — fills remaining viewport */}
       <main className='flex min-h-0 flex-1'>
         <div className='flex h-full w-full flex-col overflow-hidden'>
+
+          {/* ── DESKTOP: 3-panel resizable layout ── */}
           <div className='hidden min-h-0 flex-1 lg:block'>
             <Group orientation='horizontal' className='h-full'>
-              <Panel defaultSize={35} minSize={25} className='overflow-hidden bg-white/70'>
+
+              {/* Panel 1: Question */}
+              <Panel defaultSize={28} minSize={20} className='overflow-hidden bg-white/70'>
                 <QuestionPanel question={question} />
               </Panel>
 
-              <Separator className='relative z-10 w-2 cursor-col-resize items-center justify-center bg-gray-300 transition-colors hover:bg-brand/5 active:bg-brand/10'>
+              <Separator className='relative z-10 w-2 cursor-col-resize items-center justify-center bg-gray-200 transition-colors hover:bg-blue-100 active:bg-blue-200'>
                 <div className='h-full w-1.5 rounded-full bg-transparent shadow-sm transition-colors group-hover:bg-brand/60' />
               </Separator>
 
-              <Panel defaultSize={65} minSize={30} className='overflow-hidden'>
+              {/* Panel 2: Code editor + explanation + submit + hint */}
+              <Panel defaultSize={47} minSize={30} className='overflow-hidden'>
                 <EditorPane
                   requiresCode={requiresCode}
                   languages={languages}
@@ -368,19 +608,42 @@ export default function InterviewCanvas({
                   explanation={explanation}
                   onExplanationChange={handleExplanationChange}
                   validationError={validationError}
+                  isSubmitting={isSubmitting}
+                  timeLeft={timeLeft}
+                  onSubmit={handleSubmit}
+                  onAskHint={handleAskHint}
                 />
               </Panel>
+
+              <Separator className='relative z-10 w-2 cursor-col-resize items-center justify-center bg-gray-200 transition-colors hover:bg-blue-100 active:bg-blue-200'>
+                <div className='h-full w-1.5 rounded-full bg-transparent shadow-sm' />
+              </Separator>
+
+              {/* Panel 3: AI Interviewer Chat */}
+              <Panel defaultSize={25} minSize={18} className='overflow-hidden'>
+                <AIChatPanel
+                  messages={messages}
+                  chatInput={chatInput}
+                  onChatInputChange={setChatInput}
+                  onSend={handleChatSend}
+                  messagesEndRef={messagesEndRef}
+                  isAiTyping={isAiTyping}
+                />
+              </Panel>
+
             </Group>
           </div>
 
+          {/* ── MOBILE: Tabs layout (4 tabs: Problem / Code / Notes / Chat) ── */}
           <div className='min-h-0 flex-1 overflow-y-auto p-4 lg:hidden'>
             <Tabs defaultValue='problem' className='h-full'>
-              <TabsList className='mb-4 grid w-full grid-cols-3'>
+              <TabsList className='mb-4 grid w-full grid-cols-4'>
                 <TabsTrigger value='problem'>Problem</TabsTrigger>
                 <TabsTrigger value='code' disabled={!requiresCode}>
                   Code
                 </TabsTrigger>
                 <TabsTrigger value='notes'>Notes</TabsTrigger>
+                <TabsTrigger value='chat'>Chat</TabsTrigger>
               </TabsList>
 
               <TabsContent value='problem' className='rounded-xl border border-gray-100'>
@@ -458,23 +721,44 @@ export default function InterviewCanvas({
                   />
                 </div>
               </TabsContent>
+
+              {/* Mobile Chat Tab */}
+              <TabsContent value='chat' className='h-[60vh]'>
+                <div className='h-full rounded-xl border border-gray-200 overflow-hidden'>
+                  <AIChatPanel
+                    messages={messages}
+                    chatInput={chatInput}
+                    onChatInputChange={setChatInput}
+                    onSend={handleChatSend}
+                    messagesEndRef={messagesEndRef}
+                    isAiTyping={isAiTyping}
+                  />
+                </div>
+              </TabsContent>
             </Tabs>
           </div>
 
+          {/* Mobile: validation error + submit bar with hint */}
           {validationError && (
-            <div className='mx-4 mb-3 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 lg:hidden'>
+            <div className='mx-4 mb-3 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 lg:hidden animate-fade-in-up'>
               <AlertCircle className='h-4 w-4 shrink-0' />
               {validationError}
             </div>
           )}
 
-          <div className='flex shrink-0 items-center justify-between border-t border-gray-200/80 bg-gray-50/50 px-5 py-3'>
-            <span className='text-xs text-gray-400 hidden sm:inline'></span>
+          <div className='flex shrink-0 items-center justify-between border-t border-gray-200/80 bg-gray-50/50 px-5 py-3 lg:hidden'>
+            <button
+              onClick={handleAskHint}
+              className='flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-600 transition-all hover:bg-blue-100 hover:text-blue-700 active:scale-[0.98]'
+            >
+              <Lightbulb className='h-4 w-4' />
+              Hint
+            </button>
             <Button
               onClick={handleSubmit}
               disabled={isSubmitting || timeLeft === 0}
               variant='outline'
-              className='gap-2 cursor-pointer rounded-lg border border-gray-200 px-6 py-2.5 font-medium transition-colors hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50'
+              className='gap-2 cursor-pointer rounded-lg border border-gray-200 px-6 py-2.5 font-medium transition-all hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50'
             >
               {isSubmitting ? (
                 <Loader2 className='h-4 w-4 animate-spin' />
@@ -484,6 +768,7 @@ export default function InterviewCanvas({
               {isSubmitting ? 'Evaluating...' : 'Submit Answer'}
             </Button>
           </div>
+
         </div>
       </main>
     </div>

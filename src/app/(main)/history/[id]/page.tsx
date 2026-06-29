@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import Loading from '@/components/dashboard/loader';
 import { formatDateFull } from '@/lib/formatters';
-import { getDifficultyBadgeClass } from '@/lib/styles';
+import { getDifficultyBadgeClass, getStatusBadgeClass, getStatusLabel } from '@/lib/styles';
 import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
 import { MOCK_INTERVIEW_QUESTIONS } from '@/lib/mockInterviewResults';
@@ -221,8 +221,8 @@ export default function InterviewDetailPage() {
                 <Badge className={getDifficultyBadgeClass(interview.difficulty)}>
                   {interview.difficulty}
                 </Badge>
-                <Badge variant={interview.status === 'completed' ? 'default' : 'secondary'}>
-                  {interview.status === 'completed' ? 'Completed' : 'In Progress'}
+                <Badge variant='outline' className={getStatusBadgeClass(interview.status)}>
+                  {getStatusLabel(interview.status)}
                 </Badge>
               </div>
             </div>

@@ -12,6 +12,7 @@ export enum Difficulty {
 export enum Status {
   InProgress = 'in_progress',
   Completed = 'completed',
+  Abandoned = 'abandoned',
 }
 
 export interface Interview {

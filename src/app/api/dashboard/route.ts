@@ -35,11 +35,12 @@ export async function GET() {
         duration: interviews.duration,
         startedAt: interviews.startedAt,
         totalScore: interviews.totalScore,
+        status: interviews.status,
       })
       .from(interviews)
       .where(eq(interviews.userId, userId))
       .orderBy(desc(interviews.startedAt))
-      .limit(3);
+      .limit(5);
 
     return NextResponse.json(
       {

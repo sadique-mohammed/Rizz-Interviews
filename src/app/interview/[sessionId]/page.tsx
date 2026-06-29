@@ -28,7 +28,7 @@ export default async function InterviewPage({ params }: PageProps) {
     .where(and(eq(interviews.id, sessionId), eq(interviews.userId, userId)))
     .limit(1);
 
-  if (!interview || interview.status === 'completed') {
+  if (!interview || interview.status !== 'in_progress') {
     redirect('/dashboard');
   }
 

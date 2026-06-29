@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Clock, Trophy, Play, ArrowRight } from 'lucide-react';
 import { Interview, Difficulty, Status } from '@/types/interviewHistory';
 import { formatDateRelative } from '@/lib/formatters';
-import { getDifficultyBadgeClass } from '@/lib/styles';
+import { getDifficultyBadgeClass, getStatusBadgeClass, getStatusLabel } from '@/lib/styles';
 
 interface HistoryListProps {
   interviewHistory: Interview[];
@@ -54,10 +54,10 @@ export default function HistoryList({ interviewHistory }: HistoryListProps) {
                   {interview.difficulty}
                 </Badge>
                 <Badge
-                  variant={interview.status === Status.Completed ? 'default' : 'outline'}
-                  className='text-xs font-medium'
+                  variant='outline'
+                  className={`text-xs font-medium ${getStatusBadgeClass(interview.status)}`}
                 >
-                  {interview.status}
+                  {getStatusLabel(interview.status)}
                 </Badge>
               </div>
 

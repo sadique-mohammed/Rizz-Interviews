@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { interviews } from '@/db/schema';
-import { and, eq, ne } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 
 const createInterviewSchema = z.object({
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     const [activeSession] = await db
       .select({ id: interviews.id })
       .from(interviews)
-      .where(and(eq(interviews.userId, userId), ne(interviews.status, 'completed')))
+      .where(and(eq(interviews.userId, userId), eq(interviews.status, 'in_progress')))
       .limit(1);
 
     if (activeSession) {

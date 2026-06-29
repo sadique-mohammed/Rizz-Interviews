@@ -38,6 +38,11 @@ export default async function DashboardPage() {
   const user = data?.user ?? null;
   const interviews = Array.isArray(data?.interviews) ? data.interviews : [];
 
+  // Detect in-progress session for the active session banner
+  const activeSession = interviews.find(
+    (i: { status?: string }) => i.status === 'in_progress',
+  ) ?? null;
+
   return (
     <>
       <div className='mx-auto max-w-7xl px-6 py-6 mb-20'>
@@ -60,7 +65,7 @@ export default async function DashboardPage() {
 
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-5'>
           <div className='lg:col-span-2'>
-            <InterviewSessionCard />
+            <InterviewSessionCard activeSession={activeSession} />
           </div>
           <div className='lg:col-span-1'>
             <RecentHistoryCard interviews={interviews} />
