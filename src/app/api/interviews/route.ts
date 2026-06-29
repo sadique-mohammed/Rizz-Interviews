@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { interviews } from '@/db/schema';
-import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
+import { reconcileUserActiveSession } from '@/lib/interview-session';
 
 const createInterviewSchema = z.object({
   domain: z.enum(['DSA', 'Web Dev']),
@@ -30,11 +30,7 @@ export async function POST(req: NextRequest) {
 
     const { domain, difficulty, duration } = validation.data;
 
-    const [activeSession] = await db
-      .select({ id: interviews.id })
-      .from(interviews)
-      .where(and(eq(interviews.userId, userId), eq(interviews.status, 'in_progress')))
-      .limit(1);
+    const activeSession = await reconcileUserActiveSession(userId);
 
     if (activeSession) {
       return NextResponse.json(

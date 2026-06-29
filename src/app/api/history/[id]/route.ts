@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { interviews, questions, answerAttempts, recordings } from '@/db/schema';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, ne } from 'drizzle-orm';
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -17,7 +17,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const interviewResult = await db
       .select()
       .from(interviews)
-      .where(and(eq(interviews.id, id), eq(interviews.userId, userId)))
+      .where(and(eq(interviews.id, id), eq(interviews.userId, userId), ne(interviews.status, 'abandoned')))
       .limit(1);
 
     if (interviewResult.length === 0) {

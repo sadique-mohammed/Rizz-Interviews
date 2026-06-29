@@ -17,7 +17,7 @@ Table interviews {
   duration int // in minutes
   started_at timestamp default now()
   ended_at timestamp // null if in-progress
-  status varchar(20) default 'in_progress' // in_progress, completed
+  status varchar(20) default 'in_progress' // in_progress, completed, abandoned
   total_score int // nullable until completed
 }
 

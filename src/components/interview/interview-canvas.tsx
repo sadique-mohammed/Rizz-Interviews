@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getQuestion, type Question } from '@/lib/questions';
 import { Send, AlertCircle, Loader2, Lightbulb, Bot, User } from 'lucide-react';
 import InterviewModeHeader from '@/components/interview/interview-mode-header';
+import { toast } from 'sonner';
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
   ssr: false,
@@ -512,10 +513,31 @@ export default function InterviewCanvas({
     return true;
   }, [requiresCode, currentCode, explanation, starterForCurrentLang]);
 
-  const handleEnd = React.useCallback(() => {
-    //ToDO: DB call marking interview as completed, then redirect to history page
-    router.push('/history');
-  }, [router]);
+  const handleEnd = React.useCallback(async () => {
+    try {
+      const res = await fetch(`/api/interviews/${sessionId}/complete`, {
+        method: 'PATCH',
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null);
+        toast.error(errorData?.error ?? 'Failed to end interview session.');
+        return;
+      }
+
+      const data = (await res.json()) as { status?: 'completed' | 'abandoned' };
+      if (data.status === 'abandoned') {
+        toast.info('Interview ended before 30%, so it was marked as abandoned.');
+      } else {
+        toast.success('Interview marked as completed.');
+      }
+
+      router.push('/history');
+    } catch (error) {
+      console.error('Error ending session:', error);
+      toast.error('Something went wrong while ending the interview.');
+    }
+  }, [router, sessionId]);
 
   const handleSubmit = React.useCallback(
     async (forceOrEvent?: boolean | React.MouseEvent) => {

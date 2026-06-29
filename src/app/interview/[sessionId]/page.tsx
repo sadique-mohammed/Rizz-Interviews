@@ -1,10 +1,8 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { db } from '@/db';
-import { interviews } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
 import InterviewCanvas from '@/components/interview/interview-canvas';
 import Footer from '@/components/dashboard/footer';
+import { getInterviewSessionForAccess } from '@/lib/interview-session';
 
 interface PageProps {
   params: Promise<{ sessionId: string }>;
@@ -16,20 +14,14 @@ export default async function InterviewPage({ params }: PageProps) {
 
   if (!userId) redirect('/auth');
 
-  const [interview] = await db
-    .select({
-      id: interviews.id,
-      domain: interviews.domain,
-      difficulty: interviews.difficulty,
-      duration: interviews.duration,
-      status: interviews.status,
-    })
-    .from(interviews)
-    .where(and(eq(interviews.id, sessionId), eq(interviews.userId, userId)))
-    .limit(1);
+  const interview = await getInterviewSessionForAccess(userId, sessionId);
 
-  if (!interview || interview.status !== 'in_progress') {
+  if (!interview) {
     redirect('/dashboard');
+  }
+
+  if (interview.status !== 'in_progress') {
+    redirect(interview.status === 'completed' ? `/history/${sessionId}` : '/dashboard');
   }
 
   return (

@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "reconcile:interviews": "node scripts/reconcile-stale-in-progress.mjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.32.0",

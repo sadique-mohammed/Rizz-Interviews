@@ -38,10 +38,8 @@ export default async function DashboardPage() {
   const user = data?.user ?? null;
   const interviews = Array.isArray(data?.interviews) ? data.interviews : [];
 
-  // Detect in-progress session for the active session banner
-  const activeSession = interviews.find(
-    (i: { status?: string }) => i.status === 'in_progress',
-  ) ?? null;
+  // Use explicit active session returned from API
+  const activeSession = data?.activeSession ?? null;
 
   return (
     <>

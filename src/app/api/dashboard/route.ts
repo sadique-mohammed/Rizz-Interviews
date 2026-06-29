@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { users, interviews } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and, ne } from 'drizzle-orm';
+import { reconcileUserActiveSession } from '@/lib/interview-session';
 
 export async function GET() {
   try {
@@ -26,7 +27,10 @@ export async function GET() {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // 2. Get only needed interview fields for RecentHistoryCard (3 most recent)
+    // 2. Get the explicit active session for the user
+    const activeSession = await reconcileUserActiveSession(userId);
+
+    // 3. Get only needed interview fields for RecentHistoryCard (3 most recent), excluding abandoned
     const recentInterviews = await db
       .select({
         id: interviews.id,
@@ -38,13 +42,14 @@ export async function GET() {
         status: interviews.status,
       })
       .from(interviews)
-      .where(eq(interviews.userId, userId))
+      .where(and(eq(interviews.userId, userId), ne(interviews.status, 'abandoned')))
       .orderBy(desc(interviews.startedAt))
       .limit(5);
 
     return NextResponse.json(
       {
         user: dbUsers[0],
+        activeSession: activeSession || null,
         interviews: recentInterviews,
       },
       { status: 200 },
