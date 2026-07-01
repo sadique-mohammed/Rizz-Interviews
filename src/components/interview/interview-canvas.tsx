@@ -318,9 +318,9 @@ const AIChatPanel = React.memo(function AIChatPanel({
                 <div className='mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100'>
                   <Bot className='h-3 w-3 text-blue-600' />
                 </div>
-                <div>
+                <div className='flex flex-col items-start flex-1 min-w-0'>
                   <span className='mb-1 block text-[10px] font-semibold text-blue-500'>Nexus AI</span>
-                  <div className='rounded-lg rounded-tl-none border border-blue-100 bg-blue-50 px-3 py-2 text-sm leading-relaxed text-gray-800 max-w-[88%]'>
+                  <div className='w-fit max-w-full rounded-lg rounded-tl-none border border-blue-100 bg-blue-50 px-3 py-2 text-sm leading-relaxed text-gray-800 break-words'>
                     {msg.text}
                   </div>
                 </div>
@@ -332,9 +332,9 @@ const AIChatPanel = React.memo(function AIChatPanel({
                 <div className='mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-200'>
                   <User className='h-3 w-3 text-gray-600' />
                 </div>
-                <div className='flex flex-col items-end'>
+                <div className='flex flex-col items-end flex-1 min-w-0'>
                   <span className='mb-1 block text-[10px] font-semibold text-gray-400'>You</span>
-                  <div className='rounded-lg rounded-tr-none border border-gray-200 bg-white px-3 py-2 text-sm leading-relaxed text-gray-800 max-w-[88%] shadow-xs'>
+                  <div className='w-fit max-w-full rounded-lg rounded-tr-none border border-gray-200 bg-white px-3 py-2 text-sm leading-relaxed text-gray-800 break-words'>
                     {msg.text}
                   </div>
                 </div>
@@ -404,6 +404,7 @@ export default function InterviewCanvas({
   ]);
   const [chatInput, setChatInput] = React.useState('');
   const [isAiTyping, setIsAiTyping] = React.useState(false);
+  const [hintIndex, setHintIndex] = React.useState(0);
   const messagesEndRef = React.useRef<HTMLDivElement | null>(null);
 
   const currentCode = codeMap[language] ?? '';
@@ -479,8 +480,14 @@ export default function InterviewCanvas({
   // ── Ask for hint → injects into chat ──
   const handleAskHint = React.useCallback(() => {
     setMessages((prev) => [...prev, { role: 'user', text: 'Can I get a hint?' }]);
-    simulateAiReply(question.hints[0] ?? 'Hint: Start by stating the invariant your solution maintains.', 600);
-  }, [question.hints, simulateAiReply]);
+    
+    const currentHint = question.hints[hintIndex] ?? question.hints[question.hints.length - 1] ?? 'Hint: Start by stating the invariant your solution maintains.';
+    simulateAiReply(currentHint, 600);
+    
+    if (hintIndex < question.hints.length - 1) {
+      setHintIndex(prev => prev + 1);
+    }
+  }, [question.hints, hintIndex, simulateAiReply]);
 
   const validateSubmission = React.useCallback((): boolean => {
     if (requiresCode) {
