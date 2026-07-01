@@ -38,6 +38,37 @@ Table answer_attempts {
   score int // 0-10 points, null until scored
   created_at timestamp default now()
 }
+Table question_bank {
+  id uuid [primary key]
+  slug varchar(255) [unique, not null] // topic-slug-problem-slug
+  domain varchar(20) [not null] // DSA, Web Dev
+  difficulty varchar(20) [not null] // easy, medium, hard
+  difficulty_score int [not null] // 1-10
+  title varchar(255) [not null]
+  primary_topic varchar(100) [not null]
+  secondary_topic varchar(100) // optional
+  description text [not null]
+  examples jsonb [not null] // array of example objects
+  constraints jsonb [not null] // array of strings
+  requires_code boolean [not null, default: true]
+  starter_code jsonb [not null] // keyed by language
+  optimal_solution jsonb [not null] // keyed by language
+  solution_explanation text [not null]
+  time_complexity text [not null]
+  space_complexity text [not null]
+  hints jsonb [not null] // array of strings
+  follow_up_questions jsonb [not null] // array of strings
+  interviewer_notes text [not null]
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
+}
+
+Table question_bank_tags {
+  id uuid [primary key]
+  question_bank_id uuid [ref: > question_bank.id]
+  tag varchar(100) [not null]
+}
+
 
 Table recordings {
   id uuid [primary key]

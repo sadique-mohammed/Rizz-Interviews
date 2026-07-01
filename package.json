@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "reconcile:interviews": "node scripts/reconcile-stale-in-progress.mjs"
+    "reconcile:interviews": "node scripts/reconcile-stale-in-progress.mjs",
+    "db:push": "node scripts/db-push.mjs",
+    "db:seed:question-bank": "node scripts/seed-question-bank.mjs",
+    "db:sync:question-bank": "node scripts/db-sync-question-bank.mjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.32.0",
