@@ -22,13 +22,78 @@ import { formatDateFull } from '@/lib/formatters';
 import { getDifficultyBadgeClass, getStatusBadgeClass, getStatusLabel } from '@/lib/styles';
 import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
-import { MOCK_INTERVIEW_QUESTIONS } from '@/lib/mockInterviewResults';
 import type { PrismLight as PrismType } from 'react-syntax-highlighter';
 
 const SyntaxHighlighter = dynamic<React.ComponentProps<typeof PrismType>>(
   () => import('react-syntax-highlighter').then((mod) => mod.Prism),
   { ssr: false, loading: () => <div className='animate-pulse bg-gray-200 h-32 rounded' /> },
 ) as typeof PrismType;
+
+const detectLanguage = (code: string): string => {
+  const source = code.trim();
+
+  if (!source) return 'text';
+
+  if (
+    source.includes('public class') ||
+    source.includes('public static') ||
+    source.includes('System.out') ||
+    source.includes('new HashMap')
+  ) {
+    return 'java';
+  }
+
+  if (
+    source.includes('#include') ||
+    source.includes('std::') ||
+    source.includes('vector<') ||
+    source.includes('using namespace std')
+  ) {
+    return 'cpp';
+  }
+
+  if (/^\s*def\s+\w+\s*\(/m.test(source) || /^\s*class\s+\w+\s*:/m.test(source)) {
+    return 'python';
+  }
+
+  if (
+    source.includes('interface ') ||
+    source.includes('type ') ||
+    source.includes(': unknown') ||
+    source.includes(': string') ||
+    source.includes(' as ')
+  ) {
+    return 'typescript';
+  }
+
+  if (
+    source.includes('function') ||
+    source.includes('const ') ||
+    source.includes('let ') ||
+    source.includes('=>')
+  ) {
+    return 'javascript';
+  }
+
+  return 'text';
+};
+
+const getLanguageLabel = (language: string): string => {
+  switch (language) {
+    case 'javascript':
+      return 'JavaScript';
+    case 'typescript':
+      return 'TypeScript';
+    case 'java':
+      return 'Java';
+    case 'python':
+      return 'Python';
+    case 'cpp':
+      return 'C++';
+    default:
+      return 'Plain text';
+  }
+};
 
 export default function InterviewDetailPage() {
   const params = useParams();
@@ -118,76 +183,6 @@ export default function InterviewDetailPage() {
     }
   }, []);
 
-  const detectLanguage = React.useMemo(() => {
-    return (code: string): string => {
-      const source = code.trim();
-
-      if (!source) return 'text';
-
-      if (
-        source.includes('public class') ||
-        source.includes('public static') ||
-        source.includes('System.out') ||
-        source.includes('new HashMap')
-      ) {
-        return 'java';
-      }
-
-      if (
-        source.includes('#include') ||
-        source.includes('std::') ||
-        source.includes('vector<') ||
-        source.includes('using namespace std')
-      ) {
-        return 'cpp';
-      }
-
-      if (/^\s*def\s+\w+\s*\(/m.test(source) || /^\s*class\s+\w+\s*:/m.test(source)) {
-        return 'python';
-      }
-
-      if (
-        source.includes('interface ') ||
-        source.includes('type ') ||
-        source.includes(': unknown') ||
-        source.includes(': string') ||
-        source.includes(' as ')
-      ) {
-        return 'typescript';
-      }
-
-      if (
-        source.includes('function') ||
-        source.includes('const ') ||
-        source.includes('let ') ||
-        source.includes('=>')
-      ) {
-        return 'javascript';
-      }
-
-      return 'text';
-    };
-  }, []);
-
-  const getLanguageLabel = React.useMemo(() => {
-    return (language: string): string => {
-      switch (language) {
-        case 'javascript':
-          return 'JavaScript';
-        case 'typescript':
-          return 'TypeScript';
-        case 'java':
-          return 'Java';
-        case 'python':
-          return 'Python';
-        case 'cpp':
-          return 'C++';
-        default:
-          return 'Plain text';
-      }
-    };
-  }, []);
-
   if (loading) return <Loading />;
   if (!interview) return <p>Interview not found</p>;
 
@@ -270,13 +265,7 @@ export default function InterviewDetailPage() {
               </p>
             </div>
           </div>
-          {interview.questions.length === 0 && interview.status !== 'completed' ? (
-            <MockInterviewQuestions
-              detectLanguage={detectLanguage}
-              handleCopyCode={handleCopyCode}
-              copiedCode={copiedCode}
-            />
-          ) : interview.questions.length === 0 ? (
+          {interview.questions.length === 0 ? (
             <Card>
               <CardContent className='text-center py-8'>
                 <MessageSquare className='h-12 w-12 text-gray-400 mx-auto mb-4' />
@@ -286,9 +275,7 @@ export default function InterviewDetailPage() {
           ) : (
             <RealInterviewQuestions
               questions={interview.questions}
-              detectLanguage={detectLanguage}
-              getLanguageLabel={getLanguageLabel}
-              handleCopyCode={handleCopyCode}
+              onCopyCode={handleCopyCode}
               copiedCode={copiedCode}
             />
           )}
@@ -298,13 +285,17 @@ export default function InterviewDetailPage() {
   );
 }
 
+interface RealInterviewQuestionsProps {
+  questions: any[];
+  onCopyCode: (code: string, attemptId: string) => void;
+  copiedCode: string | null;
+}
+
 const RealInterviewQuestions = ({
   questions,
-  detectLanguage,
-  getLanguageLabel,
-  handleCopyCode,
+  onCopyCode,
   copiedCode,
-}: any) => {
+}: RealInterviewQuestionsProps) => {
   return (
     <>
       {questions.map((q: any, idx: number) => (
@@ -426,7 +417,7 @@ const RealInterviewQuestions = ({
                             <Button
                               variant='ghost'
                               size='sm'
-                              onClick={() => handleCopyCode(attempt.code, attempt.id)}
+                              onClick={() => onCopyCode(attempt.code, attempt.id)}
                               aria-label='Copy code to clipboard'
                               title='Copy code'
                               className='h-8 px-2 cursor-pointer'
@@ -497,36 +488,4 @@ const RealInterviewQuestions = ({
   );
 };
 
-const MockInterviewQuestions = ({ detectLanguage, handleCopyCode, copiedCode }: any) => {
-  return (
-    <div className='space-y-4'>
-      <div className='flex items-center gap-2 px-1 py-2 rounded-lg bg-amber-50 border border-amber-200 mb-6'>
-        <span className='text-xs font-semibold text-amber-700 uppercase tracking-wide px-2'>
-          Dev Preview — Mock Session Data
-        </span>
-      </div>
-      <RealInterviewQuestions
-        questions={MOCK_INTERVIEW_QUESTIONS}
-        detectLanguage={detectLanguage}
-        getLanguageLabel={(language: string) => {
-          switch (language) {
-            case 'javascript':
-              return 'JavaScript';
-            case 'typescript':
-              return 'TypeScript';
-            case 'java':
-              return 'Java';
-            case 'python':
-              return 'Python';
-            case 'cpp':
-              return 'C++';
-            default:
-              return 'Plain text';
-          }
-        }}
-        handleCopyCode={handleCopyCode}
-        copiedCode={copiedCode}
-      />
-    </div>
-  );
-};
+
