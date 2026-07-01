@@ -6,10 +6,10 @@ import dynamic from 'next/dynamic';
 import { Panel, Group, Separator } from 'react-resizable-panels';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getQuestion, type Question } from '@/lib/questions';
 import { Send, AlertCircle, Loader2, Lightbulb, Bot, User } from 'lucide-react';
 import InterviewModeHeader from '@/components/interview/interview-mode-header';
 import { toast } from 'sonner';
+import type { QuestionBankQuestion } from '@/lib/question-bank';
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
   ssr: false,
@@ -42,6 +42,7 @@ interface InterviewCanvasProps {
   domain: 'DSA' | 'Web Dev';
   difficulty: 'easy' | 'medium' | 'hard';
   duration: number;
+  question: QuestionBankQuestion;
 }
 
 interface LanguageOption {
@@ -79,7 +80,7 @@ function TypingIndicator() {
 // ─── Question Panel ──────────────────────────────────────────────────────────
 
 interface QuestionPanelProps {
-  question: Question;
+  question: QuestionBankQuestion;
 }
 
 const QuestionPanel = React.memo(function QuestionPanel({ question }: QuestionPanelProps) {
@@ -375,12 +376,9 @@ export default function InterviewCanvas({
   domain,
   difficulty,
   duration,
+  question,
 }: InterviewCanvasProps) {
   const router = useRouter();
-  const question: Question = React.useMemo(
-    () => getQuestion(domain, difficulty, 0),
-    [domain, difficulty],
-  );
 
   const requiresCode = question.requiresCode !== false;
   const languages = domain === 'DSA' ? DSA_LANGUAGES : WEBDEV_LANGUAGES;
@@ -481,11 +479,8 @@ export default function InterviewCanvas({
   // ── Ask for hint → injects into chat ──
   const handleAskHint = React.useCallback(() => {
     setMessages((prev) => [...prev, { role: 'user', text: 'Can I get a hint?' }]);
-    simulateAiReply(
-      'Hint: Think about what data structure gives you O(1) lookup. What are you looking for each time you visit a number?',
-      600,
-    );
-  }, [simulateAiReply]);
+    simulateAiReply(question.hints[0] ?? 'Hint: Start by stating the invariant your solution maintains.', 600);
+  }, [question.hints, simulateAiReply]);
 
   const validateSubmission = React.useCallback((): boolean => {
     if (requiresCode) {
@@ -543,9 +538,7 @@ export default function InterviewCanvas({
     async (forceOrEvent?: boolean | React.MouseEvent) => {
       const force = forceOrEvent === true;
       if (!force && !validateSubmission()) return;
-      // ToDo: DB call to submit the code, and move to next question
       setIsSubmitting(true);
-      console.log('Submit:', { sessionId, code: currentCode, language, explanation, force });
 
       // Inject submission event into chat
       setMessages((prev) => [
@@ -553,8 +546,26 @@ export default function InterviewCanvas({
         { role: 'user', text: `[Submitted ${language} solution]` },
       ]);
 
-      setIsAiTyping(true);
-      setTimeout(() => {
+      try {
+        const response = await fetch(`/api/interviews/${sessionId}/answers`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            questionId: question.sessionQuestionId,
+            code: requiresCode ? currentCode : null,
+            explanation: explanation.trim() || (force ? 'Auto-submitted when time expired.' : ''),
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          toast.error(errorData?.error ?? 'Failed to submit answer.');
+          setIsSubmitting(false);
+          return;
+        }
+
+        setIsAiTyping(true);
+        setTimeout(() => {
         setIsAiTyping(false);
         setMessages((prev) => [
           ...prev,
@@ -570,8 +581,22 @@ export default function InterviewCanvas({
           handleEnd();
         }
       }, 1000);
+      } catch (error) {
+        console.error('Submit answer error:', error);
+        toast.error('Something went wrong while submitting your answer.');
+        setIsSubmitting(false);
+      }
     },
-    [sessionId, currentCode, language, explanation, validateSubmission, handleEnd],
+    [
+      currentCode,
+      explanation,
+      handleEnd,
+      language,
+      question.sessionQuestionId,
+      requiresCode,
+      sessionId,
+      validateSubmission,
+    ],
   );
 
   const handleSubmitRef = React.useRef(handleSubmit);

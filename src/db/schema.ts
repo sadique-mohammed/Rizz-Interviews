@@ -27,32 +27,6 @@ export const interviews = pgTable('interviews', {
   totalScore: integer('total_score'),
 });
 
-// Questions
-export const questions = pgTable('questions', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  interviewId: uuid('interview_id')
-    .references(() => interviews.id)
-    .notNull(),
-  aiQuestion: text('ai_question').notNull(),
-  createdAt: timestamp('created_at').defaultNow(),
-});
-
-// Answer Attempts
-export const answerAttempts = pgTable('answer_attempts', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  questionId: uuid('question_id')
-    .references(() => questions.id)
-    .notNull(),
-  userId: varchar('user_id', { length: 255 })
-    .references(() => users.id)
-    .notNull(),
-  code: text('code'),
-  explanation: text('explanation').notNull(),
-  aiFeedback: text('ai_feedback'),
-  score: integer('score'),
-  createdAt: timestamp('created_at').defaultNow(),
-});
-
 // Question Bank
 export const questionBank = pgTable('question_bank', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -85,6 +59,34 @@ export const questionBankTags = pgTable('question_bank_tags', {
     .references(() => questionBank.id)
     .notNull(),
   tag: varchar('tag', { length: 100 }).notNull(),
+});
+
+// Questions assigned to interview sessions
+export const questions = pgTable('questions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  interviewId: uuid('interview_id')
+    .references(() => interviews.id)
+    .notNull(),
+  questionBankId: uuid('question_bank_id')
+    .references(() => questionBank.id)
+    .notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+// Answer Attempts
+export const answerAttempts = pgTable('answer_attempts', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  questionId: uuid('question_id')
+    .references(() => questions.id)
+    .notNull(),
+  userId: varchar('user_id', { length: 255 })
+    .references(() => users.id)
+    .notNull(),
+  code: text('code'),
+  explanation: text('explanation').notNull(),
+  aiFeedback: text('ai_feedback'),
+  score: integer('score'),
+  createdAt: timestamp('created_at').defaultNow(),
 });
 
 // Recordings

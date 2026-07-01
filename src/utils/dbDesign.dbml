@@ -24,7 +24,7 @@ Table interviews {
 Table questions {
   id uuid [primary key]
   interview_id uuid [ref: > interviews.id]
-  ai_question text
+  question_bank_id uuid [ref: > question_bank.id]
   created_at timestamp default now()
 }
 

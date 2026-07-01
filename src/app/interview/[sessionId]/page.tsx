@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import InterviewCanvas from '@/components/interview/interview-canvas';
 import Footer from '@/components/dashboard/footer';
 import { getInterviewSessionForAccess } from '@/lib/interview-session';
+import { getOrCreateSessionQuestion } from '@/lib/question-bank';
 
 interface PageProps {
   params: Promise<{ sessionId: string }>;
@@ -24,6 +25,12 @@ export default async function InterviewPage({ params }: PageProps) {
     redirect(interview.status === 'completed' ? `/history/${sessionId}` : '/dashboard');
   }
 
+  const question = await getOrCreateSessionQuestion(interview);
+
+  if (!question) {
+    redirect('/dashboard');
+  }
+
   return (
     <>
       <InterviewCanvas
@@ -31,6 +38,7 @@ export default async function InterviewPage({ params }: PageProps) {
         domain={interview.domain as 'DSA' | 'Web Dev'}
         difficulty={interview.difficulty as 'easy' | 'medium' | 'hard'}
         duration={interview.duration}
+        question={question}
       />
       <Footer />
     </>
