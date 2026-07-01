@@ -13,7 +13,15 @@ export async function GET() {
 
     // FK constraint ensures user exists
     const userInterviews = await db
-      .select()
+      .select({
+        id: interviews.id,
+        domain: interviews.domain,
+        difficulty: interviews.difficulty,
+        duration: interviews.duration,
+        startedAt: interviews.startedAt,
+        totalScore: interviews.totalScore,
+        status: interviews.status,
+      })
       .from(interviews)
       .where(and(eq(interviews.userId, userId), ne(interviews.status, 'abandoned')))
       .orderBy(desc(interviews.startedAt));

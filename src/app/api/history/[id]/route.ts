@@ -16,7 +16,15 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
     // Get interview with ownership verification (returns 404 if not found or not owned)
     const interviewResult = await db
-      .select()
+      .select({
+        id: interviews.id,
+        domain: interviews.domain,
+        difficulty: interviews.difficulty,
+        duration: interviews.duration,
+        startedAt: interviews.startedAt,
+        totalScore: interviews.totalScore,
+        status: interviews.status,
+      })
       .from(interviews)
       .where(and(eq(interviews.id, id), eq(interviews.userId, userId), ne(interviews.status, 'abandoned')))
       .limit(1);
@@ -35,25 +43,10 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         questionBankId: questions.questionBankId,
         createdAt: questions.createdAt,
         bankId: questionBank.id,
-        slug: questionBank.slug,
-        domain: questionBank.domain,
-        difficulty: questionBank.difficulty,
-        difficultyScore: questionBank.difficultyScore,
         title: questionBank.title,
-        primaryTopic: questionBank.primaryTopic,
-        secondaryTopic: questionBank.secondaryTopic,
         description: questionBank.description,
         examples: questionBank.examples,
         constraints: questionBank.constraints,
-        requiresCode: questionBank.requiresCode,
-        starterCode: questionBank.starterCode,
-        optimalSolution: questionBank.optimalSolution,
-        solutionExplanation: questionBank.solutionExplanation,
-        timeComplexity: questionBank.timeComplexity,
-        spaceComplexity: questionBank.spaceComplexity,
-        hints: questionBank.hints,
-        followUpQuestions: questionBank.followUpQuestions,
-        interviewerNotes: questionBank.interviewerNotes,
       })
       .from(questions)
       .innerJoin(questionBank, eq(questions.questionBankId, questionBank.id))
@@ -64,14 +57,26 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const allAnswers =
       questionIds.length > 0
         ? await db
-            .select()
+            .select({
+              id: answerAttempts.id,
+              questionId: answerAttempts.questionId,
+              code: answerAttempts.code,
+              explanation: answerAttempts.explanation,
+              aiFeedback: answerAttempts.aiFeedback,
+              score: answerAttempts.score,
+            })
             .from(answerAttempts)
             .where(inArray(answerAttempts.questionId, questionIds))
         : [];
 
     // 4. Get all recordings for this interview
     const interviewRecordings = await db
-      .select()
+      .select({
+        id: recordings.id,
+        videoUrl: recordings.videoUrl,
+        transcriptUrl: recordings.transcriptUrl,
+        createdAt: recordings.createdAt,
+      })
       .from(recordings)
       .where(eq(recordings.interviewId, id));
 
@@ -79,25 +84,10 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const questionsWithAnswers = interviewQuestions.map((q) => {
       const bankQuestion = {
         id: q.bankId,
-        slug: q.slug,
-        domain: q.domain,
-        difficulty: q.difficulty,
-        difficultyScore: q.difficultyScore,
         title: q.title,
-        primaryTopic: q.primaryTopic,
-        secondaryTopic: q.secondaryTopic,
         description: q.description,
         examples: Array.isArray(q.examples) ? q.examples : [],
         constraints: Array.isArray(q.constraints) ? q.constraints : [],
-        requiresCode: q.requiresCode,
-        starterCode: q.starterCode,
-        optimalSolution: q.optimalSolution,
-        solutionExplanation: q.solutionExplanation,
-        timeComplexity: q.timeComplexity,
-        spaceComplexity: q.spaceComplexity,
-        hints: q.hints,
-        followUpQuestions: q.followUpQuestions,
-        interviewerNotes: q.interviewerNotes,
       };
 
       return {

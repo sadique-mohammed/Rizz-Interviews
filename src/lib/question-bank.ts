@@ -17,13 +17,7 @@ export type QuestionBankQuestion = {
   constraints: string[];
   requiresCode: boolean;
   starterCode: Record<string, string>;
-  optimalSolution: Record<string, string>;
-  solutionExplanation: string;
-  timeComplexity: string;
-  spaceComplexity: string;
   hints: string[];
-  followUpQuestions: string[];
-  interviewerNotes: string;
 };
 
 type QuestionBankRow = typeof questionBank.$inferSelect;
@@ -75,13 +69,7 @@ function mapQuestion(row: QuestionBankRow & { sessionQuestionId: string }): Ques
     constraints: asStringArray(row.constraints),
     requiresCode: row.requiresCode,
     starterCode: asCodeMap(row.starterCode),
-    optimalSolution: asCodeMap(row.optimalSolution),
-    solutionExplanation: row.solutionExplanation,
-    timeComplexity: row.timeComplexity,
-    spaceComplexity: row.spaceComplexity,
     hints: asStringArray(row.hints),
-    followUpQuestions: asStringArray(row.followUpQuestions),
-    interviewerNotes: row.interviewerNotes,
   };
 }
 

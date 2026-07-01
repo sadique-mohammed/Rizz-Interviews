@@ -325,9 +325,56 @@ const RealInterviewQuestions = ({
                     </div>
                   </div>
 
-                  <div className='mt-3 text-gray-900 leading-relaxed [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mb-1 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-4 [&_li]:mt-0.5'>
-                    <ReactMarkdown>{q.aiQuestion}</ReactMarkdown>
-                  </div>
+                  {q.questionBank ? (
+                    <div className='mt-4 space-y-5'>
+                      <div>
+                        <h2 className='mb-2 text-lg font-semibold tracking-tight text-gray-900'>
+                          {q.questionBank.title}
+                        </h2>
+                        <div className='text-sm leading-relaxed text-gray-700 whitespace-pre-wrap'>
+                          {q.questionBank.description}
+                        </div>
+                      </div>
+
+                      {q.questionBank.examples?.length > 0 && (
+                        <div>
+                          <h3 className='mb-2 text-xs font-semibold uppercase tracking-wide text-blue-800'>
+                            Examples
+                          </h3>
+                          <div className='space-y-2'>
+                            {q.questionBank.examples.map((example: string, i: number) => (
+                              <div
+                                key={i}
+                                className='rounded-lg border border-blue-200/60 bg-white/60 p-3 font-mono text-xs leading-relaxed text-gray-800 shadow-xs'
+                              >
+                                {example}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {q.questionBank.constraints?.length > 0 && (
+                        <div>
+                          <h3 className='mb-2 text-xs font-semibold uppercase tracking-wide text-blue-800'>
+                            Constraints
+                          </h3>
+                          <ul className='space-y-1.5 rounded-lg border border-blue-200/60 bg-white/60 p-3 shadow-xs'>
+                            {q.questionBank.constraints.map((c: string, i: number) => (
+                              <li key={i} className='flex items-start gap-2 text-xs font-medium text-gray-700'>
+                                <span className='mt-0.5 text-blue-500'>•</span>
+                                <span>{c}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className='mt-3 text-gray-900 leading-relaxed [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mb-1 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-4 [&_li]:mt-0.5'>
+                      <ReactMarkdown>{q.aiQuestion}</ReactMarkdown>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
