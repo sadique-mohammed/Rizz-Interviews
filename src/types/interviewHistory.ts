@@ -27,20 +27,3 @@ export interface Interview {
   status: Status;
 }
 
-export interface Question {
-  id: string;
-  interviewId: string;
-  aiQuestion: string;
-  createdAt: string;
-}
-
-export interface AnswerAttempt {
-  id: string;
-  questionId: string;
-  userId: string; // clerk_id
-  code?: string; // optional for theoretical questions
-  explanation?: string;
-  aiFeedback?: string;
-  score: number | null; // null until AI scores
-  createdAt: string;
-}

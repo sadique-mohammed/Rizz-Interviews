@@ -2,23 +2,7 @@ import { and, eq, sql } from 'drizzle-orm';
 import { db } from '@/db';
 import { interviews, questionBank, questions } from '@/db/schema';
 
-export type QuestionBankQuestion = {
-  sessionQuestionId: string;
-  questionBankId: string;
-  slug: string;
-  domain: 'DSA' | 'Web Dev';
-  difficulty: 'easy' | 'medium' | 'hard';
-  difficultyScore: number;
-  title: string;
-  primaryTopic: string;
-  secondaryTopic: string | null;
-  description: string;
-  examples: string[];
-  constraints: string[];
-  requiresCode: boolean;
-  starterCode: Record<string, string>;
-  hints: string[];
-};
+import type { QuestionBankQuestion } from '@/types/questionBank';
 
 type QuestionBankRow = typeof questionBank.$inferSelect;
 

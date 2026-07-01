@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Send, AlertCircle, Loader2, Lightbulb, Bot, User } from 'lucide-react';
 import InterviewModeHeader from '@/components/interview/interview-mode-header';
 import { toast } from 'sonner';
-import type { QuestionBankQuestion } from '@/lib/question-bank';
+import type { QuestionBankQuestion } from '@/types/questionBank';
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
   ssr: false,

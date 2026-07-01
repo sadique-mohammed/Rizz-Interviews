@@ -4,26 +4,12 @@ import { interviews } from '@/db/schema';
 
 export const MINIMUM_COMPLETION_THRESHOLD = 0.3;
 
-type SessionStatus = 'in_progress' | 'completed' | 'abandoned';
-
-interface SessionTiming {
-  startedAt: Date | string;
-  duration: number;
-}
-
-interface ActiveSessionRecord extends SessionTiming {
-  id: string;
-  domain: string;
-  difficulty: string;
-  status: string | null;
-}
-
-interface InterviewSessionRecord extends SessionTiming {
-  id: string;
-  domain: string;
-  difficulty: string;
-  status: string | null;
-}
+import type {
+  SessionStatus,
+  SessionTiming,
+  ActiveSessionRecord,
+  InterviewSessionRecord,
+} from '@/types/interviewSession';
 
 export function getCompletionRatio(session: SessionTiming, now: Date = new Date()): number {
   const totalDurationMs = session.duration * 60 * 1000;
