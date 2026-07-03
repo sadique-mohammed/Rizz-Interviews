@@ -48,6 +48,61 @@ const getLanguageLabel = (language: string): string => {
   }
 };
 
+const getExpectedQuestionsCount = (duration: number, difficulty: string): number => {
+  let expectedTimePerQuestion = 15;
+  if (difficulty === 'easy') expectedTimePerQuestion = 6;
+  else if (difficulty === 'medium') expectedTimePerQuestion = 10;
+  else if (difficulty === 'hard') expectedTimePerQuestion = 15;
+
+  return Math.max(1, Math.floor(duration / expectedTimePerQuestion));
+};
+
+const generateOverallFeedback = (interview: any) => {
+  if (!interview || !interview.questions) return null;
+  
+  const allStrengths: string[] = [];
+  const allWeaknesses: string[] = [];
+  let attemptedQuestionsCount = 0;
+  
+  interview.questions.forEach((q: any) => {
+    if (q.attempts && q.attempts.length > 0) {
+      // Filter out 0-effort auto-submits exactly like the backend does
+      const validAttempts = q.attempts.filter(
+        (a: any) => !(a.score === 0 && a.explanation === 'Auto-submitted when time expired.')
+      );
+
+      if (validAttempts.length > 0) {
+        attemptedQuestionsCount++;
+        const bestAttempt = validAttempts.reduce((best: any, current: any) => 
+          (current.score || 0) > (best.score || 0) ? current : best
+        , validAttempts[0]);
+        
+        if (bestAttempt.evaluationResult) {
+          if (bestAttempt.evaluationResult.strengths) {
+            allStrengths.push(...bestAttempt.evaluationResult.strengths);
+          }
+          if (bestAttempt.evaluationResult.improvements) {
+            allWeaknesses.push(...bestAttempt.evaluationResult.improvements);
+          }
+        }
+      }
+    }
+  });
+
+  const expectedCount = getExpectedQuestionsCount(interview.duration, interview.difficulty);
+  
+  const uniqueStrengths = Array.from(new Set(allStrengths)).slice(0, 3);
+  const uniqueWeaknesses = Array.from(new Set(allWeaknesses)).slice(0, 3);
+  
+  return {
+    attemptedCount: attemptedQuestionsCount,
+    expectedCount,
+    strengths: uniqueStrengths,
+    weaknesses: uniqueWeaknesses,
+    hasPenalty: attemptedQuestionsCount < expectedCount
+  };
+};
+
 export default function InterviewDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -139,6 +194,8 @@ export default function InterviewDetailPage() {
   if (loading) return <Loading />;
   if (!interview) return <p>Interview not found</p>;
 
+  const overallFeedback = generateOverallFeedback(interview);
+
   return (
     <div className='min-h-screen bg-gradient-to-b from-blue-50/40 via-white to-white'>
       <div className='max-w-5xl mx-auto px-6 py-10'>
@@ -206,6 +263,65 @@ export default function InterviewDetailPage() {
               </div>
             </div>
           </CardContent>
+
+          {overallFeedback && interview.status === 'completed' && (
+            <div className='px-6 pb-6'>
+              <div className='rounded-xl bg-slate-50 border border-slate-200 p-6'>
+                <h3 className='text-lg font-semibold text-slate-900 mb-4'>Overall Feedback</h3>
+                
+                {/* Score Justification */}
+                <div className='mb-6 p-4 rounded-lg bg-white border border-slate-100 shadow-sm'>
+                  <p className='text-sm text-slate-700 leading-relaxed'>
+                    <span className='font-semibold text-slate-900'>Pacing & Overall Speed: </span>
+                    You completed <span className='font-semibold'>{overallFeedback.attemptedCount}</span> question(s) during your <span className='font-semibold'>{interview.duration} minute {interview.difficulty}</span> interview. 
+                    {overallFeedback.attemptedCount > overallFeedback.expectedCount ? (
+                      <span className='text-emerald-700 font-medium'> Your pacing was exceptionally fast, demonstrating a strong ability to write working code quickly under time constraints. You moved through the problems with highly impressive speed!</span>
+                    ) : overallFeedback.attemptedCount === overallFeedback.expectedCount ? (
+                      <span className='text-emerald-700 font-medium'> Your pacing was excellent and perfectly aligned with what is expected for this difficulty level. You demonstrated a solid balance of speed and accuracy.</span>
+                    ) : (
+                      <span className='text-rose-700 font-medium'> While focus on quality is important, your overall pacing was slower than what is typically expected for this time limit. In a real interview setting, completing more problems within the time limit is crucial, which slightly impacted your final score.</span>
+                    )}
+                  </p>
+                </div>
+
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                  {/* Strengths */}
+                  {overallFeedback.strengths.length > 0 && (
+                    <div className='space-y-3'>
+                      <h4 className='text-sm font-semibold uppercase tracking-wider text-emerald-700 flex items-center gap-2'>
+                        <div className='h-2 w-2 rounded-full bg-emerald-500' />
+                        The Good
+                      </h4>
+                      <ul className='space-y-2'>
+                        {overallFeedback.strengths.map((s, i) => (
+                          <li key={i} className='text-sm text-slate-600 leading-relaxed flex items-start gap-2'>
+                            <span className='text-emerald-500 mt-0.5'>•</span> {s}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Weaknesses */}
+                  {overallFeedback.weaknesses.length > 0 && (
+                    <div className='space-y-3'>
+                      <h4 className='text-sm font-semibold uppercase tracking-wider text-rose-700 flex items-center gap-2'>
+                        <div className='h-2 w-2 rounded-full bg-rose-500' />
+                        What to Focus On
+                      </h4>
+                      <ul className='space-y-2'>
+                        {overallFeedback.weaknesses.map((w, i) => (
+                          <li key={i} className='text-sm text-slate-600 leading-relaxed flex items-start gap-2'>
+                            <span className='text-rose-500 mt-0.5'>•</span> {w}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </Card>
 
         {/* Questions */}
