@@ -61,7 +61,9 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
               id: answerAttempts.id,
               questionId: answerAttempts.questionId,
               code: answerAttempts.code,
+              language: answerAttempts.language,
               explanation: answerAttempts.explanation,
+              hintsUsed: answerAttempts.hintsUsed,
               aiFeedback: answerAttempts.aiFeedback,
               score: answerAttempts.score,
             })

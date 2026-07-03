@@ -29,54 +29,7 @@ const SyntaxHighlighter = dynamic<React.ComponentProps<typeof PrismType>>(
   { ssr: false, loading: () => <div className='animate-pulse bg-gray-200 h-32 rounded' /> },
 ) as typeof PrismType;
 
-const detectLanguage = (code: string): string => {
-  const source = code.trim();
 
-  if (!source) return 'text';
-
-  if (
-    source.includes('public class') ||
-    source.includes('public static') ||
-    source.includes('System.out') ||
-    source.includes('new HashMap')
-  ) {
-    return 'java';
-  }
-
-  if (
-    source.includes('#include') ||
-    source.includes('std::') ||
-    source.includes('vector<') ||
-    source.includes('using namespace std')
-  ) {
-    return 'cpp';
-  }
-
-  if (/^\s*def\s+\w+\s*\(/m.test(source) || /^\s*class\s+\w+\s*:/m.test(source)) {
-    return 'python';
-  }
-
-  if (
-    source.includes('interface ') ||
-    source.includes('type ') ||
-    source.includes(': unknown') ||
-    source.includes(': string') ||
-    source.includes(' as ')
-  ) {
-    return 'typescript';
-  }
-
-  if (
-    source.includes('function') ||
-    source.includes('const ') ||
-    source.includes('let ') ||
-    source.includes('=>')
-  ) {
-    return 'javascript';
-  }
-
-  return 'text';
-};
 
 const getLanguageLabel = (language: string): string => {
   switch (language) {
@@ -372,7 +325,7 @@ const RealInterviewQuestions = ({
 
             {/* User Attempts */}
             {q.attempts.map((attempt: any, aIdx: number) => {
-              const language = detectLanguage(attempt.code ?? '');
+              const language = attempt.language || 'text';
 
               return (
                 <div key={attempt.id} className='flex gap-4'>

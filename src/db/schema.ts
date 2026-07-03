@@ -1,4 +1,5 @@
-import { boolean, integer, jsonb, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+import { boolean, integer, jsonb, pgTable, text, timestamp, uuid, varchar, uniqueIndex } from 'drizzle-orm/pg-core';
 
 // Users - clerk_id is the primary key (permanent identifier from Clerk)
 export const users = pgTable('users', {
@@ -25,6 +26,12 @@ export const interviews = pgTable('interviews', {
   endedAt: timestamp('ended_at'),
   status: varchar('status', { length: 20 }).default('in_progress'),
   totalScore: integer('total_score'),
+}, (table) => {
+  return {
+    activeIdx: uniqueIndex('interviews_one_active_per_user_idx')
+      .on(table.userId)
+      .where(sql`${table.status} = 'in_progress'`),
+  };
 });
 
 // Question Bank
@@ -70,6 +77,7 @@ export const questions = pgTable('questions', {
   questionBankId: uuid('question_bank_id')
     .references(() => questionBank.id)
     .notNull(),
+  position: integer('position').notNull(),
   createdAt: timestamp('created_at').defaultNow(),
 });
 
@@ -83,8 +91,11 @@ export const answerAttempts = pgTable('answer_attempts', {
     .references(() => users.id)
     .notNull(),
   code: text('code'),
+  language: varchar('language', { length: 50 }),
   explanation: text('explanation').notNull(),
+  hintsUsed: integer('hints_used').default(0).notNull(),
   aiFeedback: text('ai_feedback'),
+  evaluationResult: jsonb('evaluation_result'),
   score: integer('score'),
   createdAt: timestamp('created_at').defaultNow(),
 });
