@@ -58,7 +58,7 @@ export async function POST(
       return NextResponse.json({ error: 'No active question found to answer' }, { status: 400 });
     }
 
-    // 2. Fetch private question details (optimalSolution, interviewerNotes) from Postgres
+    // 2. Fetch private question details from Postgres
     const bankRow = await db.query.questionBank.findFirst({
       where: eq(questionBank.id, currentSlot.questionBankId),
       columns: {
@@ -66,6 +66,7 @@ export async function POST(
         timeComplexity: true,
         spaceComplexity: true,
         interviewerNotes: true,
+        starterCode: true,
       },
     });
 
@@ -73,31 +74,72 @@ export async function POST(
       return NextResponse.json({ error: 'Question data missing in database' }, { status: 500 });
     }
 
-    // 3. Build EvaluationRequest
-    const evalReq: EvaluationRequest = {
-      question: {
-        title: currentSlot.title,
-        description: currentSlot.description,
-        examples: currentSlot.examples,
-        constraints: currentSlot.constraints,
-        domain: currentSlot.domain,
-        difficulty: currentSlot.difficulty,
-        optimalSolution: bankRow.optimalSolution as Record<string, string>,
-        timeComplexity: bankRow.timeComplexity,
-        spaceComplexity: bankRow.spaceComplexity,
-        interviewerNotes: bankRow.interviewerNotes,
-      },
-      candidate: {
-        code,
-        language,
-        explanation,
-        hintsUsed: state.activeQuestionState.hintsUsed,
-        timeSpentSeconds,
-      },
-    };
+    const defaultCode = (bankRow.starterCode as Record<string, string>)?.[language] || '';
+    const userMessages = state.chatMessages.filter(m => m.role === 'user');
+    const hasInteracted = userMessages.length > 0;
+    
+    let isZeroEffortTimeout = false;
+    let finalExplanation = explanation;
 
-    // 4. Call AI to evaluate
-    const evalResult = await evaluateAnswer(evalReq);
+    if (explanation === 'Auto-submitted when time expired.') {
+      if (!hasInteracted && code.trim() === defaultCode.trim()) {
+        isZeroEffortTimeout = true;
+      } else {
+        explanation = 'Auto-submitted when time expired. (Partial effort)';
+        finalExplanation = explanation + '\n\nNote to evaluator: The candidate ran out of time. They made partial progress either in chat or by writing partial code. Please evaluate what they have and award partial credit (e.g. 2-5 points) for their effort and logical direction, even if the code does not fully compile or run.';
+      }
+    }
+
+    let evalResult;
+
+    if (isZeroEffortTimeout) {
+      // 3. Fast-path: Skip the 6-second LLM call for 0-effort timeouts
+      evalResult = {
+        score: 0,
+        isCorrect: false,
+        confidence: 'high' as const,
+        codeFeedback: 'Time expired before any code was written.',
+        communicationFeedback: 'No communication recorded.',
+        complexityFeedback: 'N/A',
+        edgeCaseFeedback: 'N/A',
+        hintPenalty: 0,
+        strengths: [],
+        improvements: ['Time management'],
+        nextAction: 'end_interview' as const,
+        interviewerReply: "Looks like we ran out of time before you could get started on this one.",
+        provider: 'mock' as const,
+        model: 'mock',
+        apiMode: 'mock' as const,
+        store: false,
+        fallbackUsed: false,
+      };
+    } else {
+      // 3. Build EvaluationRequest
+      const evalReq: EvaluationRequest = {
+        question: {
+          title: currentSlot.title,
+          description: currentSlot.description,
+          examples: currentSlot.examples,
+          constraints: currentSlot.constraints,
+          domain: currentSlot.domain,
+          difficulty: currentSlot.difficulty,
+          optimalSolution: bankRow.optimalSolution as Record<string, string>,
+          timeComplexity: bankRow.timeComplexity,
+          spaceComplexity: bankRow.spaceComplexity,
+          interviewerNotes: bankRow.interviewerNotes,
+        },
+        candidate: {
+          code,
+          language,
+          explanation: finalExplanation,
+          hintsUsed: state.activeQuestionState.hintsUsed,
+          timeSpentSeconds,
+        },
+      };
+
+      // 4. Call AI to evaluate
+      evalResult = await evaluateAnswer(evalReq);
+    }
 
     // 5. Store attempt in Postgres immediately (Durability)
     const [attempt] = await db.insert(answerAttempts).values({
