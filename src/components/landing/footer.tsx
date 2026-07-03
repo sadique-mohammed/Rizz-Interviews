@@ -31,7 +31,7 @@ export default function Footer() {
           </div>
           <div className="flex items-center gap-4">
             <a
-              href="https://www.linkedin.com/in/mohammed-sadique20"
+              href="https://linkedin.com"
               target="_blank"
               rel="noreferrer"
               aria-label="LinkedIn"
@@ -49,7 +49,7 @@ export default function Footer() {
               <Twitter className="h-5 w-5" />
             </a>
             <a
-              href="https://github.com/sadique-mohammed/nexus-ai-frontend"
+              href="https://github.com"
               target="_blank"
               rel="noreferrer"
               aria-label="GitHub"
