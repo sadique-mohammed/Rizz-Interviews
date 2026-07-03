@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { interviews } from '@/db/schema';
 import { and, eq } from 'drizzle-orm';
+import { deleteInterviewState } from '@/lib/interview-redis';
 
 interface RouteContext {
   params: Promise<{ sessionId: string }>;
@@ -39,6 +40,9 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       .update(interviews)
       .set({ status: 'abandoned', endedAt: new Date() })
       .where(eq(interviews.id, sessionId));
+
+    // Clear Redis active session
+    await deleteInterviewState(sessionId, userId);
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

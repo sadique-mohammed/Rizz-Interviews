@@ -1,6 +1,6 @@
 import { and, desc, eq } from 'drizzle-orm';
 import { db } from '@/db';
-import { interviews } from '@/db/schema';
+import { interviews, questions, answerAttempts } from '@/db/schema';
 
 export const MINIMUM_COMPLETION_THRESHOLD = 0.3;
 
@@ -33,12 +33,52 @@ async function finalizeSessionRecord(
 ): Promise<SessionStatus> {
   const status = getFinalizedStatus(session, now);
 
+  let totalScore: number | null = null;
+
+  if (status === 'completed') {
+    // Compute real score from answer_attempts — same logic as complete/route.ts
+    const sessionQuestions = await db
+      .select({ id: questions.id })
+      .from(questions)
+      .where(eq(questions.interviewId, session.id));
+
+    if (sessionQuestions.length > 0) {
+      const attempts = await db
+        .select({
+          questionId: answerAttempts.questionId,
+          score: answerAttempts.score,
+        })
+        .from(answerAttempts)
+        .innerJoin(questions, eq(answerAttempts.questionId, questions.id))
+        .where(eq(questions.interviewId, session.id));
+
+      const bestScores = new Map<string, number>();
+      for (const a of attempts) {
+        const currentBest = bestScores.get(a.questionId) ?? 0;
+        const score = a.score ?? 0;
+        if (score > currentBest) {
+          bestScores.set(a.questionId, score);
+        }
+      }
+
+      let sum = 0;
+      for (const score of bestScores.values()) {
+        sum += score;
+      }
+
+      const maxPossible = sessionQuestions.length * 10;
+      totalScore = Math.round((sum / maxPossible) * 100);
+    } else {
+      totalScore = 0;
+    }
+  }
+
   await db
     .update(interviews)
     .set({
       status,
       endedAt: now,
-      totalScore: status === 'completed' ? 0 : null,
+      totalScore,
     })
     .where(eq(interviews.id, session.id));
 
