@@ -5,6 +5,7 @@ import { Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare, Bot } from 'luci
 import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import DemoLoginButton from './demo-login-button';
 
 // CSS-based fade-in animation for critical above-the-fold content
 const fadeInUp = 'animate-fade-in-up';
@@ -38,6 +39,7 @@ export default function Hero() {
                 Get Started
               </div>
             </Link>
+            <DemoLoginButton />
             <a
               href='#features'
               className='inline-flex items-center justify-center rounded-xl px-10 py-2 text-sm font-semibold border border-gray-300 text-gray-900 hover:bg-gray-50 transition-all'

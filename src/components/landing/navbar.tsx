@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import DemoLoginButton from './demo-login-button';
 
 export default function Navbar() {
   return (
@@ -31,7 +32,8 @@ export default function Navbar() {
             ))} */}
           </div>
 
-          <div className='flex items-center '>
+          <div className='flex items-center gap-3'>
+            <DemoLoginButton className="hidden md:inline-flex" />
             <Link href='/dashboard' passHref>
               <div className='inline-flex items-center justify-center rounded-xl px-10 py-2 text-sm font-semibold btn-invert hover:bg-gray-900 hover:text-white transition-all duration-200'>
                 Get Started

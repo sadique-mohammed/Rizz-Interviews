@@ -1,0 +1,58 @@
+'use client';
+
+import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import { useSignIn } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+
+export default function DemoLoginButton({ className }: { className?: string }) {
+  const [isLoading, setIsLoading] = useState(false);
+  const { signIn, setActive, isLoaded } = useSignIn();
+  const router = useRouter();
+  
+  const handleDemoLogin = async () => {
+    if (!isLoaded) return;
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/demo-login', { method: 'POST' });
+      const data = await res.json();
+      
+      if (data.ticket) {
+        const result = await signIn.create({
+          strategy: 'ticket',
+          ticket: data.ticket,
+        });
+
+        if (result.status === 'complete') {
+          await setActive({ session: result.createdSessionId });
+          router.push('/dashboard');
+        } else {
+          throw new Error('Failed to complete sign in flow');
+        }
+      } else {
+        throw new Error(data.error || 'Failed to create demo session');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Failed to start demo session. Please try again.');
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <button 
+      onClick={handleDemoLogin}
+      disabled={isLoading}
+      className={`inline-flex items-center justify-center rounded-xl px-10 py-2 text-sm font-semibold btn-invert hover:bg-gray-900 hover:text-white hover:shadow-lg transition-all duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed ${className}`}
+    >
+      {isLoading ? (
+        <>
+          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          Authenticating...
+        </>
+      ) : (
+        'Try Demo (No Sign Up)'
+      )}
+    </button>
+  );
+}
