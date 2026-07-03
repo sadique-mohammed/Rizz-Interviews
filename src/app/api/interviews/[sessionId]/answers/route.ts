@@ -35,7 +35,8 @@ export async function POST(
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
     }
 
-    const { code, language, explanation, timeSpentSeconds } = validation.data;
+    const { code, language, timeSpentSeconds } = validation.data;
+    let { explanation } = validation.data;
 
     // 1. Fetch Redis state
     const state = await getInterviewState(sessionId);
