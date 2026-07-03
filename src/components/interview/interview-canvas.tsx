@@ -453,19 +453,6 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
     setHintIndex(state.activeQuestionState.hintIndex);
   }, [state.chatMessages, state.activeQuestionState.hintIndex]);
 
-  // ── Initialize chat if empty ──
-  React.useEffect(() => {
-    if (messages.length === 0 && question) {
-      const initialMessage: RedisChatMessage = {
-        id: crypto.randomUUID(),
-        role: 'ai',
-        text: `Let's start. Here's ${question.title} — before you code, walk me through your first instinct.`,
-        timestamp: new Date().toISOString()
-      };
-      setMessages([initialMessage]);
-    }
-  }, [messages.length, question]);
-
   // ── Timer ──
   React.useEffect(() => {
     intervalRef.current = setInterval(() => {
@@ -681,16 +668,24 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
     [currentCode, explanation, language, duration, timeLeft, sessionId, validateSubmission, handleEnd],
   );
 
-  // ── Auto-Submit when time runs out ──
+  // ── Auto-End/Submit when time runs out ──
   React.useEffect(() => {
-    if (timeLeft === 0 && !hasSubmitted && !isSubmitting) {
-      // Small timeout to avoid React state dispatch conflicts during render cycle
-      const t = setTimeout(() => {
-        handleSubmit(true);
-      }, 0);
-      return () => clearTimeout(t);
+    if (timeLeft === 0) {
+      if (!hasSubmitted && !isSubmitting) {
+        // Not submitted yet — force submit which will then auto-end
+        const t = setTimeout(() => {
+          handleSubmit(true);
+        }, 0);
+        return () => clearTimeout(t);
+      } else if (hasSubmitted) {
+        // Already submitted — just end the interview
+        const t = setTimeout(() => {
+          handleEnd();
+        }, 0);
+        return () => clearTimeout(t);
+      }
     }
-  }, [timeLeft, hasSubmitted, isSubmitting, handleSubmit]);
+  }, [timeLeft, hasSubmitted, isSubmitting, handleSubmit, handleEnd]);
 
   // ── Advance to the next question ──
   const handleNextQuestion = React.useCallback(async () => {
@@ -711,7 +706,11 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
       const data = await res.json();
 
       if (!data.hasNext) {
-        toast.success('All questions completed!');
+        if (data.reason === 'time_limit') {
+          toast.success('Not enough time for next question. Ending interview...');
+        } else {
+          toast.success('All questions completed!');
+        }
         handleEnd();
         return;
       }
@@ -782,8 +781,8 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
                   <Panel defaultSize={40} minSize={30} id='question-pane'>
                     <QuestionPanel question={question} />
                   </Panel>
-                  <Separator className='w-[1px] bg-gray-200 transition-colors hover:bg-brand/50 active:bg-brand flex items-center justify-center cursor-col-resize'>
-                    <div className='h-8 w-1 rounded-full bg-gray-300' />
+                  <Separator className='group relative flex w-1.5 cursor-col-resize items-center justify-center bg-gray-100 transition-colors hover:bg-blue-400 active:bg-blue-500'>
+                    <div className='h-8 w-0.5 rounded-full bg-gray-300 transition-colors group-hover:bg-white group-active:bg-white' />
                   </Separator>
                   <Panel defaultSize={60} minSize={30} id='editor-pane'>
                     <EditorPane
@@ -854,8 +853,8 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
             </div>
           </Panel>
 
-          <Separator className='w-[1px] bg-gray-200 transition-colors hover:bg-brand/50 active:bg-brand flex items-center justify-center cursor-col-resize'>
-            <div className='h-8 w-1 rounded-full bg-gray-300' />
+          <Separator className='group relative flex w-1.5 cursor-col-resize items-center justify-center bg-gray-100 transition-colors hover:bg-blue-400 active:bg-blue-500'>
+            <div className='h-8 w-0.5 rounded-full bg-gray-300 transition-colors group-hover:bg-white group-active:bg-white' />
           </Separator>
 
           <Panel defaultSize={30} minSize={25} id='chat-pane'>
