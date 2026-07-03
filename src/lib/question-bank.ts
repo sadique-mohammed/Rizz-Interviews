@@ -113,6 +113,7 @@ export async function getOrCreateSessionQuestion(interview: {
     .values({
       interviewId: interview.id,
       questionBankId: bankQuestion.id,
+      position: 0,
     })
     .returning({ id: questions.id });
 
