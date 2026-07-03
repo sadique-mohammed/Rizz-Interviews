@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
-import { interviews, questions, answerAttempts } from '@/db/schema';
+import { interviews } from '@/db/schema';
 import { and, eq } from 'drizzle-orm';
-import { getCompletionRatio, getFinalizedStatus } from '@/lib/interview-session';
 import { deleteInterviewState } from '@/lib/interview-redis';
 
 interface RouteContext {
@@ -43,60 +42,10 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
     }
 
     const now = new Date();
-    const completionRatio = getCompletionRatio(session, now);
-    const nextStatus = getFinalizedStatus(session, now);
-
-    let finalTotalScore: number | null = null;
-
-    if (nextStatus === 'completed') {
-      // Find all questions for this session
-      const sessionQuestions = await db
-        .select({ id: questions.id })
-        .from(questions)
-        .where(eq(questions.interviewId, sessionId));
-
-      if (sessionQuestions.length > 0) {
-        // Find all attempts for these questions
-        const attempts = await db
-          .select({
-            questionId: answerAttempts.questionId,
-            score: answerAttempts.score,
-          })
-          .from(answerAttempts)
-          .innerJoin(questions, eq(answerAttempts.questionId, questions.id))
-          .where(eq(questions.interviewId, sessionId));
-
-        // Get the best score for each question in case of multiple attempts
-        const bestScores = new Map<string, number>();
-        for (const a of attempts) {
-          const currentBest = bestScores.get(a.questionId) ?? 0;
-          const score = a.score ?? 0;
-          if (score > currentBest) {
-            bestScores.set(a.questionId, score);
-          }
-        }
-
-        let sum = 0;
-        for (const score of bestScores.values()) {
-          sum += score;
-        }
-
-        // Calculate average percentage (each question is out of 10)
-        const maxPossibleScore = sessionQuestions.length * 10;
-        finalTotalScore = Math.round((sum / maxPossibleScore) * 100);
-      } else {
-        finalTotalScore = 0;
-      }
-    }
-
-    await db
-      .update(interviews)
-      .set({
-        status: nextStatus,
-        endedAt: now,
-        totalScore: finalTotalScore,
-      })
-      .where(eq(interviews.id, sessionId));
+    
+    // Check answerAttempts for completion status and update DB
+    const { calculateAndFinalizeInterview } = await import('@/lib/interview-session');
+    const nextStatus = await calculateAndFinalizeInterview(sessionId, now);
 
     // Clear Redis active session
     await deleteInterviewState(sessionId, userId);
@@ -105,7 +54,6 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       {
         success: true,
         status: nextStatus,
-        completionRatio,
       },
       { status: 200 },
     );

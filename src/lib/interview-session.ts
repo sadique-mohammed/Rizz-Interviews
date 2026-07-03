@@ -1,9 +1,6 @@
 import { and, desc, eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { interviews, questions, answerAttempts } from '@/db/schema';
-
-export const MINIMUM_COMPLETION_THRESHOLD = 0.3;
-
 import type {
   SessionStatus,
   SessionTiming,
@@ -11,46 +8,36 @@ import type {
   InterviewSessionRecord,
 } from '@/types/interviewSession';
 
-export function getCompletionRatio(session: SessionTiming, now: Date = new Date()): number {
-  const totalDurationMs = session.duration * 60 * 1000;
-  if (totalDurationMs <= 0) return 0;
-  return (now.getTime() - new Date(session.startedAt).getTime()) / totalDurationMs;
-}
-
 export function isSessionExpired(session: SessionTiming, now: Date = new Date()): boolean {
-  return getCompletionRatio(session, now) >= 1;
+  const totalDurationMs = session.duration * 60 * 1000;
+  if (totalDurationMs <= 0) return true;
+  return (now.getTime() - new Date(session.startedAt).getTime()) >= totalDurationMs;
 }
 
-export function getFinalizedStatus(session: SessionTiming, now: Date = new Date()): SessionStatus {
-  return getCompletionRatio(session, now) < MINIMUM_COMPLETION_THRESHOLD
-    ? 'abandoned'
-    : 'completed';
-}
-
-async function finalizeSessionRecord(
-  session: Pick<ActiveSessionRecord, 'id' | 'startedAt' | 'duration'>,
+export async function calculateAndFinalizeInterview(
+  sessionId: string,
   now: Date,
 ): Promise<SessionStatus> {
-  const status = getFinalizedStatus(session, now);
+  const sessionQuestions = await db
+    .select({ id: questions.id })
+    .from(questions)
+    .where(eq(questions.interviewId, sessionId));
 
+  let status: SessionStatus = 'abandoned';
   let totalScore: number | null = null;
 
-  if (status === 'completed') {
-    // Compute real score from answer_attempts — same logic as complete/route.ts
-    const sessionQuestions = await db
-      .select({ id: questions.id })
-      .from(questions)
-      .where(eq(questions.interviewId, session.id));
+  if (sessionQuestions.length > 0) {
+    const attempts = await db
+      .select({
+        questionId: answerAttempts.questionId,
+        score: answerAttempts.score,
+      })
+      .from(answerAttempts)
+      .innerJoin(questions, eq(answerAttempts.questionId, questions.id))
+      .where(eq(questions.interviewId, sessionId));
 
-    if (sessionQuestions.length > 0) {
-      const attempts = await db
-        .select({
-          questionId: answerAttempts.questionId,
-          score: answerAttempts.score,
-        })
-        .from(answerAttempts)
-        .innerJoin(questions, eq(answerAttempts.questionId, questions.id))
-        .where(eq(questions.interviewId, session.id));
+    if (attempts.length > 0) {
+      status = 'completed';
 
       const bestScores = new Map<string, number>();
       for (const a of attempts) {
@@ -68,9 +55,11 @@ async function finalizeSessionRecord(
 
       const maxPossible = sessionQuestions.length * 10;
       totalScore = Math.round((sum / maxPossible) * 100);
-    } else {
-      totalScore = 0;
     }
+  }
+
+  if (status === 'abandoned') {
+    totalScore = 0;
   }
 
   await db
@@ -80,7 +69,7 @@ async function finalizeSessionRecord(
       endedAt: now,
       totalScore,
     })
-    .where(eq(interviews.id, session.id));
+    .where(eq(interviews.id, sessionId));
 
   return status;
 }
@@ -106,7 +95,7 @@ export async function reconcileUserActiveSession(userId: string): Promise<Active
 
   for (const session of sessions) {
     if (isSessionExpired(session, now)) {
-      await finalizeSessionRecord(session, now);
+      await calculateAndFinalizeInterview(session.id, now);
       continue;
     }
 
@@ -138,7 +127,7 @@ export async function getInterviewSessionForAccess(
   if (!session) return null;
 
   if (session.status === 'in_progress' && isSessionExpired(session)) {
-    const finalStatus = await finalizeSessionRecord(session, new Date());
+    const finalStatus = await calculateAndFinalizeInterview(session.id, new Date());
     return {
       ...session,
       status: finalStatus,

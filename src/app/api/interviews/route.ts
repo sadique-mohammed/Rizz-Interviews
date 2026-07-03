@@ -31,9 +31,11 @@ export async function POST(req: NextRequest) {
     }
 
     const { domain, difficulty, duration } = validation.data;
+    
+    // Determine max questions cap based on duration
+    const maxQuestions = duration === 15 ? 5 : duration === 30 ? 10 : 15;
 
-    // 1. Fetch 2 questions from the bank for the requested domain/difficulty
-    // We order by RANDOM() to get varied questions
+    // 1. Fetch the 1st active question
     const bankQuestions = await db
       .select()
       .from(questionBank)
@@ -44,7 +46,7 @@ export async function POST(req: NextRequest) {
         )
       )
       .orderBy(sql`RANDOM()`)
-      .limit(2);
+      .limit(1);
 
     if (bankQuestions.length === 0) {
       return NextResponse.json(
@@ -53,9 +55,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Create the interview row
-    // The database has a partial unique index `interviews_one_active_per_user_idx`
-    // which guarantees no concurrent active interviews for the same user.
+    const activeQ = bankQuestions[0];
+    const seenQuestionBankIds = [activeQ.id];
+
+    // 2. Fetch the initial adaptive buffers
+    const { fetchAdaptiveBuffers } = await import('@/lib/question-bank');
+    const pendingBuffers = await fetchAdaptiveBuffers(domain, activeQ.difficultyScore, seenQuestionBankIds);
+
+    // Record buffer IDs into the seen ledger
+    if (pendingBuffers.harder) seenQuestionBankIds.push(pendingBuffers.harder.questionBankId);
+    if (pendingBuffers.easier) seenQuestionBankIds.push(pendingBuffers.easier.questionBankId);
+    if (pendingBuffers.same_topic) seenQuestionBankIds.push(pendingBuffers.same_topic.questionBankId);
+
+    // 3. Create the interview row
     let interview;
     try {
       const result = await db
@@ -72,7 +84,6 @@ export async function POST(req: NextRequest) {
     } catch (error: any) {
       // Postgres error code 23505 = unique_violation
       if (error.code === '23505' && error.constraint === 'interviews_one_active_per_user_idx') {
-        // Find their existing active interview to return the ID
         const existing = await db.query.interviews.findFirst({
           where: and(eq(interviews.userId, userId), eq(interviews.status, 'in_progress')),
           columns: { id: true },
@@ -85,9 +96,7 @@ export async function POST(req: NextRequest) {
       throw error;
     }
 
-    // 3. Create the active session question in Postgres
-    const [activeQ, lookaheadQ] = bankQuestions;
-
+    // 4. Create the active session question in Postgres
     const [sessionQuestion] = await db
       .insert(questions)
       .values({
@@ -97,7 +106,7 @@ export async function POST(req: NextRequest) {
       })
       .returning({ id: questions.id });
 
-    // 4. Construct Redis Question Slots (stripping private fields)
+    // 5. Construct Redis Question Slots
     const questionSlots: RedisQuestionSlot[] = [
       {
         questionBankId: activeQ.id,
@@ -111,27 +120,12 @@ export async function POST(req: NextRequest) {
         hints: activeQ.hints as string[],
         domain: activeQ.domain,
         difficulty: activeQ.difficulty,
+        difficultyScore: activeQ.difficultyScore,
         status: 'active',
       },
     ];
 
-    if (lookaheadQ) {
-      questionSlots.push({
-        questionBankId: lookaheadQ.id,
-        position: 1,
-        title: lookaheadQ.title,
-        description: lookaheadQ.description,
-        examples: lookaheadQ.examples as string[],
-        constraints: lookaheadQ.constraints as string[],
-        starterCode: lookaheadQ.starterCode as Record<string, string>,
-        hints: lookaheadQ.hints as string[],
-        domain: lookaheadQ.domain,
-        difficulty: lookaheadQ.difficulty,
-        status: 'lookahead',
-      });
-    }
-
-    // 5. Initialize the Redis state
+    // 6. Initialize the Redis state
     const state: RedisInterviewState = {
       sessionId: interview.id,
       userId,
@@ -142,6 +136,9 @@ export async function POST(req: NextRequest) {
       expiresAt: new Date(Date.now() + duration * 60 * 1000).toISOString(),
       status: 'in_progress',
       questionSlots,
+      maxQuestions,
+      seenQuestionBankIds,
+      pendingBuffers,
       currentQuestionIndex: 0,
       activeQuestionState: {
         hintIndex: 0,
@@ -160,7 +157,7 @@ export async function POST(req: NextRequest) {
       answeredQuestions: [],
     };
 
-    // 6. Write to Redis
+    // 7. Write to Redis
     await createInterviewState(state);
     await setUserActiveInterview(userId, interview.id, duration * 60 * 2);
 

@@ -133,12 +133,21 @@ export async function POST(
 
     await appendChatMessages(sessionId, [userMsg, aiMsg]);
 
+    // Save chosenNextAction for the next-question traversal
+    const { updateActiveQuestionState } = await import('@/lib/interview-redis');
+    await updateActiveQuestionState(sessionId, {
+      chosenNextAction: evalResult.nextAction,
+    });
+
     // NOTE: Question advancement is NOT done here.
     // The frontend will call /next-question when the user is ready to move on.
     // This allows the AI to finish cross-questioning about the current question.
 
     // 7. Return the evaluation result + attempt metadata to the client
-    const hasNextQuestion = state.currentQuestionIndex + 1 < state.questionSlots.length;
+    let hasNextQuestion = state.questionSlots.length < state.maxQuestions;
+    if (evalResult.nextAction === 'end_interview') {
+      hasNextQuestion = false;
+    }
 
     return NextResponse.json({
       ...evalResult,

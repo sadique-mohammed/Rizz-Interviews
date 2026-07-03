@@ -26,6 +26,7 @@ export interface RedisQuestionSlot {
   hints: string[];
   domain: string;
   difficulty: string;
+  difficultyScore: number;
   status: 'lookahead' | 'active' | 'answered' | 'skipped';
 }
 
@@ -42,6 +43,8 @@ export interface RedisActiveQuestionState {
   draftLanguage: string | null;
   draftExplanation: string | null;
   lastDraftSavedAt: string | null;
+  /** The action chosen by the AI after evaluation for this active question. */
+  chosenNextAction?: 'follow_up' | 'same_topic' | 'harder' | 'easier' | 'end_interview';
 }
 
 // ---------------------------------------------------------------------------
@@ -80,6 +83,7 @@ export interface RedisAnsweredQuestion {
   attemptId: string;
   score: number | null;
   submittedAt: string;
+  nextAction?: 'follow_up' | 'same_topic' | 'harder' | 'easier' | 'end_interview';
 }
 
 // ---------------------------------------------------------------------------
@@ -96,8 +100,21 @@ export interface RedisInterviewState {
   expiresAt: string; // ISO timestamp
   status: 'in_progress';
 
-  /** Active + lookahead question snapshots (public fields only). */
+  /** Linear array of questions ACTUALLY asked. */
   questionSlots: RedisQuestionSlot[];
+
+  /** Max question cap derived from duration (e.g. 5, 10, 15) */
+  maxQuestions: number;
+
+  /** Append-only global ledger of ALL fetched question IDs (for dedup). */
+  seenQuestionBankIds: string[];
+
+  /** Adaptive buffers prefetched based on current active question's difficulty. */
+  pendingBuffers: {
+    harder?: Omit<RedisQuestionSlot, 'position' | 'sessionQuestionId' | 'status'>;
+    easier?: Omit<RedisQuestionSlot, 'position' | 'sessionQuestionId' | 'status'>;
+    same_topic?: Omit<RedisQuestionSlot, 'position' | 'sessionQuestionId' | 'status'>;
+  };
 
   /** Index into questionSlots for the currently active question. */
   currentQuestionIndex: number;
@@ -114,3 +131,4 @@ export interface RedisInterviewState {
   /** References to submitted & evaluated answers. */
   answeredQuestions: RedisAnsweredQuestion[];
 }
+

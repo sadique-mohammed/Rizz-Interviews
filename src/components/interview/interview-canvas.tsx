@@ -607,7 +607,7 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
 
       const data = (await res.json()) as { status?: 'completed' | 'abandoned' };
       if (data.status === 'abandoned') {
-        toast.info('Interview ended before 30%, so it was marked as abandoned.');
+        toast.info('Interview abandoned (no questions answered).');
       } else {
         toast.success('Interview marked as completed.');
       }

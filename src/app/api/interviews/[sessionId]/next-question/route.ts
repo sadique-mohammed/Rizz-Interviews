@@ -43,10 +43,14 @@ export async function POST(
       return NextResponse.json({ error: 'No active question to advance from' }, { status: 400 });
     }
 
-    const nextIndex = state.currentQuestionIndex + 1;
-    const hasNext = nextIndex < state.questionSlots.length;
+    const chosenNextAction = state.activeQuestionState.chosenNextAction;
 
-    // 2. Advance the question in Redis
+    // 2. Defensive check for early end
+    if (chosenNextAction === 'end_interview') {
+      return NextResponse.json({ success: true, hasNext: false });
+    }
+
+    // 3. Record the answer in history
     await markQuestionAnswered(sessionId, {
       sessionQuestionId: currentSlot.sessionQuestionId,
       questionBankId: currentSlot.questionBankId,
@@ -54,48 +58,69 @@ export async function POST(
       attemptId: attemptId ?? '',
       score: null,
       submittedAt: new Date().toISOString(),
+      nextAction: chosenNextAction,
     });
 
-    // 3. If there's a next question, make sure it has a Postgres session row
-    if (hasNext) {
-      const nextSlot = state.questionSlots[nextIndex];
-      if (nextSlot && !nextSlot.sessionQuestionId) {
-        // Create the session question row in Postgres
-        const [sessionQuestion] = await db
-          .insert(questions)
-          .values({
-            interviewId: sessionId,
-            questionBankId: nextSlot.questionBankId,
-            position: nextSlot.position,
-          })
-          .returning({ id: questions.id });
+    // 4. Determine buffer to pop (fallback cascade)
+    let bufferKey: 'harder' | 'easier' | 'same_topic' = 'same_topic';
+    if (chosenNextAction === 'harder') bufferKey = 'harder';
+    if (chosenNextAction === 'easier') bufferKey = 'easier';
+    if (chosenNextAction === 'same_topic') bufferKey = 'same_topic';
+    // 'follow_up' naturally uses 'same_topic'
 
-        // Update the Redis state with the new sessionQuestionId
-        const updatedState = await getInterviewState(sessionId);
-        if (updatedState) {
-          const slot = updatedState.questionSlots[nextIndex];
-          if (slot) {
-            slot.sessionQuestionId = sessionQuestion.id;
-            // Re-save (markQuestionAnswered already saved, but we need to patch the ID)
-            const { updateInterviewState } = await import('@/lib/interview-redis');
-            await updateInterviewState(sessionId, updatedState);
-          }
-        }
-      }
+    let bufferToPop = state.pendingBuffers[bufferKey];
+    if (!bufferToPop) bufferToPop = state.pendingBuffers['same_topic'];
+    if (!bufferToPop) bufferToPop = state.pendingBuffers['harder'];
+    if (!bufferToPop) bufferToPop = state.pendingBuffers['easier'];
 
-      // 4. Append a transition message to chat
-      await appendChatMessages(sessionId, [{
-        id: crypto.randomUUID(),
-        role: 'system' as const,
-        text: `Great work on that question! Let's move on to the next one.`,
-        timestamp: new Date().toISOString(),
-        kind: 'transition' as const,
-      }]);
+    // Total exhaustion -> force end
+    if (!bufferToPop) {
+      return NextResponse.json({ success: true, hasNext: false });
     }
+
+    // 5. Insert Postgres row for new question
+    const nextPosition = state.questionSlots.length;
+    const [sessionQuestion] = await db
+      .insert(questions)
+      .values({
+        interviewId: sessionId,
+        questionBankId: bufferToPop.questionBankId,
+        position: nextPosition,
+      })
+      .returning({ id: questions.id });
+
+    // 6. Refill buffers synchronously if under cap
+    let newBuffers = state.pendingBuffers;
+    if (nextPosition + 1 < state.maxQuestions) {
+      const { fetchAdaptiveBuffers } = await import('@/lib/question-bank');
+      // current state.seenQuestionBankIds is slightly stale since bufferToPop isn't added?
+      // Actually bufferToPop WAS added to seenQuestionBankIds when it was fetched! So seenQuestionBankIds is perfectly accurate.
+      newBuffers = await fetchAdaptiveBuffers(state.domain, bufferToPop.difficultyScore, state.seenQuestionBankIds);
+    } else {
+      // Empty out buffers if we hit the cap so we don't hold them in memory
+      newBuffers = {};
+    }
+
+    // 7. Late-stage Redis Commit (Promote buffer)
+    const { promoteNextQuestion } = await import('@/lib/interview-redis');
+    const newState = await promoteNextQuestion(sessionId, bufferKey, sessionQuestion.id, newBuffers);
+
+    if (!newState) {
+       return NextResponse.json({ error: 'Failed to promote question' }, { status: 500 });
+    }
+
+    // 8. Append a transition message to chat
+    await appendChatMessages(sessionId, [{
+      id: crypto.randomUUID(),
+      role: 'system' as const,
+      text: `Great work on that question! Let's move on to the next one.`,
+      timestamp: new Date().toISOString(),
+      kind: 'transition' as const,
+    }]);
 
     return NextResponse.json({
       success: true,
-      hasNext,
+      hasNext: true,
     });
 
   } catch (error) {

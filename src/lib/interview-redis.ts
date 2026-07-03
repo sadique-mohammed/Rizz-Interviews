@@ -221,28 +221,10 @@ export async function markQuestionAnswered(
 
   // Record the answered question reference
   state.answeredQuestions.push(answered);
-
-  // Advance to the next question
-  const nextIndex = state.currentQuestionIndex + 1;
-
-  if (nextIndex < state.questionSlots.length) {
-    state.currentQuestionIndex = nextIndex;
-
-    // Activate the lookahead question
-    const nextSlot = state.questionSlots[nextIndex];
-    if (nextSlot && nextSlot.status === 'lookahead') {
-      nextSlot.status = 'active';
-    }
-
-    // Reset active question state for the new question
-    state.activeQuestionState = {
-      hintIndex: 0,
-      hintsUsed: 0,
-      draftCode: null,
-      draftLanguage: null,
-      draftExplanation: null,
-      lastDraftSavedAt: null,
-    };
+  
+  // Store the chosen next action in the active state for the immediate transition
+  if (answered.nextAction) {
+    state.activeQuestionState.chosenNextAction = answered.nextAction;
   }
 
   await updateInterviewState(sessionId, state);
@@ -250,20 +232,64 @@ export async function markQuestionAnswered(
 }
 
 /**
- * Add a new lookahead question slot to the session.
- * Called after a question is activated and a new lookahead is selected.
+ * Promote a buffer to be the next active question.
+ * Pops the designated buffer from pendingBuffers, appends it to questionSlots,
+ * assigns the Postgres sessionQuestionId, and updates the seenQuestionBankIds ledger.
  */
-export async function addLookaheadQuestion(
+export async function promoteNextQuestion(
   sessionId: string,
-  slot: RedisQuestionSlot,
+  chosenBufferKey: 'harder' | 'easier' | 'same_topic',
+  sessionQuestionId: string,
+  newBuffers: RedisInterviewState['pendingBuffers'],
 ): Promise<RedisInterviewState | null> {
   const state = await getInterviewState(sessionId);
   if (!state) return null;
 
-  state.questionSlots.push(slot);
+  let bufferToPop = state.pendingBuffers[chosenBufferKey];
+
+  // Exhaustion fallback cascade
+  if (!bufferToPop) {
+    bufferToPop = state.pendingBuffers['same_topic'];
+  }
+  if (!bufferToPop) {
+    bufferToPop = state.pendingBuffers['harder'];
+  }
+  if (!bufferToPop) {
+    bufferToPop = state.pendingBuffers['easier'];
+  }
+
+  if (!bufferToPop) {
+    // Complete exhaustion
+    return null;
+  }
+
+  // Promote the buffer
+  const nextPosition = state.questionSlots.length;
+  const newSlot: RedisQuestionSlot = {
+    ...bufferToPop,
+    position: nextPosition,
+    sessionQuestionId,
+    status: 'active',
+  };
+
+  state.questionSlots.push(newSlot);
+  state.currentQuestionIndex = nextPosition;
+
+  // Reset active state for the new question
+  state.activeQuestionState = createFreshActiveQuestionState();
+
+  // Replace buffers and record new IDs in the seen ledger
+  state.pendingBuffers = newBuffers;
+  
+  if (newBuffers.harder) state.seenQuestionBankIds.push(newBuffers.harder.questionBankId);
+  if (newBuffers.easier) state.seenQuestionBankIds.push(newBuffers.easier.questionBankId);
+  if (newBuffers.same_topic) state.seenQuestionBankIds.push(newBuffers.same_topic.questionBankId);
+
   await updateInterviewState(sessionId, state);
   return state;
 }
+
+
 
 // ---------------------------------------------------------------------------
 // Transcript windowing helpers
