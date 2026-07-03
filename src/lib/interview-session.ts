@@ -14,10 +14,27 @@ export function isSessionExpired(session: SessionTiming, now: Date = new Date())
   return (now.getTime() - new Date(session.startedAt).getTime()) >= totalDurationMs;
 }
 
+export function getExpectedQuestionsCount(duration: number, difficulty: string): number {
+  let expectedTimePerQuestion = 15;
+  if (difficulty === 'easy') expectedTimePerQuestion = 6;
+  else if (difficulty === 'medium') expectedTimePerQuestion = 10;
+  else if (difficulty === 'hard') expectedTimePerQuestion = 15;
+
+  return Math.max(1, Math.floor(duration / expectedTimePerQuestion));
+}
+
 export async function calculateAndFinalizeInterview(
   sessionId: string,
   now: Date,
 ): Promise<SessionStatus> {
+  const [interview] = await db
+    .select({ duration: interviews.duration, difficulty: interviews.difficulty })
+    .from(interviews)
+    .where(eq(interviews.id, sessionId))
+    .limit(1);
+
+  if (!interview) return 'abandoned';
+
   const sessionQuestions = await db
     .select({ id: questions.id })
     .from(questions)
@@ -27,14 +44,20 @@ export async function calculateAndFinalizeInterview(
   let totalScore: number | null = null;
 
   if (sessionQuestions.length > 0) {
-    const attempts = await db
+    let attempts = await db
       .select({
         questionId: answerAttempts.questionId,
         score: answerAttempts.score,
+        explanation: answerAttempts.explanation,
       })
       .from(answerAttempts)
       .innerJoin(questions, eq(answerAttempts.questionId, questions.id))
       .where(eq(questions.interviewId, sessionId));
+
+    // Filter out 0-effort auto-submissions
+    attempts = attempts.filter(
+      (a) => !(a.score === 0 && a.explanation === 'Auto-submitted when time expired.')
+    );
 
     if (attempts.length > 0) {
       status = 'completed';
@@ -53,7 +76,10 @@ export async function calculateAndFinalizeInterview(
         sum += score;
       }
 
-      const maxPossible = sessionQuestions.length * 10;
+      const expectedQuestions = getExpectedQuestionsCount(interview.duration, interview.difficulty);
+      const denominatorQuestions = Math.max(expectedQuestions, bestScores.size);
+      
+      const maxPossible = denominatorQuestions * 10;
       totalScore = Math.round((sum / maxPossible) * 100);
     }
   }

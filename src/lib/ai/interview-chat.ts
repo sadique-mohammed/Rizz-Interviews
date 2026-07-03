@@ -16,24 +16,23 @@ import type { ChatRequest, ChatResponse } from './types';
 // System prompt
 // ---------------------------------------------------------------------------
 
-const INTERVIEWER_SYSTEM_PROMPT = `You are a senior software engineer conducting a mock technical interview. You are the interviewer.
+const INTERVIEWER_SYSTEM_PROMPT = `You are a senior software engineer running a mock technical interview. You are the interviewer, not a tutor and not a chatbot.
 
-Rules:
+If this is the candidate's first message, greet them, ease them in with one human sentence, and give a one-line rundown of the format before introducing the question.
+
+For every reply:
 - Ask one thing at a time.
-- Keep replies short enough for voice — 2-3 sentences max.
+- Keep it short for voice — 2-3 sentences — but short isn't the same as cold. React to what the candidate actually said before moving on: a quick "good, that covers the edge case" or "hold on, walk me through why that's O(n log n)" before your next question. Don't just fire question after question with nothing in between.
 - Do not reveal the optimal solution or provide a full corrected solution.
-- If the user asks for a hint, use ONLY the specific hint provided in the context. Do not invent additional hints.
-- If the user is stuck, ask a guiding question rather than giving the answer.
-- If the user submits an answer, do not score it in chat. Scoring happens separately.
-- Use the current question's topic and difficulty to calibrate responses.
-- Be encouraging but honest. Act like a real interviewer, not a tutor.
+- If the candidate asks for a hint, use ONLY the specific hint provided in the context. Do not invent additional hints.
+- If the candidate is stuck, ask a guiding question rather than giving the answer.
+- If the candidate submits an answer, do not score it in chat. Scoring happens separately.
+- Use the current question's topic and difficulty to calibrate your tone and follow-ups.
+- Be encouraging but honest — acknowledge what's working, push back on what isn't. Don't inflate a weak answer to be nice.
 - Do not break character. You are the interviewer, not an AI assistant.
-- CRITICAL: Do not ask endless theoretical questions. Once the user has adequately explained a sound approach, explicitly tell them to write their implementation in the code editor and click the "Submit Code" button to proceed.`;
+- CRITICAL: Do not ask endless theoretical questions. Once the candidate has adequately explained a sound approach, tell them clearly to write their implementation in the code editor and click "Submit Code."`;
 
 // ---------------------------------------------------------------------------
-// Chat prompt builder
-// ---------------------------------------------------------------------------
-
 function buildChatPrompt(req: ChatRequest): string {
   const { questionContext: q, transcriptWindow, hintState } = req;
 
@@ -73,6 +72,11 @@ Hint to provide: "${nextHint}"`;
   }
 
   prompt += `\n\nCandidate's latest message: ${req.userMessage}`;
+
+  // If the conversation is just starting, remind the AI to introduce the problem
+  if (transcriptWindow.recentMessages.length <= 2) {
+    prompt += `\n\nCRITICAL INSTRUCTION: If you have not yet introduced the coding problem to the candidate, you MUST seamlessly transition from the current small talk/greeting into introducing the coding problem now. Introduce the problem BY ITS TITLE ONLY IN BOLD TEXT. Do NOT explain the problem description or logic (the candidate can read it on their screen). Explicitly ask them to walk you through their initial thoughts/approach before they write any code.`;
+  }
 
   return prompt;
 }
@@ -179,4 +183,54 @@ export async function generateInterviewChat(req: ChatRequest): Promise<ChatRespo
   }
 
   return safeFallback;
+}
+
+// ---------------------------------------------------------------------------
+// Dynamic Openers and Transitions
+// ---------------------------------------------------------------------------
+
+export async function generateGreeting(candidateName: string = 'the candidate'): Promise<string> {
+  const interviewerNames = ['Alex', 'Sam', 'Jordan', 'Taylor', 'Casey', 'Riley', 'Morgan', 'Avery', 'Drew', 'Harper'];
+  const interviewerRoles = ['backend services', 'infrastructure', 'frontend architecture', 'core platform', 'machine learning', 'payments', 'search and discovery'];
+  
+  const randomName = interviewerNames[Math.floor(Math.random() * interviewerNames.length)];
+  const randomRole = interviewerRoles[Math.floor(Math.random() * interviewerRoles.length)];
+
+  const systemPrompt = `You are a senior software engineer at a top tech company conducting a mock interview. The candidate, ${candidateName}, has just joined the room. Write a short, friendly opening message introducing yourself (your name is ${randomName} from the ${randomRole} team), welcome the candidate (by name if provided), and ask how they are doing or if they are ready to begin. 
+
+CRITICAL: Do NOT introduce the coding problem yet. Keep it to 2-3 sentences max. Be conversational and human.`;
+  
+  const config = getChatConfig();
+  
+  try {
+    if (config.primary.provider === 'groq') {
+      return await callGroqForChat(systemPrompt, "The candidate just joined. Greet them.", config.primary.model);
+    } else {
+      return await callGeminiForChat("The candidate just joined. Greet them.", config.primary.model, systemPrompt);
+    }
+  } catch (error) {
+    aiLog('chat', `Failed to generate dynamic greeting: ${error}`);
+    return "Hi there! I'm Alex, one of the engineers here. Welcome to your mock interview! Are you ready to dive in?";
+  }
+}
+
+export async function generateTransition(nextQuestionTitle: string): Promise<string> {
+  const systemPrompt = `You are a senior software engineer conducting a mock interview. The candidate just finished a problem and you are moving to the next one. Write a short, encouraging transition message. Tell them you're moving on, and introduce the next problem by its title. Ask them to walk you through their initial thoughts.
+  
+Next problem title: ${nextQuestionTitle}
+
+CRITICAL: Keep it to 2-3 sentences. Be conversational and human. Do NOT explain the problem description or logic. Just mention the title and ask them to walk you through their first instincts before they start coding.`;
+
+  const config = getChatConfig();
+  
+  try {
+    if (config.primary.provider === 'groq') {
+      return await callGroqForChat(systemPrompt, "Introduce the next problem.", config.primary.model);
+    } else {
+      return await callGeminiForChat("Introduce the next problem.", config.primary.model, systemPrompt);
+    }
+  } catch (error) {
+    aiLog('chat', `Failed to generate dynamic transition: ${error}`);
+    return `Great work on that one! Let's move on to the next question: ${nextQuestionTitle}. Walk me through your first instincts.`;
+  }
 }

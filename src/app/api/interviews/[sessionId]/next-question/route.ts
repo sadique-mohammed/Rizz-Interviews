@@ -78,6 +78,18 @@ export async function POST(
       return NextResponse.json({ success: true, hasNext: false });
     }
 
+    // 4.5 Check if remaining time is sufficient for the next question's difficulty
+    const remainingMs = new Date(state.expiresAt).getTime() - Date.now();
+    const remainingMins = remainingMs / (1000 * 60);
+
+    let minRequiredMins = 3; // easy
+    if (bufferToPop.difficulty === 'medium') minRequiredMins = 8;
+    if (bufferToPop.difficulty === 'hard') minRequiredMins = 10;
+
+    if (remainingMins < minRequiredMins) {
+      return NextResponse.json({ success: true, hasNext: false, reason: 'time_limit' });
+    }
+
     // 5. Insert Postgres row for new question
     const nextPosition = state.questionSlots.length;
     const [sessionQuestion] = await db
@@ -109,14 +121,21 @@ export async function POST(
        return NextResponse.json({ error: 'Failed to promote question' }, { status: 500 });
     }
 
-    // 8. Append a transition message to chat
-    await appendChatMessages(sessionId, [{
-      id: crypto.randomUUID(),
-      role: 'system' as const,
-      text: `Great work on that question! Let's move on to the next one.`,
-      timestamp: new Date().toISOString(),
-      kind: 'transition' as const,
-    }]);
+    // 8. Generate dynamic AI transition message
+    const { generateTransition } = await import('@/lib/ai/interview-chat');
+    const dynamicTransition = await generateTransition(bufferToPop.title);
+
+    // 9. Append a transition message to chat
+    await appendChatMessages(sessionId, [
+      {
+        id: crypto.randomUUID(),
+        role: 'ai' as const,
+        text: dynamicTransition,
+        timestamp: new Date().toISOString(),
+        questionPosition: nextPosition,
+        kind: 'message' as const,
+      }
+    ]);
 
     return NextResponse.json({
       success: true,

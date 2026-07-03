@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { interviews, questionBank, questions } from '@/db/schema';
 import { z } from 'zod';
@@ -125,7 +125,13 @@ export async function POST(req: NextRequest) {
       },
     ];
 
-    // 6. Initialize the Redis state
+    // 6. Generate dynamic AI greeting
+    const user = await currentUser();
+    const candidateName = user?.firstName || 'the candidate';
+    const { generateGreeting } = await import('@/lib/ai/interview-chat');
+    const dynamicGreeting = await generateGreeting(candidateName);
+
+    // 7. Initialize the Redis state
     const state: RedisInterviewState = {
       sessionId: interview.id,
       userId,
@@ -148,7 +154,16 @@ export async function POST(req: NextRequest) {
         draftExplanation: null,
         lastDraftSavedAt: null,
       },
-      chatMessages: [],
+      chatMessages: [
+        {
+          id: crypto.randomUUID(),
+          role: 'ai',
+          text: dynamicGreeting,
+          timestamp: new Date().toISOString(),
+          questionPosition: 0,
+          kind: 'message',
+        },
+      ],
       chatSummary: {
         text: '',
         summarizedThroughMessageId: null,
@@ -157,7 +172,7 @@ export async function POST(req: NextRequest) {
       answeredQuestions: [],
     };
 
-    // 7. Write to Redis
+    // 8. Write to Redis
     await createInterviewState(state);
     await setUserActiveInterview(userId, interview.id, duration * 60 * 2);
 
