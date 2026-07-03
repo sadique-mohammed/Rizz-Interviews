@@ -1,9 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import InterviewCanvas from '@/components/interview/interview-canvas';
-import Footer from '@/components/dashboard/footer';
-import { getInterviewSessionForAccess } from '@/lib/interview-session';
-import { getOrCreateSessionQuestion } from '@/lib/question-bank';
+import { getInterviewState } from '@/lib/interview-redis';
 
 interface PageProps {
   params: Promise<{ sessionId: string }>;
@@ -15,32 +13,21 @@ export default async function InterviewPage({ params }: PageProps) {
 
   if (!userId) redirect('/auth');
 
-  const interview = await getInterviewSessionForAccess(userId, sessionId);
+  const state = await getInterviewState(sessionId);
 
-  if (!interview) {
+  if (!state) {
     redirect('/dashboard');
   }
 
-  if (interview.status !== 'in_progress') {
-    redirect(interview.status === 'completed' ? `/history/${sessionId}` : '/dashboard');
+  if (state.userId !== userId) {
+    redirect('/dashboard');
   }
 
-  const question = await getOrCreateSessionQuestion(interview);
-
-  if (!question) {
-    redirect('/dashboard');
+  if (state.status !== 'in_progress') {
+    redirect(`/history/${sessionId}`);
   }
 
   return (
-    <>
-      <InterviewCanvas
-        sessionId={interview.id}
-        domain={interview.domain as 'DSA' | 'Web Dev'}
-        difficulty={interview.difficulty as 'easy' | 'medium' | 'hard'}
-        duration={interview.duration}
-        question={question}
-      />
-      <Footer />
-    </>
+    <InterviewCanvas state={state} />
   );
 }
