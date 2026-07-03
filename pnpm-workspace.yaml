@@ -1,8 +1,10 @@
 allowBuilds:
   '@clerk/shared': true
+  '@google/genai': true
   '@tailwindcss/oxide': true
   '@vercel/speed-insights': true
   esbuild: true
+  protobufjs: true
   sharp: true
 
 ignoredBuiltDependencies:
