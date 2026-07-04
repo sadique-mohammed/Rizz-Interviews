@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { interviews, questions, answerAttempts, recordings, questionBank } from '@/db/schema';
-import { and, eq, inArray, ne } from 'drizzle-orm';
+import { and, eq, inArray, ne, asc } from 'drizzle-orm';
 import { questionBankToMarkdown } from '@/lib/question-bank';
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -50,7 +50,8 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       })
       .from(questions)
       .innerJoin(questionBank, eq(questions.questionBankId, questionBank.id))
-      .where(eq(questions.interviewId, id));
+      .where(eq(questions.interviewId, id))
+      .orderBy(asc(questions.position));
 
     // 3. Get all answer attempts for these questions
     const questionIds = interviewQuestions.map((q) => q.id);

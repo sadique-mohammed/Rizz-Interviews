@@ -77,7 +77,7 @@ export const questions = pgTable('questions', {
   questionBankId: uuid('question_bank_id')
     .references(() => questionBank.id)
     .notNull(),
-  position: integer('position').notNull(),
+  position: integer('position').default(0).notNull(),
   createdAt: timestamp('created_at').defaultNow(),
 });
 
