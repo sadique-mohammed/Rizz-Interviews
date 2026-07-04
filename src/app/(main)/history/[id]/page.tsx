@@ -112,19 +112,15 @@ export default function InterviewDetailPage() {
 
   React.useEffect(() => {
     const CACHE_KEY = `interview_${params.id}`;
-    const IN_PROGRESS_TTL = 15_000; // 15s for in-progress sessions
-
     const fetchInterviewDetail = async () => {
       // Check sessionStorage before hitting the network
       try {
         const cached = sessionStorage.getItem(CACHE_KEY);
         if (cached) {
-          const { data, status, cachedAt } = JSON.parse(cached);
-          const isCompleted = status === 'completed';
-          const isStillFresh = Date.now() - cachedAt < IN_PROGRESS_TTL;
-
-          // Completed = immutable, serve forever. In-progress = serve within TTL.
-          if (isCompleted || isStillFresh) {
+          const { data, status } = JSON.parse(cached);
+          
+          // Only serve from cache if the interview is fully completed or abandoned
+          if (status === 'completed' || status === 'abandoned') {
             setInterview(data);
             setLoading(false);
             return;
@@ -158,17 +154,19 @@ export default function InterviewDetailPage() {
         setInterview(interviewData);
 
         // Cache in sessionStorage — completed interviews cached indefinitely
-        try {
-          sessionStorage.setItem(
-            CACHE_KEY,
-            JSON.stringify({
-              data: interviewData,
-              status: interviewData.status,
-              cachedAt: Date.now(),
-            }),
-          );
-        } catch {
-          // sessionStorage full or unavailable — silently skip
+        if (interviewData.status === 'completed' || interviewData.status === 'abandoned') {
+          try {
+            sessionStorage.setItem(
+              CACHE_KEY,
+              JSON.stringify({
+                data: interviewData,
+                status: interviewData.status,
+                cachedAt: Date.now(),
+              }),
+            );
+          } catch {
+            // sessionStorage full or unavailable — silently skip
+          }
         }
       } catch (error) {
         console.error(error);
