@@ -4,11 +4,11 @@ import { db } from '@/db';
 import { interviews } from '@/db/schema';
 import { eq, desc, and, ne } from 'drizzle-orm';
 
-export async function GET() {
+export async function GET(): Promise<NextResponse> {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new Error('Unauthenticated');
     }
 
     // FK constraint ensures user exists

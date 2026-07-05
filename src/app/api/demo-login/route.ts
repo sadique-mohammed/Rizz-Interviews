@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { clerkClient } from '@clerk/nextjs/server';
 import crypto from 'crypto';
 
-export async function POST(req: Request) {
+export async function POST(req: Request): Promise<NextResponse> {
   try {
     const client = await clerkClient();
     

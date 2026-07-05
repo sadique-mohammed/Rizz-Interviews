@@ -50,7 +50,7 @@ async function syncUserToDatabase(userData: UserInsert & { updatedAt: Date }) {
   console.log(`[Webhook] Synced user: ${userData.email} (id: ${result[0]?.id})`);
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     // Verify webhook signature for security
     const evt = await verifyWebhook(req);

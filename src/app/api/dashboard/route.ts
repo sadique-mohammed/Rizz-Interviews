@@ -5,11 +5,11 @@ import { users, interviews } from '@/db/schema';
 import { eq, desc, and, ne } from 'drizzle-orm';
 import { reconcileUserActiveSession } from '@/lib/interview-session';
 
-export async function GET() {
+export async function GET(): Promise<NextResponse> {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new Error('Unauthenticated');
     }
 
     // 1. Get only needed user fields (name, email for greeting)

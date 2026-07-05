@@ -5,13 +5,13 @@ import { interviews, questions, answerAttempts, recordings, questionBank } from 
 import { and, eq, inArray, ne, asc } from 'drizzle-orm';
 import { questionBankToMarkdown } from '@/lib/question-bank';
 
-export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }): Promise<NextResponse> {
   try {
     const { id } = await params;
     const { userId } = await auth();
 
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new Error('Unauthenticated');
     }
 
     // Get interview with ownership verification (returns 404 if not found or not owned)

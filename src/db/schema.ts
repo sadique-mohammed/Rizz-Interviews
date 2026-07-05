@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { boolean, integer, jsonb, pgTable, text, timestamp, uuid, varchar, uniqueIndex } from 'drizzle-orm/pg-core';
+import { boolean, integer, jsonb, pgTable, text, timestamp, uuid, varchar, uniqueIndex, index } from 'drizzle-orm/pg-core';
 
 // Users - clerk_id is the primary key (permanent identifier from Clerk)
 export const users = pgTable('users', {
@@ -58,6 +58,10 @@ export const questionBank = pgTable('question_bank', {
   interviewerNotes: text('interviewer_notes').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => {
+  return {
+    domainDifficultyIdx: index('domain_difficulty_idx').on(table.domain, table.difficultyScore)
+  };
 });
 
 export const questionBankTags = pgTable('question_bank_tags', {
