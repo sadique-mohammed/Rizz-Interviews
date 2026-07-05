@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { CheckCircle2 } from 'lucide-react';
 
 export default function EmailSignup() {
   const [email, setEmail] = React.useState('');
@@ -27,23 +28,25 @@ export default function EmailSignup() {
   };
 
   return (
-    <section id='contact' className='py-20 px-6 md:px-12 bg-gray-50'>
-      <div className='mx-auto max-w-4xl text-center'>
-        <div className='animate-fade-in-up' style={{ animationDelay: '0ms' }}>
-          <h2 className='text-3xl md:text-4xl font-bold text-gray-900'>
-            Start Practicing with Nexus Today
-          </h2>
-          <p className='mt-4 text-lg text-gray-600 max-w-2xl mx-auto'>
-            Join thousands of developers and professionals who trust Nexus for seamless AI-powered
-            interview preparation.
-          </p>
-        </div>
+    <section id='contact' className='py-24 px-6 md:px-12 relative overflow-hidden'>
+      {/* Background with subtle glow */}
+      <div className="absolute inset-0 bg-gray-50/50" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl h-[400px] bg-blue-100/50 blur-[120px] rounded-full pointer-events-none" />
 
-        <div className='mt-8 animate-fade-in-up' style={{ animationDelay: '100ms' }}>
-          {!isSubmitted ? (
-            <form
-              onSubmit={handleSubmit}
-              className='flex flex-col sm:flex-row gap-3 max-w-md mx-auto'
+      <div className='mx-auto max-w-4xl relative z-10'>
+        <div className='rounded-3xl border border-white/60 bg-white/40 backdrop-blur-xl p-10 md:p-16 shadow-[0_8px_40px_rgb(0,0,0,0.04)] text-center animate-fade-in-up' style={{ animationDelay: '0ms' }}>
+          <h2 className='text-3xl md:text-5xl font-bold text-gray-900 tracking-tight'>
+            Ready to ace your next interview?
+          </h2>
+          <p className='mt-5 text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed'>
+            Join thousands of developers who trust Nexus AI for seamless, adaptive interview preparation. Free practice sessions available now.
+          </p>
+
+          <div className='mt-10 max-w-md mx-auto'>
+            {!isSubmitted ? (
+              <form
+                onSubmit={handleSubmit}
+                className='flex flex-col sm:flex-row gap-3'
               noValidate
             >
               <div className='flex-1'>
@@ -81,36 +84,16 @@ export default function EmailSignup() {
               </Button>
             </form>
           ) : (
-            <div className='max-w-md mx-auto'>
-              <div className='flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-green-100'>
-                <svg
-                  className='w-6 h-6 text-green-600'
-                  fill='none'
-                  stroke='currentColor'
-                  viewBox='0 0 24 24'
-                >
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M5 13l4 4L19 7'
-                  />
-                </svg>
+              <div className='flex items-center justify-center gap-3 bg-green-50/50 border border-green-100 rounded-2xl py-4 px-6 animate-fade-in-up'>
+                <CheckCircle2 className='w-6 h-6 text-green-500 shrink-0' />
+                <div className='text-left'>
+                  <h3 className='text-sm font-semibold text-gray-900'>You're on the list!</h3>
+                  <p className='text-xs text-gray-600'>We'll send your invitation shortly.</p>
+                </div>
               </div>
-              <h3 className='text-lg font-semibold text-gray-900'>Thanks for signing up!</h3>
-              <p className='mt-2 text-gray-600'>
-                We'll send you an invitation to get started with Nexus soon.
-              </p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-
-        <p
-          className='mt-4 text-sm text-gray-500 animate-fade-in-up'
-          style={{ animationDelay: '200ms' }}
-        >
-          No credit card required • Free practice sessions • 14-day trial
-        </p>
       </div>
     </section>
   );
