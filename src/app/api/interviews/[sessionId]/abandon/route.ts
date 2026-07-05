@@ -9,11 +9,11 @@ interface RouteContext {
   params: Promise<{ sessionId: string }>;
 }
 
-export async function PATCH(req: NextRequest, context: RouteContext) {
+export async function PATCH(req: NextRequest, context: RouteContext): Promise<NextResponse> {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new Error('Unauthenticated');
     }
 
     const { sessionId } = await context.params;

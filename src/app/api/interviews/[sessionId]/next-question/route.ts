@@ -11,11 +11,11 @@ import {
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> }
-) {
+): Promise<NextResponse> {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new Error('Unauthenticated');
     }
 
     const resolvedParams = await params;
@@ -62,29 +62,22 @@ export async function POST(
     });
 
     // 4. Determine buffer to pop (fallback cascade)
-    let bufferKey: 'harder' | 'easier' | 'same_topic' = 'same_topic';
-    if (chosenNextAction === 'harder') bufferKey = 'harder';
-    if (chosenNextAction === 'easier') bufferKey = 'easier';
-    if (chosenNextAction === 'same_topic') bufferKey = 'same_topic';
-    // 'follow_up' naturally uses 'same_topic'
-
-    let bufferToPop = state.pendingBuffers[bufferKey];
-    if (!bufferToPop) bufferToPop = state.pendingBuffers['same_topic'];
-    if (!bufferToPop) bufferToPop = state.pendingBuffers['harder'];
-    if (!bufferToPop) bufferToPop = state.pendingBuffers['easier'];
+    const { resolveNextBuffer } = await import('@/lib/question-bank');
+    const resolved = resolveNextBuffer(chosenNextAction, state.pendingBuffers);
 
     // Total exhaustion -> force end
-    if (!bufferToPop) {
+    if (!resolved) {
       return NextResponse.json({ success: true, hasNext: false });
     }
+
+    const { key: bufferKeyToPromote, buffer: bufferToPop } = resolved;
 
     // 4.5 Check if remaining time is sufficient for the next question's difficulty
     const remainingMs = new Date(state.expiresAt).getTime() - Date.now();
     const remainingMins = remainingMs / (1000 * 60);
 
-    let minRequiredMins = 3; // easy
-    if (bufferToPop.difficulty === 'medium') minRequiredMins = 8;
-    if (bufferToPop.difficulty === 'hard') minRequiredMins = 10;
+    let minRequiredMins = 2; // easy and medium
+    if (bufferToPop.difficulty === 'hard') minRequiredMins = 5;
 
     if (remainingMins < minRequiredMins) {
       return NextResponse.json({ success: true, hasNext: false, reason: 'time_limit' });
@@ -115,7 +108,7 @@ export async function POST(
 
     // 7. Late-stage Redis Commit (Promote buffer)
     const { promoteNextQuestion } = await import('@/lib/interview-redis');
-    const newState = await promoteNextQuestion(sessionId, bufferKey, sessionQuestion.id, newBuffers);
+    const newState = await promoteNextQuestion(sessionId, bufferKeyToPromote, sessionQuestion.id, newBuffers);
 
     if (!newState) {
        return NextResponse.json({ error: 'Failed to promote question' }, { status: 500 });

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
-import { interviews, questionBank, questions } from '@/db/schema';
+import { interviews, questionBank, questions, users } from '@/db/schema';
 import { z } from 'zod';
 import { createInterviewState, setUserActiveInterview } from '@/lib/interview-redis';
 import type { RedisInterviewState, RedisQuestionSlot } from '@/types/interviewRedis';
@@ -13,11 +13,25 @@ const createInterviewSchema = z.object({
   duration: z.coerce.number().pipe(z.union([z.literal(15), z.literal(30), z.literal(45)])),
 });
 
-export async function POST(req: NextRequest) {
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(5, '1 m'),
+});
+
+export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.warn('Unauthorized access attempt: No userId provided to /api/interviews');
+      throw new Error('Unauthenticated');
+    }
+
+    const { success } = await ratelimit.limit(`ratelimit_interview_create_${userId}`);
+    if (!success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const body = await req.json();
@@ -126,8 +140,8 @@ export async function POST(req: NextRequest) {
     ];
 
     // 6. Generate dynamic AI greeting
-    const user = await currentUser();
-    const candidateName = user?.firstName || 'the candidate';
+    const [localUser] = await db.select({ name: users.name }).from(users).where(eq(users.id, userId));
+    const candidateName = localUser?.name?.split(' ')[0] || 'the candidate';
     const { generateGreeting } = await import('@/lib/ai/interview-chat');
     const dynamicGreeting = await generateGreeting(candidateName);
 

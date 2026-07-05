@@ -13,11 +13,11 @@ const chatSchema = z.object({
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> }
-) {
+): Promise<NextResponse> {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new Error('Unauthenticated');
     }
 
     const resolvedParams = await params;

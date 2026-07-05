@@ -7,6 +7,13 @@ import { eq } from 'drizzle-orm';
 import { getInterviewState, appendChatMessages } from '@/lib/interview-redis';
 import { evaluateAnswer } from '@/lib/ai/evaluate-answer';
 import type { EvaluationRequest } from '@/lib/ai/types';
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(10, '1 m'),
+});
 
 const answerSchema = z.object({
   code: z.string(),
@@ -18,11 +25,17 @@ const answerSchema = z.object({
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> }
-) {
+): Promise<NextResponse> {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.warn('Unauthorized access attempt: No userId provided to /api/interviews/[sessionId]/answers');
+      throw new Error('Unauthenticated');
+    }
+
+    const { success } = await ratelimit.limit(`ratelimit_answer_submit_${userId}`);
+    if (!success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const resolvedParams = await params;
@@ -46,6 +59,7 @@ export async function POST(
 
     // Authorization check
     if (state.userId !== userId) {
+      console.warn(`Unauthorized access attempt: User ${userId} tried to submit answer for session ${sessionId}`);
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

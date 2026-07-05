@@ -245,23 +245,15 @@ export async function promoteNextQuestion(
   const state = await getInterviewState(sessionId);
   if (!state) return null;
 
-  let bufferToPop = state.pendingBuffers[chosenBufferKey];
+  const { resolveNextBuffer } = await import('@/lib/question-bank');
+  const resolved = resolveNextBuffer(chosenBufferKey, state.pendingBuffers);
 
-  // Exhaustion fallback cascade
-  if (!bufferToPop) {
-    bufferToPop = state.pendingBuffers['same_topic'];
-  }
-  if (!bufferToPop) {
-    bufferToPop = state.pendingBuffers['harder'];
-  }
-  if (!bufferToPop) {
-    bufferToPop = state.pendingBuffers['easier'];
-  }
-
-  if (!bufferToPop) {
+  if (!resolved) {
     // Complete exhaustion
     return null;
   }
+
+  const { buffer: bufferToPop } = resolved;
 
   // Promote the buffer
   const nextPosition = state.questionSlots.length;

@@ -136,3 +136,19 @@ export async function fetchAdaptiveBuffers(
 
   return buffers;
 }
+
+export function resolveNextBuffer(
+  chosenNextAction: 'harder' | 'easier' | 'same_topic' | 'follow_up' | 'end_interview' | undefined,
+  pendingBuffers: { harder?: BufferSlot; easier?: BufferSlot; same_topic?: BufferSlot }
+): { key: 'harder' | 'easier' | 'same_topic'; buffer: BufferSlot } | undefined {
+  let initialKey: 'harder' | 'easier' | 'same_topic' = 'same_topic';
+  if (chosenNextAction === 'harder') initialKey = 'harder';
+  if (chosenNextAction === 'easier') initialKey = 'easier';
+
+  if (pendingBuffers[initialKey]) return { key: initialKey, buffer: pendingBuffers[initialKey] as BufferSlot };
+  if (pendingBuffers['same_topic']) return { key: 'same_topic', buffer: pendingBuffers['same_topic'] as BufferSlot };
+  if (pendingBuffers['harder']) return { key: 'harder', buffer: pendingBuffers['harder'] as BufferSlot };
+  if (pendingBuffers['easier']) return { key: 'easier', buffer: pendingBuffers['easier'] as BufferSlot };
+
+  return undefined;
+}

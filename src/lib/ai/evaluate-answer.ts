@@ -30,6 +30,7 @@ There is no code execution in this product version, so be explicit about uncerta
 Do not reveal the optimal solution.
 Do not provide a full corrected solution unless the session is already ended.
 This call is stateless from the application perspective. The request includes all required context. Do not assume prior turns unless they are included in this prompt.
+CRITICAL: Do NOT mention or suggest any specific follow-up problem names in your interviewerReply (e.g., do not say "Let's move on to Meeting Rooms" or "Are you familiar with Counting Bits"). The system will automatically select the next question independently. Simply provide feedback on the current submission and state that you are moving on to the next question.
 
 Question:
 - Title: ${q.title}

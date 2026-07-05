@@ -12,11 +12,11 @@ const draftSchema = z.object({
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> }
-) {
+): Promise<NextResponse> {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new Error('Unauthenticated');
     }
 
     const { sessionId } = await params;
