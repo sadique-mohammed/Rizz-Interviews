@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useSignIn } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 export default function DemoLoginButton({ className }: { className?: string }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +35,8 @@ export default function DemoLoginButton({ className }: { className?: string }) {
       }
     } catch (e) {
       console.error(e);
-      alert('Failed to start demo session. Please try again.');
+      const errorMessage = e instanceof Error ? e.message : 'Failed to start demo session. Please try again.';
+      alert(errorMessage);
       setIsLoading(false);
     }
   };
@@ -43,7 +45,10 @@ export default function DemoLoginButton({ className }: { className?: string }) {
     <button 
       onClick={handleDemoLogin}
       disabled={isLoading}
-      className={`inline-flex items-center justify-center rounded-xl px-10 py-2 text-sm font-semibold btn-invert hover:bg-gray-900 hover:text-white hover:shadow-lg transition-all duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed ${className}`}
+      className={cn(
+        "inline-flex items-center justify-center rounded-xl px-10 py-2 text-sm font-semibold btn-invert hover:bg-gray-900 hover:text-white hover:shadow-lg transition-all duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed",
+        className
+      )}
     >
       {isLoading ? (
         <>
@@ -51,7 +56,7 @@ export default function DemoLoginButton({ className }: { className?: string }) {
           Authenticating...
         </>
       ) : (
-        'Try Demo (No Sign Up)'
+        'Try Live Demo'
       )}
     </button>
   );

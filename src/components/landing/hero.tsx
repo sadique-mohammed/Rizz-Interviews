@@ -31,21 +31,25 @@ export default function Hero() {
           </p>
 
           <div
-            className={`mt-8 flex items-center gap-3 ${fadeInUp}`}
+            className={`mt-8 flex flex-col items-start gap-4 w-full sm:w-auto ${fadeInUp}`}
             style={{ animationDelay: '100ms' }}
           >
-            <Link href='/dashboard' passHref>
-              <div className='inline-flex items-center justify-center rounded-xl px-10 py-2 text-sm font-semibold btn-invert hover:bg-gray-900 hover:text-white hover:shadow-lg transition-all duration-200'>
-                Get Started
-              </div>
-            </Link>
-            <DemoLoginButton />
-            <a
-              href='#features'
-              className='inline-flex items-center justify-center rounded-xl px-10 py-2 text-sm font-semibold border border-gray-300 text-gray-900 hover:bg-gray-50 transition-all'
-            >
-              Learn More
-            </a>
+            <div className="flex flex-row items-center gap-3 w-full sm:w-auto">
+              <Link href='/dashboard' passHref className="flex-1 sm:flex-none">
+                <div className='w-full inline-flex items-center justify-center rounded-xl px-6 sm:px-10 py-2 text-sm font-semibold btn-invert hover:bg-gray-900 hover:text-white hover:shadow-lg transition-all duration-200'>
+                  Get Started
+                </div>
+              </Link>
+              <a
+                href='#features'
+                className='flex-1 sm:flex-none inline-flex items-center justify-center rounded-xl px-6 sm:px-10 py-2 text-sm font-semibold border border-gray-300 text-gray-900 hover:bg-gray-50 transition-all'
+              >
+                Learn More
+              </a>
+            </div>
+            <div className="w-full sm:w-auto flex">
+              <DemoLoginButton className="w-full sm:w-auto px-6 sm:px-10" />
+            </div>
           </div>
 
           <p
