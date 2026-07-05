@@ -14,7 +14,7 @@ const ratelimit = new Ratelimit({
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     // 1. IP-based Rate Limiting
-    const ip = req.ip ?? req.headers.get('x-forwarded-for') ?? 'anonymous';
+    const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'anonymous';
     const { success, limit, remaining, reset } = await ratelimit.limit(`ratelimit_demo_login_${ip}`);
 
     if (!success) {
