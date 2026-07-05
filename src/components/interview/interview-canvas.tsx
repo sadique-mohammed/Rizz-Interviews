@@ -371,28 +371,62 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
   const requiresCode = true; // Web Dev and DSA both expect code in our simplified model
   const languages = domain === 'DSA' ? DSA_LANGUAGES : WEBDEV_LANGUAGES;
 
-  // ── Editor state (hydrated from Redis drafts on refresh) ──
+  // ── Editor state (hydrated from localStorage on refresh) ──
+  const storageKeyBase = `nexus_draft_${sessionId}_${currentQuestionIndex}`;
+  
   const [language, setLanguage] = React.useState(() => {
     const saved = state.activeQuestionState.draftLanguage;
     if (saved && languages.some((l) => l.value === saved)) return saved;
     return languages[0].value;
   });
+
   const [codeMap, setCodeMap] = React.useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
     if (question) {
       languages.forEach((l) => (initial[l.value] = question.starterCode?.[l.value] ?? ''));
     }
-    // Overlay saved draft code if present
+
+    // Overlay saved draft code if present from server fallback
     const savedCode = state.activeQuestionState.draftCode;
     const savedLang = state.activeQuestionState.draftLanguage;
-    if (savedCode && savedLang) {
+    if (savedCode !== null && savedCode !== undefined && savedLang) {
       initial[savedLang] = savedCode;
     }
     return initial;
   });
-  const [explanation, setExplanation] = React.useState(
-    state.activeQuestionState.draftExplanation ?? ''
-  );
+
+  const [explanation, setExplanation] = React.useState(() => {
+    return state.activeQuestionState.draftExplanation ?? '';
+  });
+
+  const [isHydrated, setIsHydrated] = React.useState(false);
+
+  // Hydrate from localStorage after SSR
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const localLang = localStorage.getItem(`${storageKeyBase}_lang`) || localStorage.getItem(`nexus_preferred_lang_${sessionId}`);
+      const localMap = localStorage.getItem(`${storageKeyBase}_codeMap`);
+      const localExpl = localStorage.getItem(`${storageKeyBase}_expl`);
+      
+      if (localLang && languages.some((l) => l.value === localLang)) {
+        setLanguage(localLang);
+      }
+      
+      if (localMap) {
+        try {
+          const parsed = JSON.parse(localMap);
+          setCodeMap(prev => ({ ...prev, ...parsed }));
+        } catch (e) {
+          // Ignore parse errors
+        }
+      }
+      
+      if (localExpl !== null) {
+        setExplanation(localExpl);
+      }
+    }
+    setIsHydrated(true);
+  }, [storageKeyBase, languages]);
   
   // Initialize timer relative to session startedAt + duration
   const [timeLeft, setTimeLeft] = React.useState(() => {
@@ -422,9 +456,8 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
   const intervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
   const draftTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Debounced draft save (1.5s after last change) ──
+  // ── Debounced server draft save ──
   React.useEffect(() => {
-    // Don't save if already submitted or if there's nothing to save
     if (hasSubmitted) return;
 
     if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
@@ -437,15 +470,13 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
           language,
           explanation,
         }),
-      }).catch(() => {
-        // Silent fail — drafts are best-effort
-      });
+      }).catch(() => {});
     }, 1500);
 
     return () => {
       if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
     };
-  }, [codeMap, language, explanation, sessionId, hasSubmitted]);
+  }, [codeMap, language, explanation, sessionId, hasSubmitted, storageKeyBase]);
 
   // ── Sync messages from server on refresh ──
   React.useEffect(() => {
@@ -478,21 +509,32 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
   const handleLanguageChange = React.useCallback((newLang: string) => {
     setLanguage(newLang);
     setValidationError('');
-  }, []);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`${storageKeyBase}_lang`, newLang);
+      localStorage.setItem(`nexus_preferred_lang_${sessionId}`, newLang);
+    }
+  }, [storageKeyBase, sessionId]);
 
   const handleCodeChange = React.useCallback(
     (value: string | undefined) => {
       const newVal = value ?? '';
-      setCodeMap((prev) => ({ ...prev, [language]: newVal }));
+      setCodeMap((prev) => {
+        const nextMap = { ...prev, [language]: newVal };
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(`${storageKeyBase}_codeMap`, JSON.stringify(nextMap));
+        }
+        return nextMap;
+      });
       setValidationError('');
     },
-    [language],
+    [language, storageKeyBase],
   );
 
   const handleExplanationChange = React.useCallback((value: string) => {
     setExplanation(value);
     setValidationError('');
-  }, []);
+    if (typeof window !== 'undefined') localStorage.setItem(`${storageKeyBase}_expl`, value);
+  }, [storageKeyBase]);
 
   // ── Send a chat message ──
   const sendChatMessage = React.useCallback(
@@ -733,19 +775,7 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
     }
   }, [sessionId, lastAttemptId, handleEnd, router]);
 
-  // ── Reset editor state when question changes (after router.refresh) ──
-  React.useEffect(() => {
-    if (question) {
-      const fresh: Record<string, string> = {};
-      languages.forEach((l) => (fresh[l.value] = question.starterCode?.[l.value] ?? ''));
-      setCodeMap(fresh);
-      setLanguage(languages[0].value);
-      setExplanation('');
-      setValidationError('');
-      setHintIndex(0);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [question?.questionBankId]);
+
 
   if (!question) {
     return (
@@ -767,89 +797,10 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
       />
 
       <div className='flex-1 min-h-0 relative'>
-        {/*
-          PanelGroup layout:
-          Left pane: Question & Editor (split 40/60)
-          Right pane: Chat Panel
-        */}
         <Group orientation='horizontal' className='h-full w-full'>
-          <Panel defaultSize={70} minSize={50} id='left-pane'>
-            <div className='relative h-full w-full'>
-              {/* The underlying editor and question panels */}
-              <div className={`h-full w-full transition-all duration-500 ${hasSubmitted ? 'opacity-40 blur-sm pointer-events-none' : ''}`}>
-                <Group orientation='horizontal' className='h-full w-full bg-white'>
-                  <Panel defaultSize={40} minSize={30} id='question-pane'>
-                    <QuestionPanel question={question} />
-                  </Panel>
-                  <Separator className='group relative flex w-1.5 cursor-col-resize items-center justify-center bg-gray-100 transition-colors hover:bg-blue-400 active:bg-blue-500'>
-                    <div className='h-8 w-0.5 rounded-full bg-gray-300 transition-colors group-hover:bg-white group-active:bg-white' />
-                  </Separator>
-                  <Panel defaultSize={60} minSize={30} id='editor-pane'>
-                    <EditorPane
-                      requiresCode={requiresCode}
-                      languages={languages}
-                      language={language}
-                      onLanguageChange={handleLanguageChange}
-                      code={currentCode}
-                      onCodeChange={handleCodeChange}
-                      explanation={explanation}
-                      onExplanationChange={handleExplanationChange}
-                      validationError={validationError}
-                      isSubmitting={isSubmitting}
-                      timeLeft={timeLeft}
-                      onSubmit={() => handleSubmit(false)}
-                      onAskHint={handleAskHint}
-                    />
-                  </Panel>
-                </Group>
-              </div>
-
-              {/* Transition glassmorphism overlay */}
-              {hasSubmitted && (
-                <div className='absolute inset-0 z-10 flex items-center justify-center p-8 bg-white/20 backdrop-blur-sm'>
-                  <div className='max-w-md w-full bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/60 p-8 text-center space-y-6 animate-fade-in-up'>
-                    <div className='mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 shadow-inner'>
-                      <CheckCircle2 className='h-8 w-8 text-emerald-600' />
-                    </div>
-
-                    <div>
-                      <h2 className='text-2xl font-bold text-gray-900 mb-2 tracking-tight'>
-                        Answer Submitted!
-                      </h2>
-                    </div>
-
-                    <p className='text-sm text-gray-600 leading-relaxed font-medium'>
-                      You can continue chatting with the AI interviewer on the right to discuss your approach, ask follow-up questions, or explore edge cases.
-                    </p>
-
-                    <div className='pt-2'>
-                      {hasNextQuestion ? (
-                        <button
-                          onClick={handleNextQuestion}
-                          disabled={isAdvancing}
-                          className='inline-flex items-center gap-2 rounded-xl bg-blue-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-200 transition-all hover:bg-blue-700 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed'
-                        >
-                          
-                          {isAdvancing ? 'Loading next question…' : 'Next Question'}
-                          {isAdvancing ? (
-                            <Loader2 className='h-4 w-4 animate-spin' />
-                          ) : (
-                            <ArrowRight className='h-4 w-4' />
-                          )}
-                        </button>
-                      ) : (
-                        <button
-                          onClick={handleEnd}
-                          className='inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-200 transition-all hover:bg-emerald-700 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]'
-                        >
-                          <CheckCircle2 className='h-4 w-4' />
-                          Complete Interview
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
+          <Panel defaultSize={30} minSize={20} id='question-pane'>
+            <div className={`h-full w-full transition-all duration-500 bg-white ${hasSubmitted ? 'opacity-40 blur-sm pointer-events-none' : ''}`}>
+              <QuestionPanel question={question} />
             </div>
           </Panel>
 
@@ -857,7 +808,7 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
             <div className='h-8 w-0.5 rounded-full bg-gray-300 transition-colors group-hover:bg-white group-active:bg-white' />
           </Separator>
 
-          <Panel defaultSize={30} minSize={25} id='chat-pane'>
+          <Panel defaultSize={35} minSize={20} id='chat-pane'>
             <AIChatPanel
               messages={messages}
               chatInput={chatInput}
@@ -867,7 +818,77 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
               isAiTyping={isAiTyping}
             />
           </Panel>
+
+          <Separator className='group relative flex w-1.5 cursor-col-resize items-center justify-center bg-gray-100 transition-colors hover:bg-blue-400 active:bg-blue-500'>
+            <div className='h-8 w-0.5 rounded-full bg-gray-300 transition-colors group-hover:bg-white group-active:bg-white' />
+          </Separator>
+
+          <Panel defaultSize={35} minSize={30} id='editor-pane'>
+            <div className={`h-full w-full transition-all duration-500 bg-white ${hasSubmitted ? 'opacity-40 blur-sm pointer-events-none' : ''}`}>
+              <EditorPane
+                requiresCode={requiresCode}
+                languages={languages}
+                language={language}
+                onLanguageChange={handleLanguageChange}
+                code={currentCode}
+                onCodeChange={handleCodeChange}
+                explanation={explanation}
+                onExplanationChange={handleExplanationChange}
+                validationError={validationError}
+                isSubmitting={isSubmitting}
+                timeLeft={timeLeft}
+                onSubmit={() => handleSubmit(false)}
+                onAskHint={handleAskHint}
+              />
+            </div>
+          </Panel>
         </Group>
+
+        {/* Transition glassmorphism overlay */}
+        {hasSubmitted && (
+          <div className='absolute inset-0 z-20 flex items-center justify-center p-8 bg-white/20 backdrop-blur-sm pointer-events-auto'>
+            <div className='max-w-md w-full bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/60 p-8 text-center space-y-6 animate-fade-in-up'>
+              <div className='mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 shadow-inner'>
+                <CheckCircle2 className='h-8 w-8 text-emerald-600' />
+              </div>
+
+              <div>
+                <h2 className='text-2xl font-bold text-gray-900 mb-2 tracking-tight'>
+                  Answer Submitted!
+                </h2>
+              </div>
+
+              <p className='text-sm text-gray-600 leading-relaxed font-medium'>
+                You can continue chatting with the AI interviewer to discuss your approach, ask follow-up questions, or explore edge cases.
+              </p>
+
+              <div className='pt-2'>
+                {hasNextQuestion ? (
+                  <button
+                    onClick={handleNextQuestion}
+                    disabled={isAdvancing}
+                    className='inline-flex items-center gap-2 rounded-xl bg-blue-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-200 transition-all hover:bg-blue-700 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed'
+                  >
+                    {isAdvancing ? 'Loading next question…' : 'Next Question'}
+                    {isAdvancing ? (
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                    ) : (
+                      <ArrowRight className='h-4 w-4' />
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleEnd}
+                    className='inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-200 transition-all hover:bg-emerald-700 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]'
+                  >
+                    <CheckCircle2 className='h-4 w-4' />
+                    Complete Interview
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

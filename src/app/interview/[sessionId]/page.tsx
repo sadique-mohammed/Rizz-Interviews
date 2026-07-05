@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation';
 import InterviewCanvas from '@/components/interview/interview-canvas';
 import { getInterviewState } from '@/lib/interview-redis';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface PageProps {
   params: Promise<{ sessionId: string }>;
 }
@@ -28,6 +31,6 @@ export default async function InterviewPage({ params }: PageProps) {
   }
 
   return (
-    <InterviewCanvas state={state} />
+    <InterviewCanvas key={state.currentQuestionIndex} state={state} />
   );
 }
