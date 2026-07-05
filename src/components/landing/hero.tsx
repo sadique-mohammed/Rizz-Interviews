@@ -1,10 +1,9 @@
 'use client';
 
 import type React from 'react';
-import { Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare, Bot } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import DemoLoginButton from './demo-login-button';
 
 // CSS-based fade-in animation for critical above-the-fold content
@@ -127,49 +126,93 @@ function HeroCard() {
             <div className='text-xs text-gray-500'>30:42</div>
           </div>
 
-          {/* Video stage */}
-          <div className='relative'>
-            <Image
-              src='/interview.png'
-              alt='Professional candidate participating in live AI-powered technical interview session'
-              width={800}
-              height={450}
-              priority
-              className='block w-full h-[300px] md:h-[360px] object-cover bg-gray-100'
-            />
+          {/* IDE Stage */}
+          <div className='relative flex flex-col md:flex-row h-[300px] md:h-[360px] bg-white/40 backdrop-blur-sm'>
+            {/* Left Panel: Problem Statement */}
+            <div className="w-full md:w-1/3 p-5 border-r border-gray-200/50 overflow-hidden relative flex-col hidden md:flex">
+               <div className="flex-1">
+                 <h3 className="text-sm font-bold text-gray-900 mb-2">Invert Binary Tree</h3>
+                 <p className="text-xs text-gray-700 leading-relaxed mb-3">
+                   Given the <code className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">root</code> of a binary tree, invert the tree, and return its root.
+                 </p>
+                 <div className="bg-white/80 rounded-lg p-2.5 text-[8px] xl:text-[9px] font-mono text-gray-800 leading-[1.4] border border-gray-200/60 shadow-sm whitespace-pre">
+                   {'     4           4\n'}
+                   {'   /   \\  =>   /   \\\n'}
+                   {'  2     7     7     2\n'}
+                   {' / \\   / \\   / \\   / \\\n'}
+                   {'1   3 6   9 9   6 3   1'}
+                 </div>
+               </div>
 
-            {/* Candidate name */}
-            <div className='absolute left-4 bottom-4 rounded-full bg-white/85 backdrop-blur px-3 py-1 text-xs text-gray-700 shadow-sm'>
-              Candidate
+               {/* AI bot PIP moved to bottom of left panel */}
+               <div className='mt-auto pt-4 relative z-10'>
+                 <div className='flex items-start gap-3 rounded-2xl bg-white/90 backdrop-blur-xl shadow-[0_4px_20px_rgb(0,0,0,0.06)] border border-gray-100/50 px-3 py-2.5 transform hover:-translate-y-1 transition-transform duration-300'>
+                   <div className='h-7 w-7 rounded-full bg-gradient-to-tr from-blue-100 to-purple-50 shrink-0 grid place-items-center border border-blue-200/50 mt-0.5 shadow-inner'>
+                     <Bot className='h-3.5 w-3.5 text-blue-600' />
+                   </div>
+                   <div className="flex flex-col">
+                     <span className='text-[9px] font-bold text-gray-900 uppercase tracking-wider'>Nexus AI</span>
+                     <span className='text-[10px] text-gray-600 leading-snug mt-1'>
+                       Elegant! Swapping the children before recursing is highly efficient.
+                     </span>
+                   </div>
+                 </div>
+               </div>
+               
+               {/* Fade out bottom text to avoid overflow */}
+               <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white/90 to-transparent pointer-events-none"></div>
             </div>
 
-            {/* AI bot PIP */}
-            <div className='absolute right-4 bottom-4'>
-              <div className='flex items-center gap-2 rounded-xl bg-white/90 backdrop-blur shadow-lg border border-gray-200 px-3 py-2'>
-                <div className='h-9 w-9 rounded-full bg-gray-100 grid place-items-center border border-gray-200'>
-                  <Bot className='h-5 w-5 text-gray-600' />
-                </div>
-                {/* Voice bars - CSS animation */}
-                <div className='flex items-end gap-1'>
-                  <span
-                    className='w-1.5 h-4 rounded bg-[#2563eb] animate-voice-bar'
-                    style={{ animationDelay: '0ms' }}
-                  />
-                  <span
-                    className='w-1.5 h-5 rounded bg-[#9333ea] animate-voice-bar'
-                    style={{ animationDelay: '200ms' }}
-                  />
-                  <span
-                    className='w-1.5 h-4 rounded bg-[#14b8a6] animate-voice-bar'
-                    style={{ animationDelay: '300ms' }}
-                  />
-                  <span
-                    className='w-1.5 h-5 rounded bg-[#2563eb] animate-voice-bar'
-                    style={{ animationDelay: '500ms' }}
-                  />
-                </div>
-                <span className='text-xs text-gray-600'>Nexus AI</span>
-              </div>
+            {/* Right Panel: Code Editor */}
+            <div className="w-full md:w-2/3 flex flex-col bg-white/80 backdrop-blur-md relative">
+               <div className="flex px-4 py-2.5 bg-white/50 text-[11px] font-medium text-gray-400 font-mono border-b border-gray-100 shadow-sm z-10">
+                  <span className="flex items-center gap-2 text-gray-500">
+                    <span className="w-2 h-2 rounded-full bg-blue-400/80"></span>
+                    solution.py
+                  </span>
+               </div>
+               <div className="p-5 text-[11px] sm:text-xs font-mono text-gray-600 overflow-hidden leading-[1.7]">
+                 <span className="text-purple-600">class</span> <span className="text-blue-600">Solution</span>:
+                 <br/>
+                 &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-600">def</span> <span className="text-blue-600">invertTree</span>(<span className="text-orange-500">self</span>, root):
+                 <br/>
+                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-600">if not</span> root:
+                 <br/>
+                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-600">return</span> <span className="text-orange-500">None</span>
+                 <br/>
+                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                 <br/>
+                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;temp = root.left
+                 <br/>
+                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;root.left = root.right
+                 <br/>
+                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;root.right = temp
+                 <br/>
+                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                 <br/>
+                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-orange-500">self</span>.<span className="text-blue-600">invertTree</span>(root.left)
+                 <br/>
+                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-orange-500">self</span>.<span className="text-blue-600">invertTree</span>(root.right)
+                 <br/>
+                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                 <br/>
+                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-600">return</span> root<span className="inline-block w-[1.5px] h-3.5 ml-1 bg-blue-500 animate-pulse align-middle"></span>
+               </div>
+
+               {/* Candidate Voice Transcription */}
+               <div className='absolute left-5 bottom-5 z-10'>
+                 <div className='flex items-start gap-3 rounded-2xl bg-gray-900/90 backdrop-blur-md shadow-2xl border border-gray-700/50 px-4 py-3 max-w-[220px] sm:max-w-[280px]'>
+                   <div className="flex gap-1 items-end h-3 shrink-0 mt-1">
+                     <span className="w-0.5 h-full bg-green-400 animate-pulse"></span>
+                     <span className="w-0.5 h-2/3 bg-green-400 animate-pulse" style={{ animationDelay: '150ms' }}></span>
+                     <span className="w-0.5 h-full bg-green-400 animate-pulse" style={{ animationDelay: '300ms' }}></span>
+                   </div>
+                   <p className="text-[10px] text-gray-200 leading-[1.5]">
+                     "Time complexity is <span className="font-mono text-green-300">O(n)</span> since every node is visited once. Space is <span className="font-mono text-green-300">O(h)</span> for the recursive stack—best case <span className="font-mono text-green-300">O(log n)</span>, worst case <span className="font-mono text-green-300">O(n)</span>."
+                   </p>
+                 </div>
+               </div>
+
             </div>
           </div>
 
@@ -179,47 +222,37 @@ function HeroCard() {
       </div>
 
       {/* Subtle glow ring */}
-      <div className='pointer-events-none absolute -inset-1 rounded-2xl ring-1 ring-gray-200' />
+      <div className='pointer-events-none absolute -inset-1 rounded-2xl ring-1 ring-gray-200/50' />
     </div>
   );
 }
 
 function HeroControls() {
-  const [micOn, setMicOn] = useState(true);
-  const [camOn, setCamOn] = useState(true);
-
   return (
-    <div className='flex items-center justify-between gap-3 px-4 py-3 border-t border-gray-200 bg-white'>
+    <div className='flex items-center justify-between gap-3 px-5 py-3 border-t border-gray-100 bg-white/80 backdrop-blur-md relative z-20'>
       <div className='flex items-center gap-2'>
         <button
-          onClick={() => setMicOn((v) => !v)}
-          className='inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-          aria-label={micOn ? 'Mute microphone' : 'Unmute microphone'}
+          className='inline-flex items-center justify-center rounded-lg border border-gray-200/80 bg-white/50 px-4 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-900 hover:bg-white hover:shadow-sm transition-all'
+          aria-label='Console'
         >
-          {micOn ? <Mic className='h-4 w-4' /> : <MicOff className='h-4 w-4 text-red-600' />}
-        </button>
-        <button
-          onClick={() => setCamOn((v) => !v)}
-          className='inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-          aria-label={camOn ? 'Turn camera off' : 'Turn camera on'}
-        >
-          {camOn ? <Video className='h-4 w-4' /> : <VideoOff className='h-4 w-4 text-yellow-600' />}
-        </button>
-        <button
-          className='inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-          aria-label='Open hints'
-        >
-          <MessageSquare className='h-4 w-4' />
+          Console
         </button>
       </div>
 
-      <button
-        className='inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700'
-        aria-label='End interview'
-      >
-        <PhoneOff className='h-4 w-4' />
-        End
-      </button>
+      <div className='flex items-center gap-3'>
+        <button
+          className='inline-flex items-center justify-center rounded-lg px-4 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors'
+          aria-label='Run Code'
+        >
+          Run Code
+        </button>
+        <button
+          className='inline-flex items-center gap-2 rounded-xl px-5 py-1.5 text-xs font-semibold text-white bg-gray-900 hover:bg-gray-800 transition-all shadow-md shadow-gray-900/10'
+          aria-label='Submit Answer'
+        >
+          Submit
+        </button>
+      </div>
     </div>
   );
 }

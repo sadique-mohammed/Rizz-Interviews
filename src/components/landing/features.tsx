@@ -13,6 +13,7 @@ import {
   PlayCircle,
   CheckCircle2,
   ExternalLink,
+  Bot,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -93,7 +94,7 @@ const TABS: Tab[] = [
 ];
 
 // DemoCard component - uses CSS for tilt instead of framer-motion
-function DemoCard({ pulse = false }: { pulse?: boolean }) {
+function DemoCard({ pulse = false, activeId = 'ai-interview' }: { pulse?: boolean; activeId?: string }) {
   const color = 'bg-brand/10 text-brand';
   const ref = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ rX: 0, rY: 0 });
@@ -139,29 +140,84 @@ function DemoCard({ pulse = false }: { pulse?: boolean }) {
       <div className={cn('rounded-xl p-3 w-fit', color)}>
         <span className='text-xs font-semibold'>Get ready for your interview</span>
       </div>
-      <div className='mt-4 rounded-xl border border-gray-200/60 p-4 bg-white/80 backdrop-blur-sm'>
-        <div className='flex items-center gap-3'>
-          <div className='h-9 w-9 rounded-md bg-gradient-to-br from-brand/20 to-brand/10 flex items-center justify-center'>
-            <Image src='/favicon.svg' alt='Nexus AI' width={24} height={24} className='absolute' />
+      {activeId === 'ai-interview' && (
+        <div className='mt-4 rounded-xl border border-gray-200/60 p-4 bg-white/80 backdrop-blur-sm'>
+          <div className='flex items-center gap-3'>
+            <div className='h-9 w-9 rounded-md bg-gradient-to-br from-brand/20 to-brand/10 flex items-center justify-center'>
+              <Image src='/favicon.svg' alt='Nexus AI' width={24} height={24} className='absolute' />
+            </div>
+            <div className='flex-1'>
+              <div className='text-sm font-medium text-gray-900'>Nexus AI Interviewer</div>
+              <div className='text-xs text-gray-500'>Ready to begin your session</div>
+            </div>
+            <div className='h-6 w-6 rounded-full bg-green-100 flex items-center justify-center'>
+              <div className='h-2 w-2 rounded-full bg-green-500 animate-ping' />
+            </div>
           </div>
-          <div className='flex-1'>
-            <div className='text-sm font-medium text-gray-900'>Nexus AI Interviewer</div>
-            <div className='text-xs text-gray-500'>Ready to begin your session</div>
-          </div>
-          <div className='h-6 w-6 rounded-full bg-green-100 flex items-center justify-center'>
-            <div className='h-2 w-2 rounded-full bg-green-500 animate-ping' />
+          <div className='mt-4 flex items-center justify-between'>
+            <div className='text-xs text-gray-500'>Estimated time: 10-15 mins</div>
+            <Button
+              size='sm'
+              className='h-8 px-4 bg-brand hover:bg-brand/90 text-white text-xs rounded-full'
+            >
+              Start Interview
+            </Button>
           </div>
         </div>
-        <div className='mt-4 flex items-center justify-between'>
-          <div className='text-xs text-gray-500'>Estimated time: 10-15 mins</div>
-          <Button
-            size='sm'
-            className='h-8 px-4 bg-brand hover:bg-brand/90 text-white text-xs rounded-full'
-          >
-            Start Interview
-          </Button>
+      )}
+
+      {activeId === 'feedback-scoring' && (
+        <div className='mt-4 rounded-xl border border-gray-200/60 p-4 bg-white/80 backdrop-blur-sm'>
+          <div className='flex gap-3 items-start'>
+             <div className='h-6 w-6 rounded-full bg-blue-50 flex items-center justify-center shrink-0 mt-0.5'>
+               <Bot className="h-3.5 w-3.5 text-blue-600" />
+             </div>
+             <div className='flex flex-col gap-1'>
+               <span className="text-xs font-semibold text-gray-900">Nexus AI</span>
+               <p className="text-[11px] text-gray-600 leading-relaxed">Great job finding the base case. Your time complexity is <span className="font-mono text-blue-600 bg-blue-50 px-1 rounded font-semibold">O(N^2)</span>. Can you optimize it using a Hash Map?</p>
+             </div>
+          </div>
         </div>
-      </div>
+      )}
+
+      {activeId === 'conversation' && (
+        <div className='mt-4 rounded-xl border border-gray-200/60 p-4 bg-white/80 backdrop-blur-sm flex flex-col gap-3'>
+          <div className='flex justify-between items-center pb-2 border-b border-gray-100'>
+             <span className='text-xs font-semibold text-gray-900'>Session History</span>
+             <span className='text-[10px] text-gray-500'>2 mins ago</span>
+          </div>
+          <div className='flex flex-col gap-2'>
+            <div className='bg-gray-50 rounded-lg p-2.5 text-[11px] text-gray-700 self-end max-w-[85%] border border-gray-100'>I think we can use a Set to track visited nodes.</div>
+            <div className='bg-blue-50/50 rounded-lg p-2.5 text-[11px] text-blue-800 self-start max-w-[85%] border border-blue-100/50'>Excellent. Implementing a visited Set correctly handles the cycles in O(1) time.</div>
+          </div>
+        </div>
+      )}
+
+      {activeId === 'recordings' && (
+        <div className='mt-4 rounded-xl border border-gray-200/60 p-4 bg-white/80 backdrop-blur-sm'>
+          <div className='aspect-video rounded-lg bg-gray-900 overflow-hidden relative flex items-center justify-center group cursor-pointer shadow-inner'>
+             <PlayCircle className='h-10 w-10 text-white/80 group-hover:scale-110 transition-transform duration-300' />
+             <div className='absolute bottom-3 left-3 right-3 flex items-center gap-2'>
+               <div className='text-[9px] text-white font-medium'>14:02</div>
+               <div className='h-1 flex-1 bg-white/20 rounded-full overflow-hidden'>
+                 <div className='h-full bg-red-500 w-1/3 rounded-full' />
+               </div>
+             </div>
+          </div>
+        </div>
+      )}
+
+      {activeId === 'scoring' && (
+        <div className='mt-4 rounded-xl border border-gray-200/60 p-4 bg-white/80 backdrop-blur-sm flex items-center gap-4'>
+           <div className='h-14 w-14 rounded-full border-[5px] border-green-500 flex items-center justify-center shrink-0 shadow-sm'>
+             <span className='text-lg font-bold text-gray-900 tracking-tight'>8.5</span>
+           </div>
+           <div className='flex flex-col gap-0.5'>
+             <span className='text-sm font-bold text-gray-900'>Strong Performance</span>
+             <span className='text-[11px] text-gray-500 leading-snug'>You passed 4/5 test cases and optimized the brute force correctly.</span>
+           </div>
+        </div>
+      )}
       <div className='mt-4 flex items-center gap-2 text-[11px] text-gray-500'>
         <Shield className='h-4 w-4 text-green-500' />
         <span>Secure & private session</span>
@@ -275,7 +331,7 @@ export default function Features() {
                 className='grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12'
               >
                 {/* Demo card */}
-                <DemoCard pulse={pulse} />
+                <DemoCard pulse={pulse} activeId={active} />
 
                 {/* Copy panel */}
                 <MotionDiv
