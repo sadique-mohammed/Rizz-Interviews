@@ -450,6 +450,7 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
   const [lastAttemptId, setLastAttemptId] = React.useState<string | null>(null);
   const [isAdvancing, setIsAdvancing] = React.useState(false);
   const [lastScore, setLastScore] = React.useState<number | null>(null);
+  const [hasAttemptedAutoSubmit, setHasAttemptedAutoSubmit] = React.useState(false);
 
   const currentCode = codeMap[language] ?? '';
   const starterForCurrentLang = question?.starterCode?.[language] ?? '';
@@ -629,6 +630,11 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
       });
 
       if (!res.ok) {
+        if (res.status === 409) {
+          // Already ended (e.g. by auto-expiry in DB)
+          router.push('/history');
+          return;
+        }
         const errorData = await res.json().catch(() => null);
         toast.error(errorData?.error ?? 'Failed to end interview session.');
         return;
@@ -673,8 +679,13 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
-          toast.error(errorData?.error ?? 'Failed to submit answer.');
+          if (!force) {
+            toast.error(errorData?.error ?? 'Failed to submit answer.');
+          }
           setIsSubmitting(false);
+          if (force) {
+            handleEnd();
+          }
           return;
         }
 
@@ -713,21 +724,22 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
   // ── Auto-End/Submit when time runs out ──
   React.useEffect(() => {
     if (timeLeft === 0) {
-      if (!hasSubmitted && !isSubmitting) {
+      if (!hasSubmitted && !isSubmitting && !hasAttemptedAutoSubmit) {
+        setHasAttemptedAutoSubmit(true);
         // Not submitted yet — force submit which will then auto-end
         const t = setTimeout(() => {
           handleSubmit(true);
         }, 0);
         return () => clearTimeout(t);
-      } else if (hasSubmitted) {
-        // Already submitted — just end the interview
+      } else if (hasSubmitted || (hasAttemptedAutoSubmit && !isSubmitting)) {
+        // Already submitted (or attempted to submit and failed) — just end the interview
         const t = setTimeout(() => {
           handleEnd();
         }, 0);
         return () => clearTimeout(t);
       }
     }
-  }, [timeLeft, hasSubmitted, isSubmitting, handleSubmit, handleEnd]);
+  }, [timeLeft, hasSubmitted, isSubmitting, handleSubmit, handleEnd, hasAttemptedAutoSubmit]);
 
   // ── Advance to the next question ──
   const handleNextQuestion = React.useCallback(async () => {
