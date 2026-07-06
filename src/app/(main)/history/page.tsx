@@ -51,13 +51,13 @@ export default async function HistoryPage() {
       : null;
 
   return (
-    <div className='min-h-screen bg-gradient-to-b from-blue-50/30 via-white to-white'>
+    <div className='page-shell min-h-screen'>
       <div className='max-w-6xl mx-auto px-6 py-12'>
         <div className='grid gap-6 md:grid-cols-[2fr,1fr] items-start mb-10'>
-          <Card className='border border-blue-100 bg-white/90 shadow-sm'>
+          <Card className='surface-brand border'>
             <CardContent className='p-6 flex flex-col gap-5'>
               <div>
-                <Badge className='bg-blue-100 text-blue-700 w-fit mb-3'>Progress</Badge>
+                <Badge className='badge-brand-soft mb-3 w-fit'>Progress</Badge>
                 <h1 className='text-3xl font-bold text-gray-900 mb-2'>Your Interview Journey</h1>
                 <p className='text-gray-600 max-w-xl'>
                   Track past sessions, review AI feedback, and identify patterns to keep improving
@@ -65,33 +65,33 @@ export default async function HistoryPage() {
                 </p>
               </div>
               <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm'>
-                <div className='rounded-xl border border-blue-100/70 bg-blue-50/50 px-4 py-3 flex items-center gap-3'>
-                  <div className='h-9 w-9 rounded-lg bg-blue-600 text-white grid place-content-center'>
+                <div className='surface-brand-soft flex items-center gap-3 rounded-xl px-4 py-3'>
+                  <div className='grid h-9 w-9 place-content-center rounded-lg bg-brand text-white'>
                     <Trophy className='h-5 w-5' />
                   </div>
                   <div>
-                    <p className='text-xs uppercase tracking-wide text-blue-700/80'>Completed</p>
-                    <p className='text-lg font-semibold text-blue-900'>{completedCount}</p>
+                    <p className='text-xs uppercase tracking-wide text-brand/80'>Completed</p>
+                    <p className='text-lg font-semibold text-brand-dark'>{completedCount}</p>
                   </div>
                 </div>
-                <div className='rounded-xl border border-slate-200 px-4 py-3 flex items-center gap-3'>
-                  <div className='h-9 w-9 rounded-lg bg-slate-900 text-white grid place-content-center'>
+                <div className='surface-muted flex items-center gap-3 rounded-xl px-4 py-3'>
+                  <div className='grid h-9 w-9 place-content-center rounded-lg bg-brand-dark text-white'>
                     <Clock className='h-5 w-5' />
                   </div>
                   <div>
-                    <p className='text-xs uppercase tracking-wide text-slate-500'>
+                    <p className='text-xs uppercase tracking-wide text-gray-600'>
                       Practice minutes
                     </p>
-                    <p className='text-lg font-semibold text-slate-900'>{totalMinutes || 0}m</p>
+                    <p className='text-lg font-semibold text-brand-dark'>{totalMinutes || 0}m</p>
                   </div>
                 </div>
-                <div className='rounded-xl border border-emerald-100 px-4 py-3 flex items-center gap-3'>
-                  <div className='h-9 w-9 rounded-lg bg-emerald-500 text-white grid place-content-center'>
+                <div className='surface-accent flex items-center gap-3 rounded-xl px-4 py-3'>
+                  <div className='grid h-9 w-9 place-content-center rounded-lg bg-brand-secondary text-white'>
                     <ArrowRight className='h-5 w-5' />
                   </div>
                   <div>
-                    <p className='text-xs uppercase tracking-wide text-emerald-600'>Avg. score</p>
-                    <p className='text-lg font-semibold text-emerald-700'>
+                    <p className='text-xs uppercase tracking-wide text-brand-secondary'>Avg. score</p>
+                    <p className='text-lg font-semibold text-brand-dark'>
                       {averageScore !== null ? `${averageScore}%` : '—'}
                     </p>
                   </div>

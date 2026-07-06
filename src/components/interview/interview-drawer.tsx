@@ -150,21 +150,21 @@ export default function InterviewDrawer({ isOpen, onClose }: InterviewDrawerProp
           {isCheckingSession ? (
             <div className='flex min-h-[280px] items-center justify-center rounded-2xl border border-gray-200 bg-gray-50'>
               <div className='flex items-center gap-3 text-sm text-gray-600'>
-                <Loader2 className='h-4 w-4 animate-spin text-blue-600' />
+                <Loader2 className='h-4 w-4 animate-spin text-brand' />
                 Checking for an active interview...
               </div>
             </div>
           ) : loadError ? (
-            <div className='rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800'>
+            <div className='surface-brand-soft rounded-2xl p-5 text-sm text-brand-dark'>
               <p className='font-medium'>Could not verify current interview state.</p>
-              <p className='mt-1 text-amber-700'>{loadError}</p>
+              <p className='mt-1 text-gray-700'>{loadError}</p>
               <button
                 type='button'
                 onClick={() => {
                   setLoadError('');
                   setRefreshKey((value) => value + 1);
                 }}
-                className='mt-4 rounded-lg bg-amber-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-amber-700'
+                className='btn-brand mt-4 rounded-lg px-4 py-2 text-xs font-semibold text-white'
               >
                 Retry
               </button>

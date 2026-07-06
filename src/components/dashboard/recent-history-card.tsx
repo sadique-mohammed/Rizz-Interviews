@@ -14,10 +14,10 @@ export default function RecentHistoryCard({ interviews }: Props) {
     .slice(0, 3);
 
   return (
-    <Card className='border-2 border-blue-100 bg-blue-50/30 h-full'>
+    <Card className='surface-brand h-full border'>
       <CardHeader className='pb-4'>
         <div className='flex items-center space-x-2'>
-          <History className='h-5 w-5 text-blue-600' />
+          <History className='h-5 w-5 text-brand' />
           <CardTitle className='text-lg font-semibold text-gray-900'>Recent Sessions</CardTitle>
         </div>
         <CardDescription className='text-gray-600'>
@@ -31,26 +31,26 @@ export default function RecentHistoryCard({ interviews }: Props) {
               <Link
                 key={interview.id}
                 href={`/history/${interview.id}`}
-                className='flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors bg-gray-50/50'
+                className='flex items-center justify-between rounded-lg border border-gray-100 bg-white/70 p-3 transition-colors hover:border-brand/30 hover:bg-brand/5'
               >
                 <div className='flex items-center space-x-4'>
                   <div className='flex-shrink-0'>
                     <div
                       className={`w-10 h-10 rounded-full flex items-center justify-center ${
                         (interview.totalScore ?? 0) >= 90
-                          ? 'bg-green-100'
+                          ? 'surface-accent'
                           : (interview.totalScore ?? 0) >= 75
-                            ? 'bg-blue-100'
-                            : 'bg-yellow-100'
+                            ? 'surface-brand-soft'
+                            : 'surface-muted'
                       }`}
                     >
                       <span
                         className={`text-base font-semibold ${
                           (interview.totalScore ?? 0) >= 90
-                            ? 'text-green-700'
+                            ? 'text-brand-dark'
                             : (interview.totalScore ?? 0) >= 75
-                              ? 'text-blue-700'
-                              : 'text-yellow-700'
+                              ? 'text-brand'
+                              : 'text-gray-500'
                         }`}
                       >
                         {interview.totalScore ?? '-'}
@@ -72,9 +72,9 @@ export default function RecentHistoryCard({ interviews }: Props) {
               <Button
                 variant='ghost'
                 size='sm'
-                className='text-blue-600 hover:text-blue-700 cursor-pointer hover:bg-blue-50'
+                className='cursor-pointer text-brand hover:bg-brand/10 hover:text-brand-dark'
               >
-                <Link href='/history' className='text-blue-600 hover:text-blue-700 text-sm '>
+                <Link href='/history' className='text-sm text-brand hover:text-brand-dark'>
                   View All
                 </Link>
               </Button>

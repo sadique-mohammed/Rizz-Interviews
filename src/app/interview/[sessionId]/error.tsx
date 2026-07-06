@@ -7,12 +7,12 @@ export default function Error({
   reset: () => void;
 }) {
   return (
-    <div className='flex min-h-screen items-center justify-center bg-gradient-to-b from-blue-50/30 via-white to-white'>
+    <div className='flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-brand/5 via-white to-white'>
       <div className='max-w-md px-6 text-center'>
         <div className='mb-6'>
-          <div className='mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-red-100'>
+          <div className='mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10'>
             <svg
-              className='h-8 w-8 text-red-600'
+              className='h-8 w-8 text-destructive'
               fill='none'
               stroke='currentColor'
               viewBox='0 0 24 24'
@@ -32,7 +32,7 @@ export default function Error({
         </div>
         <button
           onClick={reset}
-          className='inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700'
+          className='btn-brand inline-flex items-center justify-center rounded-lg px-6 py-3 font-semibold'
         >
           Try again
         </button>

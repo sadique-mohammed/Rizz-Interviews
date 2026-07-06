@@ -36,14 +36,14 @@ export default function HistoryList({ interviewHistory }: HistoryListProps) {
     <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
       {interviewHistory.map((interview) => (
         <Link key={interview.id} href={`/history/${interview.id}`} passHref>
-          <Card className='h-full hover:border-blue-500 hover:shadow-sm transition-all duration-200 group'>
+          <Card className='group h-full transition-all duration-200 hover:border-brand hover:shadow-sm'>
             <CardContent className='p-5 flex flex-col h-full'>
               <div className='flex items-start justify-between mb-3'>
                 <div>
                   <h3 className='font-semibold text-base text-gray-800'>{interview.domain}</h3>
                   <p className='text-xs text-gray-500'>{formatDateRelative(interview.startedAt)}</p>
                 </div>
-                <ArrowRight className='h-4 w-4 text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-transform duration-200' />
+                <ArrowRight className='h-4 w-4 text-gray-400 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-brand' />
               </div>
 
               <div className='flex items-center gap-2 mb-4'>
@@ -68,7 +68,7 @@ export default function HistoryList({ interviewHistory }: HistoryListProps) {
                 </div>
                 {interview.totalScore !== null && (
                   <div className='flex items-center gap-1.5 font-medium'>
-                    <Trophy className='h-4 w-4 text-yellow-500' />
+                    <Trophy className='h-4 w-4 text-brand-secondary' />
                     <span>{interview.totalScore}%</span>
                   </div>
                 )}

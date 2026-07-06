@@ -128,8 +128,8 @@ function AbandonModal({ session, onKeep, onConfirmAbandon, isAbandoning }: Aband
       {/* Modal */}
       <div className='relative z-10 w-[90vw] max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl animate-in slide-in-from-bottom-4 fade-in duration-300'>
         <div className='mb-2 flex items-center gap-3'>
-          <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100'>
-            <AlertTriangle className='h-5 w-5 text-red-600' />
+          <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/10'>
+            <AlertTriangle className='h-5 w-5 text-destructive' />
           </div>
           <h3 className='text-lg font-semibold text-gray-900'>Abandon this session?</h3>
         </div>
@@ -153,7 +153,7 @@ function AbandonModal({ session, onKeep, onConfirmAbandon, isAbandoning }: Aband
           <Button
             onClick={onConfirmAbandon}
             disabled={isAbandoning}
-            className='cursor-pointer rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-red-700 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50'
+            className='btn-destructive-soft cursor-pointer rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50'
           >
             {isAbandoning ? (
               <>
@@ -181,20 +181,20 @@ interface ActiveSessionBannerProps {
 
 function ActiveSessionBanner({ session, onResume, onAbandon }: ActiveSessionBannerProps) {
   return (
-    <div className='rounded-xl border border-amber-200 bg-amber-50 p-4 animate-fade-in-up'>
+    <div className='surface-brand-soft animate-fade-in-up rounded-xl p-4'>
       <div className='flex items-start gap-3'>
-        <div className='mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100'>
-          <Clock className='h-4 w-4 text-amber-600' />
+        <div className='mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/12'>
+          <Clock className='h-4 w-4 text-brand' />
         </div>
 
         <div className='flex-1 min-w-0'>
           <div className='flex items-center gap-2 flex-wrap'>
-            <h4 className='text-sm font-semibold text-amber-800'>Unfinished session</h4>
-            <span className='inline-flex items-center rounded-full bg-amber-200/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700'>
+            <h4 className='text-sm font-semibold text-brand-dark'>Unfinished session</h4>
+            <span className='inline-flex items-center rounded-full bg-brand/12 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand'>
               in progress
             </span>
           </div>
-          <p className='mt-1 text-sm text-amber-700'>
+          <p className='mt-1 text-sm text-gray-700'>
             <span className='font-medium'>{session.domain}</span>
             {' · '}
             <span className='capitalize'>{session.difficulty}</span>
@@ -209,7 +209,7 @@ function ActiveSessionBanner({ session, onResume, onAbandon }: ActiveSessionBann
           <Button
             onClick={onResume}
             size='sm'
-            className='cursor-pointer rounded-lg bg-amber-600 px-3.5 py-1.5 text-xs font-semibold text-white transition-all hover:bg-amber-700 hover:scale-[1.02] active:scale-[0.98]'
+            className='btn-brand cursor-pointer rounded-lg px-3.5 py-1.5 text-xs font-semibold text-white hover:scale-[1.02] active:scale-[0.98]'
           >
             <ArrowRight className='mr-1.5 h-3.5 w-3.5' />
             Resume
@@ -218,7 +218,7 @@ function ActiveSessionBanner({ session, onResume, onAbandon }: ActiveSessionBann
             onClick={onAbandon}
             variant='outline'
             size='sm'
-            className='cursor-pointer rounded-lg border-amber-300 px-3 py-1.5 text-xs font-medium text-amber-700 transition-all hover:bg-amber-100 hover:scale-[1.02] active:scale-[0.98]'
+            className='btn-brand-soft cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium hover:scale-[1.02] active:scale-[0.98]'
           >
             <XCircle className='mr-1 h-3.5 w-3.5' />
             Abandon
@@ -321,10 +321,10 @@ export default function InterviewSessionCard({
 
   return (
     <>
-      <Card className='border-2 border-blue-100 bg-blue-50/30 h-full'>
+      <Card className='surface-brand h-full border'>
         <CardHeader>
           <div className='flex items-center space-x-2'>
-            <Target className='h-5 w-5 text-blue-600' />
+            <Target className='h-5 w-5 text-brand' />
             <CardTitle className='text-lg font-semibold text-gray-900'>
               Start New Interview Session
             </CardTitle>
@@ -346,7 +346,7 @@ export default function InterviewSessionCard({
           {/* Form — disabled when there's an active session */}
           <div className={isLocked ? 'pointer-events-none opacity-40 select-none' : ''}>
             {isLocked && (
-              <p className='mb-4 text-sm font-medium text-amber-700'>
+              <p className='mb-4 text-sm font-medium text-brand-dark'>
                 Finish or abandon your active session first.
               </p>
             )}
@@ -366,8 +366,8 @@ export default function InterviewSessionCard({
                       aria-pressed={selectedType === type.id}
                       className={`p-4 rounded-lg border cursor-pointer transition-all ${
                         selectedType === type.id
-                          ? 'border-blue-500 bg-blue-50 shadow-sm'
-                          : 'border-gray-200 hover:border-gray-300 hover:shadow-xs bg-white'
+                          ? 'border-brand bg-brand/8 shadow-sm'
+                          : 'border-gray-200 bg-white hover:border-brand/30 hover:shadow-xs'
                       }`}
                       onClick={() => setSelectedType(type.id)}
                       onKeyDown={(e) => {
@@ -380,12 +380,12 @@ export default function InterviewSessionCard({
                       <div className='flex items-start space-x-3'>
                         <div
                           className={`p-2 rounded-md transition-colors ${
-                            selectedType === type.id ? 'bg-blue-100' : 'bg-gray-100'
+                            selectedType === type.id ? 'bg-brand/12' : 'bg-gray-100'
                           }`}
                         >
                           <Icon
                             className={`h-4 w-4 ${
-                              selectedType === type.id ? 'text-blue-600' : 'text-gray-600'
+                              selectedType === type.id ? 'text-brand' : 'text-gray-600'
                             }`}
                           />
                         </div>
@@ -438,7 +438,7 @@ export default function InterviewSessionCard({
                     <SelectValue placeholder='Select duration' />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value='1' className='cursor-pointer text-amber-700 font-semibold bg-amber-50 focus:bg-amber-100 focus:text-amber-800'>
+                    <SelectItem value='1' className='cursor-pointer bg-brand/8 font-semibold text-brand focus:bg-brand/14 focus:text-brand-dark'>
                       1 min (Testing)
                     </SelectItem>
                     <SelectItem value='15' className='cursor-pointer'>
@@ -459,8 +459,7 @@ export default function InterviewSessionCard({
               <Button
                 onClick={handleStartInterview}
                 disabled={isLoading || isLocked}
-                variant='outline'
-                className='p-4 rounded-lg border cursor-pointer transition-all border-gray-200 hover:border-blue-500 hover:bg-blue-50 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed'
+                className='btn-brand cursor-pointer rounded-lg p-4 text-white transition-all hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50'
               >
                 {isLoading ? (
                   <Loader2 className='h-4 w-4 animate-spin' />

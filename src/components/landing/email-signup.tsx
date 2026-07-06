@@ -31,7 +31,7 @@ export default function EmailSignup() {
     <section id='contact' className='py-24 px-6 md:px-12 relative overflow-hidden'>
       {/* Background with subtle glow */}
       <div className="absolute inset-0 bg-gray-50/50" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl h-[400px] bg-blue-100/50 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl h-[400px] bg-brand/10 blur-[120px] rounded-full pointer-events-none" />
 
       <div className='mx-auto max-w-4xl relative z-10'>
         <div className='rounded-3xl border border-white/60 bg-white/40 backdrop-blur-xl p-10 md:p-16 shadow-[0_8px_40px_rgb(0,0,0,0.04)] text-center animate-fade-in-up' style={{ animationDelay: '0ms' }}>
@@ -71,7 +71,7 @@ export default function EmailSignup() {
                   aria-describedby={error ? 'email-error' : undefined}
                 />
                 {error && (
-                  <p id='email-error' className='mt-1 text-sm text-red-600' role='alert'>
+                  <p id='email-error' className='mt-1 text-sm text-destructive' role='alert'>
                     {error}
                   </p>
                 )}
@@ -84,8 +84,8 @@ export default function EmailSignup() {
               </Button>
             </form>
           ) : (
-              <div className='flex items-center justify-center gap-3 bg-green-50/50 border border-green-100 rounded-2xl py-4 px-6 animate-fade-in-up'>
-                <CheckCircle2 className='w-6 h-6 text-green-500 shrink-0' />
+              <div className='flex items-center justify-center gap-3 surface-brand-soft rounded-2xl py-4 px-6 animate-fade-in-up'>
+                <CheckCircle2 className='w-6 h-6 text-brand shrink-0' />
                 <div className='text-left'>
                   <h3 className='text-sm font-semibold text-gray-900'>You're on the list!</h3>
                   <p className='text-xs text-gray-600'>We'll send your invitation shortly.</p>

@@ -195,13 +195,13 @@ export default function InterviewDetailPage() {
   const overallFeedback = generateOverallFeedback(interview);
 
   return (
-    <div className='min-h-screen bg-gradient-to-b from-blue-50/40 via-white to-white'>
+    <div className='page-shell min-h-screen'>
       <div className='max-w-5xl mx-auto px-6 py-10'>
         <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6'>
           <Button
             asChild
             variant='ghost'
-            className='w-fit gap-2 px-0 text-blue-700 hover:text-blue-900 hover:cursor-pointer'
+            className='w-fit gap-2 px-0 text-brand hover:cursor-pointer hover:text-brand-dark'
           >
             <Link href='/history'>
               <ArrowLeft className='h-4 w-4' /> Back to history
@@ -210,11 +210,11 @@ export default function InterviewDetailPage() {
         </div>
 
         {/* Overview */}
-        <Card className='mb-10 border border-blue-100 bg-white/90 shadow-sm'>
+        <Card className='surface-brand mb-10 border'>
           <CardHeader className='pb-4'>
             <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
               <div>
-                <Badge className='mb-3 bg-blue-100 text-blue-700'>Session recap</Badge>
+                <Badge className='badge-brand-soft mb-3'>Session recap</Badge>
                 <CardTitle className='text-3xl font-semibold text-gray-900'>
                   {interview.domain} Interview
                 </CardTitle>
@@ -231,33 +231,33 @@ export default function InterviewDetailPage() {
             </div>
           </CardHeader>
           <CardContent className='grid grid-cols-1 sm:grid-cols-3 gap-5'>
-            <div className='rounded-xl border border-slate-200/80 bg-slate-50/60 p-4 flex items-center gap-3'>
-              <div className='h-10 w-10 rounded-lg bg-slate-900 text-white grid place-content-center'>
+            <div className='surface-muted flex items-center gap-3 rounded-xl p-4'>
+              <div className='grid h-10 w-10 place-content-center rounded-lg bg-brand-dark text-white'>
                 <Clock className='h-5 w-5' />
               </div>
               <div>
-                <p className='text-xs uppercase tracking-wide text-slate-500'>Duration</p>
-                <p className='text-lg font-semibold text-slate-900'>{interview.duration} minutes</p>
+                <p className='text-xs uppercase tracking-wide text-gray-600'>Duration</p>
+                <p className='text-lg font-semibold text-brand-dark'>{interview.duration} minutes</p>
               </div>
             </div>
             {interview.totalScore !== null && (
-              <div className='rounded-xl border border-emerald-200/70 bg-emerald-50/60 p-4 flex items-center gap-3'>
-                <div className='h-10 w-10 rounded-lg bg-emerald-500 text-white grid place-content-center'>
+              <div className='surface-accent flex items-center gap-3 rounded-xl p-4'>
+                <div className='grid h-10 w-10 place-content-center rounded-lg bg-brand-secondary text-white'>
                   <Trophy className='h-5 w-5' />
                 </div>
                 <div>
-                  <p className='text-xs uppercase tracking-wide text-emerald-600'>Overall score</p>
-                  <p className='text-lg font-semibold text-emerald-700'>{interview.totalScore}%</p>
+                  <p className='text-xs uppercase tracking-wide text-brand-secondary'>Overall score</p>
+                  <p className='text-lg font-semibold text-brand-dark'>{interview.totalScore}%</p>
                 </div>
               </div>
             )}
-            <div className='rounded-xl border border-blue-100 bg-blue-50/70 p-4 flex items-center gap-3'>
-              <div className='h-10 w-10 rounded-lg bg-blue-600 text-white grid place-content-center'>
+            <div className='surface-brand-soft flex items-center gap-3 rounded-xl p-4'>
+              <div className='grid h-10 w-10 place-content-center rounded-lg bg-brand text-white'>
                 <MessageSquare className='h-5 w-5' />
               </div>
               <div>
-                <p className='text-xs uppercase tracking-wide text-blue-700/80'>Questions</p>
-                <p className='text-lg font-semibold text-blue-900'>{interview.questions.length}</p>
+                <p className='text-xs uppercase tracking-wide text-brand/80'>Questions</p>
+                <p className='text-lg font-semibold text-brand-dark'>{interview.questions.length}</p>
               </div>
             </div>
           </CardContent>
@@ -273,9 +273,9 @@ export default function InterviewDetailPage() {
                     <span className='font-semibold text-slate-900'>Pacing & Overall Speed: </span>
                     You completed <span className='font-semibold'>{overallFeedback.attemptedCount}</span> question(s) during your <span className='font-semibold'>{interview.duration} minute {interview.difficulty}</span> interview. 
                     {overallFeedback.attemptedCount > overallFeedback.expectedCount ? (
-                      <span className='text-emerald-700 font-medium'> Your pacing was exceptionally fast, demonstrating a strong ability to write working code quickly under time constraints. You moved through the problems with highly impressive speed!</span>
+                      <span className='font-medium text-brand-secondary'> Your pacing was exceptionally fast, demonstrating a strong ability to write working code quickly under time constraints. You moved through the problems with highly impressive speed!</span>
                     ) : overallFeedback.attemptedCount === overallFeedback.expectedCount ? (
-                      <span className='text-emerald-700 font-medium'> Your pacing was excellent and perfectly aligned with what is expected for this difficulty level. You demonstrated a solid balance of speed and accuracy.</span>
+                      <span className='font-medium text-brand-secondary'> Your pacing was excellent and perfectly aligned with what is expected for this difficulty level. You demonstrated a solid balance of speed and accuracy.</span>
                     ) : (
                       <span className='text-rose-700 font-medium'> While focus on quality is important, your overall pacing was slower than what is typically expected for this time limit. In a real interview setting, completing more problems within the time limit is crucial, which slightly impacted your final score.</span>
                     )}
@@ -286,14 +286,14 @@ export default function InterviewDetailPage() {
                   {/* Strengths */}
                   {overallFeedback.strengths.length > 0 && (
                     <div className='space-y-3'>
-                      <h4 className='text-sm font-semibold uppercase tracking-wider text-emerald-700 flex items-center gap-2'>
-                        <div className='h-2 w-2 rounded-full bg-emerald-500' />
+                      <h4 className='flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-brand-secondary'>
+                        <div className='h-2 w-2 rounded-full bg-brand-secondary' />
                         The Good
                       </h4>
                       <ul className='space-y-2'>
                         {overallFeedback.strengths.map((s, i) => (
                           <li key={i} className='text-sm text-slate-600 leading-relaxed flex items-start gap-2'>
-                            <span className='text-emerald-500 mt-0.5'>•</span> {s}
+                            <span className='mt-0.5 text-brand-secondary'>•</span> {s}
                           </li>
                         ))}
                       </ul>
@@ -371,13 +371,13 @@ const RealInterviewQuestions = ({
             {/* AI Question */}
             <div className='flex gap-4'>
               <div className='flex-1'>
-                <div className='bg-blue-50/80 border border-blue-100 rounded-xl p-4'>
+                <div className='surface-brand-soft rounded-xl p-4'>
                   <div className='flex items-center gap-2'>
-                    <div className='h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center'>
+                    <div className='h-9 w-9 rounded-lg bg-brand flex items-center justify-center'>
                       <Bot className='h-4 w-4 text-white' />
                     </div>
                     <div className='h-9 flex items-center'>
-                      <p className='text-sm font-semibold tracking-wide text-blue-600 leading-none'>
+                      <p className='text-sm font-semibold tracking-wide text-brand-dark leading-none'>
                         Nexus AI &mdash; Question #{idx + 1}
                       </p>
                     </div>
@@ -396,14 +396,14 @@ const RealInterviewQuestions = ({
 
                       {q.questionBank.examples?.length > 0 && (
                         <div>
-                          <h3 className='mb-2 text-xs font-semibold uppercase tracking-wide text-blue-800'>
+                          <h3 className='mb-2 text-xs font-semibold uppercase tracking-wide text-brand-dark'>
                             Examples
                           </h3>
                           <div className='space-y-2'>
                             {q.questionBank.examples.map((example: string, i: number) => (
                               <div
                                 key={i}
-                                className='rounded-lg border border-blue-200/60 bg-white/60 p-3 font-mono text-xs leading-relaxed text-gray-800 shadow-xs'
+                                className='rounded-lg border border-brand/20 bg-brand/5 p-3 font-mono text-xs leading-relaxed text-gray-800 shadow-xs'
                               >
                                 {example}
                               </div>
@@ -414,13 +414,13 @@ const RealInterviewQuestions = ({
 
                       {q.questionBank.constraints?.length > 0 && (
                         <div>
-                          <h3 className='mb-2 text-xs font-semibold uppercase tracking-wide text-blue-800'>
+                          <h3 className='mb-2 text-xs font-semibold uppercase tracking-wide text-brand-dark'>
                             Constraints
                           </h3>
-                          <ul className='space-y-1.5 rounded-lg border border-blue-200/60 bg-white/60 p-3 shadow-xs'>
+                          <ul className='space-y-1.5 rounded-lg border border-brand/20 bg-brand/5 p-3 shadow-xs'>
                             {q.questionBank.constraints.map((c: string, i: number) => (
                               <li key={i} className='flex items-start gap-2 text-xs font-medium text-gray-700'>
-                                <span className='mt-0.5 text-blue-500'>•</span>
+                                <span className='mt-0.5 text-brand'>•</span>
                                 <span>{c}</span>
                               </li>
                             ))}
@@ -460,10 +460,10 @@ const RealInterviewQuestions = ({
                           <Badge
                             className={`border gap-1 font-semibold ${
                               attempt.score >= 8
-                                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                                ? 'border-brand/20 bg-brand/10 text-brand-dark'
                                 : attempt.score >= 6
-                                  ? 'border-amber-200 bg-amber-50 text-amber-700'
-                                  : 'border-red-200 bg-red-50 text-red-700'
+                                  ? 'border-brand-secondary/20 bg-brand-secondary/10 text-brand-secondary'
+                                  : 'border-destructive/20 bg-destructive/10 text-destructive'
                             }`}
                           >
                             <Trophy className='h-3 w-3' />
@@ -490,7 +490,7 @@ const RealInterviewQuestions = ({
                               className='h-8 px-2 cursor-pointer'
                             >
                               {copiedCode === attempt.id ? (
-                                <Check className='h-3 w-3 text-green-600' />
+                                <Check className='h-3 w-3 text-brand-secondary' />
                               ) : (
                                 <Copy className='h-3 w-3 cursor-pointer' />
                               )}
@@ -522,8 +522,8 @@ const RealInterviewQuestions = ({
                       )}
                     </div>
                     {attempt.aiFeedback && (
-                      <div className='bg-blue-50/60 border border-blue-100 rounded-lg p-4'>
-                        <p className='text-sm font-medium text-blue-600 mb-1'>Nexus AI Feedback</p>
+                      <div className='surface-brand-soft rounded-lg p-4'>
+                        <p className='text-sm font-medium text-brand-dark mb-1'>Nexus AI Feedback</p>
                         <p className='text-sm text-slate-700 whitespace-pre-line'>
                           {attempt.aiFeedback}
                         </p>
@@ -554,5 +554,4 @@ const RealInterviewQuestions = ({
     </>
   );
 };
-
 

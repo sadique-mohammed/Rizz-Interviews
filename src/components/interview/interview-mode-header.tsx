@@ -89,25 +89,24 @@ export default function InterviewModeHeader({
             >
               {difficulty}
             </Badge>
-            <Badge className='border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] uppercase tracking-wide text-blue-600'>
+            <Badge className='badge-brand-soft px-2 py-0.5 text-[11px] uppercase tracking-wide'>
               {domain}
             </Badge>
           </div>
         </div>
 
-        <div className={`flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-4 py-1.5 transition-all duration-300 ${animateScale ? 'scale-125 border-red-300 bg-red-50 shadow-lg' : ''}`}>
-          <Clock className={`h-4 w-4 ${timerColor(timeLeft)} ${animateScale ? 'text-red-600 animate-pulse' : ''}`} />
-          <span className={`font-mono text-sm font-semibold tabular-nums ${timerColor(timeLeft)} ${animateScale ? 'text-red-600 font-bold' : ''}`}>
+        <div className={`flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-4 py-1.5 transition-all duration-300 ${animateScale ? 'scale-125 border-destructive/30 bg-destructive/10 shadow-lg' : ''}`}>
+          <Clock className={`h-4 w-4 ${timerColor(timeLeft)} ${animateScale ? 'text-destructive animate-pulse' : ''}`} />
+          <span className={`font-mono text-sm font-semibold tabular-nums ${timerColor(timeLeft)} ${animateScale ? 'text-destructive font-bold' : ''}`}>
             {formatTime(timeLeft)}
           </span>
         </div>
 
         <div className='flex items-center gap-3'>
           <Button
-            variant='ghost'
             size='sm'
             onClick={onEnd}
-            className='gap-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 cursor-pointer'
+            className='btn-destructive-soft gap-1.5 text-sm font-medium cursor-pointer'
           >
             <LogOut className='h-3.5 w-3.5' />
             <span className='hidden sm:inline'>End</span>

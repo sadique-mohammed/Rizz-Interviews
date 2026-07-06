@@ -52,15 +52,15 @@ function TypingIndicator() {
   return (
     <div className='flex flex-col items-start animate-fade-in-up'>
       <div className='flex items-start gap-2'>
-        <div className='mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100'>
-          <Bot className='h-3 w-3 text-blue-600' />
+        <div className='mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand/12'>
+          <Bot className='h-3 w-3 text-brand' />
         </div>
         <div>
-          <span className='mb-1 block text-[10px] font-semibold text-blue-500'>Nexus AI</span>
-          <div className='flex items-center gap-1 rounded-lg rounded-tl-none border border-blue-100 bg-blue-50 px-3 py-2.5'>
-            <span className='h-1.5 w-1.5 rounded-full bg-blue-400 animate-bounce' style={{ animationDelay: '0ms' }} />
-            <span className='h-1.5 w-1.5 rounded-full bg-blue-400 animate-bounce' style={{ animationDelay: '150ms' }} />
-            <span className='h-1.5 w-1.5 rounded-full bg-blue-400 animate-bounce' style={{ animationDelay: '300ms' }} />
+          <span className='mb-1 block text-[10px] font-semibold text-brand'>Nexus AI</span>
+          <div className='flex items-center gap-1 rounded-lg rounded-tl-none border border-brand/15 bg-brand/8 px-3 py-2.5'>
+            <span className='h-1.5 w-1.5 animate-bounce rounded-full bg-brand/70' style={{ animationDelay: '0ms' }} />
+            <span className='h-1.5 w-1.5 animate-bounce rounded-full bg-brand/70' style={{ animationDelay: '150ms' }} />
+            <span className='h-1.5 w-1.5 animate-bounce rounded-full bg-brand/70' style={{ animationDelay: '300ms' }} />
           </div>
         </div>
       </div>
@@ -94,7 +94,7 @@ const QuestionPanel = React.memo(function QuestionPanel({ question }: QuestionPa
               {question.examples.map((example, i) => (
                 <div
                   key={i}
-                  className='rounded-xl border border-blue-100 bg-blue-50/80 p-4 font-mono text-sm leading-relaxed text-gray-900 shadow-xs'
+                  className='rounded-xl border border-brand/15 bg-brand/8 p-4 font-mono text-sm leading-relaxed text-gray-900 shadow-xs'
                 >
                   {example}
                 </div>
@@ -159,7 +159,7 @@ const EditorPane = React.memo(function EditorPane({
   return (
     <div className='h-full flex flex-col'>
       {validationError && (
-        <div className='m-3 mb-0 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 animate-fade-in-up'>
+        <div className='m-3 mb-0 flex items-center gap-2 rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive animate-fade-in-up'>
           <AlertCircle className='h-4 w-4 shrink-0' />
           {validationError}
         </div>
@@ -239,7 +239,7 @@ const EditorPane = React.memo(function EditorPane({
       <div className='flex shrink-0 items-center justify-between border-t border-gray-200/80 bg-gray-50/50 px-5 py-3'>
         <button
           onClick={onAskHint}
-          className='flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3.5 py-2 text-sm font-medium text-blue-600 transition-all hover:bg-blue-100 hover:text-blue-700 hover:scale-[1.02] active:scale-[0.98]'
+          className='btn-brand-soft flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium hover:scale-[1.02] active:scale-[0.98]'
         >
           <Lightbulb className='h-4 w-4' />
           Ask for hint
@@ -247,8 +247,7 @@ const EditorPane = React.memo(function EditorPane({
         <Button
           onClick={onSubmit}
           disabled={isSubmitting || timeLeft === 0}
-          variant='outline'
-          className='gap-2 cursor-pointer rounded-lg border border-gray-200 px-6 py-2.5 font-medium transition-all hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50'
+          className='btn-brand gap-2 cursor-pointer rounded-lg px-6 py-2.5 font-medium disabled:opacity-50'
         >
           {isSubmitting ? (
             <Loader2 className='h-4 w-4 animate-spin' />
@@ -289,13 +288,13 @@ const AIChatPanel = React.memo(function AIChatPanel({
   };
 
   return (
-    <div className='flex flex-col h-full bg-gray-50/60 border-l border-gray-100'>
+    <div className='flex flex-col h-full surface-muted border-l border-gray-100'>
       {/* Header */}
       <div className='flex items-center gap-2 border-b border-gray-200 px-4 py-3 bg-white shrink-0'>
-        <Bot className='h-4 w-4 text-blue-500' />
+        <Bot className='h-4 w-4 text-brand' />
         <span className='text-sm font-semibold text-gray-900'>AI Interviewer</span>
-        <span className='ml-auto inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-green-600'>
-          <span className='h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse' />
+        <span className='ml-auto inline-flex items-center gap-1.5 rounded-full bg-brand-light/20 px-2 py-0.5 micro-label-brand'>
+          <span className='h-1.5 w-1.5 rounded-full bg-brand-light animate-pulse' />
           live
         </span>
       </div>
@@ -306,12 +305,12 @@ const AIChatPanel = React.memo(function AIChatPanel({
           msg.role === 'ai' ? (
             <div key={msg.id} className='flex flex-col items-start animate-fade-in-up'>
               <div className='flex items-start gap-2'>
-                <div className='mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100'>
-                  <Bot className='h-3 w-3 text-blue-600' />
+                <div className='mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand/12'>
+                  <Bot className='h-3 w-3 text-brand' />
                 </div>
                 <div className='flex flex-col items-start flex-1 min-w-0'>
-                  <span className='mb-1 block text-[10px] font-semibold text-blue-500'>Nexus AI</span>
-                  <div className='w-fit max-w-full rounded-lg rounded-tl-none border border-blue-100 bg-blue-50 px-3 py-2 text-sm leading-relaxed text-gray-800 break-words whitespace-pre-wrap'>
+                  <span className='mb-1 block text-[10px] font-semibold text-brand'>Nexus AI</span>
+                  <div className='w-fit max-w-full rounded-lg rounded-tl-none border border-brand/15 bg-brand/8 px-3 py-2 text-sm leading-relaxed text-gray-800 break-words whitespace-pre-wrap'>
                     {msg.text}
                   </div>
                 </div>
@@ -345,13 +344,13 @@ const AIChatPanel = React.memo(function AIChatPanel({
           onChange={(e) => onChatInputChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder='Reply to interviewer…'
-          className='flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-colors'
+          className='flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 transition-colors placeholder:text-gray-400 focus:border-brand/35 focus:outline-none focus:ring-2 focus:ring-brand/10'
         />
         <button
           onClick={onSend}
           disabled={!chatInput.trim()}
           aria-label='Send message'
-          className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white transition-all hover:bg-blue-700 hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed'
+          className='btn-brand flex h-8 w-8 shrink-0 items-center justify-center rounded-lg disabled:opacity-40'
         >
           <Send className='h-3.5 w-3.5' />
         </button>
@@ -816,7 +815,7 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
             </div>
           </Panel>
 
-          <Separator className='group relative flex w-1.5 cursor-col-resize items-center justify-center bg-gray-100 transition-colors hover:bg-blue-400 active:bg-blue-500'>
+          <Separator className='group relative flex w-1.5 cursor-col-resize items-center justify-center bg-gray-100 transition-colors hover:bg-brand active:bg-brand-dark'>
             <div className='h-8 w-0.5 rounded-full bg-gray-300 transition-colors group-hover:bg-white group-active:bg-white' />
           </Separator>
 
@@ -831,7 +830,7 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
             />
           </Panel>
 
-          <Separator className='group relative flex w-1.5 cursor-col-resize items-center justify-center bg-gray-100 transition-colors hover:bg-blue-400 active:bg-blue-500'>
+          <Separator className='group relative flex w-1.5 cursor-col-resize items-center justify-center bg-gray-100 transition-colors hover:bg-brand active:bg-brand-dark'>
             <div className='h-8 w-0.5 rounded-full bg-gray-300 transition-colors group-hover:bg-white group-active:bg-white' />
           </Separator>
 
@@ -858,10 +857,10 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
 
         {/* Transition glassmorphism overlay */}
         {hasSubmitted && (
-          <div className='absolute inset-0 z-20 flex items-center justify-center p-8 bg-white/20 backdrop-blur-sm pointer-events-auto'>
-            <div className='max-w-md w-full bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/60 p-8 text-center space-y-6 animate-fade-in-up'>
-              <div className='mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 shadow-inner'>
-                <CheckCircle2 className='h-8 w-8 text-emerald-600' />
+          <div className='absolute inset-0 z-20 flex items-center justify-center p-8 bg-black/5 backdrop-blur-sm pointer-events-auto'>
+            <div className='max-w-md w-full surface-brand rounded-3xl p-8 text-center space-y-6 animate-fade-in-up'>
+              <div className='mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand/12 shadow-inner'>
+                <CheckCircle2 className='h-8 w-8 text-brand' />
               </div>
 
               <div>
@@ -879,7 +878,7 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
                   <button
                     onClick={handleNextQuestion}
                     disabled={isAdvancing}
-                    className='inline-flex items-center gap-2 rounded-xl bg-blue-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-200 transition-all hover:bg-blue-700 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed'
+                    className='btn-brand inline-flex items-center gap-2 rounded-xl px-8 py-3.5 text-sm font-bold text-white transition-all hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60'
                   >
                     {isAdvancing ? 'Loading next question…' : 'Next Question'}
                     {isAdvancing ? (
@@ -891,7 +890,7 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
                 ) : (
                   <button
                     onClick={handleEnd}
-                    className='inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-200 transition-all hover:bg-emerald-700 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]'
+                    className='btn-brand inline-flex items-center gap-2 rounded-xl px-8 py-3.5 text-sm font-bold'
                   >
                     <CheckCircle2 className='h-4 w-4' />
                     Complete Interview
@@ -905,5 +904,4 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
     </div>
   );
 }
-
 

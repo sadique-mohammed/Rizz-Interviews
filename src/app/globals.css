@@ -160,7 +160,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
   }
 }
 
@@ -208,6 +208,66 @@
   /* bright blue glow */
 }
 
+.page-shell {
+  background-image:
+    linear-gradient(180deg,
+      rgba(0, 165, 207, 0.04) 0%,
+      rgba(0, 165, 207, 0.02) 20%,
+      #ffffff 60%);
+}
+
+.surface-brand {
+  border: 1px solid rgba(0, 165, 207, 0.15);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(0, 165, 207, 0.05));
+  box-shadow: 0 14px 34px rgba(0, 165, 207, 0.06);
+}
+
+.surface-brand-soft {
+  border: 1px solid rgba(0, 165, 207, 0.14);
+  background: rgba(0, 165, 207, 0.06);
+}
+
+.surface-muted {
+  border: 1px solid rgba(0, 78, 100, 0.1);
+  background: rgba(0, 78, 100, 0.04);
+}
+
+.surface-accent {
+  border: 1px solid rgba(37, 161, 142, 0.18);
+  background: rgba(159, 254, 203, 0.24);
+}
+
+.badge-brand-soft {
+  border: 1px solid rgba(0, 78, 100, 0.08);
+  background: rgba(0, 165, 207, 0.1);
+  color: #004e64;
+}
+
+.btn-brand {
+  background-color: var(--color-brand);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 165, 207, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-brand:hover {
+  background-color: #0092b8;
+  box-shadow: 0 6px 20px rgba(0, 165, 207, 0.35);
+}
+
+.btn-brand-soft {
+  border: 1px solid rgba(0, 165, 207, 0.18);
+  background: rgba(0, 165, 207, 0.08);
+  color: #004e64;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-brand-soft:hover {
+  border-color: rgba(0, 78, 100, 0.22);
+  background: rgba(0, 165, 207, 0.14);
+  color: #003d4f;
+}
+
 /* Optional: subtle gradient top border helper (used in footer) */
 .border-t-gradient {
   position: relative;
@@ -223,6 +283,30 @@
   opacity: 0.6;
 }
 
+/* Destructive Soft Button: for End Interview, etc. */
+.btn-destructive-soft {
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  background: white;
+  color: rgb(185, 28, 28);
+  transition: all 0.2s ease;
+}
+
+.btn-destructive-soft:hover {
+  border-color: rgba(220, 38, 38, 0.3);
+  background: rgba(224, 24, 24, 0.252);
+  color: rgb(153, 27, 27);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.08);
+}
+
+/* Micro-label brand for AI indicators */
+.micro-label-brand {
+  font-size: 0.625rem; /* 10px */
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-brand-dark);
+}
+
 /* Neutral Minimal CTA: black text on white, hover invert */
 .btn-invert {
   background-color: var(--color-brand-foreground);
@@ -236,6 +320,8 @@
 }
 
 .btn-invert:hover {
+  background-color: #004e64;
+  color: #ffffff;
   /* white text */
   box-shadow: 0 6px 18px rgba(0, 165, 207, 0.15);
   /* bright blue glow */

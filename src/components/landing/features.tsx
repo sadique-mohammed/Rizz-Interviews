@@ -150,8 +150,8 @@ function DemoCard({ pulse = false, activeId = 'ai-interview' }: { pulse?: boolea
               <div className='text-sm font-medium text-gray-900'>Nexus AI Interviewer</div>
               <div className='text-xs text-gray-500'>Ready to begin your session</div>
             </div>
-            <div className='h-6 w-6 rounded-full bg-green-100 flex items-center justify-center'>
-              <div className='h-2 w-2 rounded-full bg-green-500 animate-ping' />
+            <div className='h-6 w-6 rounded-full bg-brand-light/20 flex items-center justify-center'>
+              <div className='h-2 w-2 rounded-full bg-brand-light animate-ping' />
             </div>
           </div>
           <div className='mt-4 flex items-center justify-between'>
@@ -169,12 +169,12 @@ function DemoCard({ pulse = false, activeId = 'ai-interview' }: { pulse?: boolea
       {activeId === 'feedback-scoring' && (
         <div className='mt-4 rounded-xl border border-gray-200/60 p-4 bg-white/80 backdrop-blur-sm'>
           <div className='flex gap-3 items-start'>
-             <div className='h-6 w-6 rounded-full bg-blue-50 flex items-center justify-center shrink-0 mt-0.5'>
-               <Bot className="h-3.5 w-3.5 text-blue-600" />
+             <div className='h-6 w-6 rounded-full bg-brand/10 flex items-center justify-center shrink-0 mt-0.5'>
+               <Bot className="h-3.5 w-3.5 text-brand" />
              </div>
              <div className='flex flex-col gap-1'>
                <span className="text-xs font-semibold text-gray-900">Nexus AI</span>
-               <p className="text-[11px] text-gray-600 leading-relaxed">Great job finding the base case. Your time complexity is <span className="font-mono text-blue-600 bg-blue-50 px-1 rounded font-semibold">O(N^2)</span>. Can you optimize it using a Hash Map?</p>
+               <p className="text-[11px] text-gray-600 leading-relaxed">Great job finding the base case. Your time complexity is <span className="font-mono text-brand bg-brand/10 px-1 rounded font-semibold">O(N^2)</span>. Can you optimize it using a Hash Map?</p>
              </div>
           </div>
         </div>
@@ -188,7 +188,7 @@ function DemoCard({ pulse = false, activeId = 'ai-interview' }: { pulse?: boolea
           </div>
           <div className='flex flex-col gap-2'>
             <div className='bg-gray-50 rounded-lg p-2.5 text-[11px] text-gray-700 self-end max-w-[85%] border border-gray-100'>I think we can use a Set to track visited nodes.</div>
-            <div className='bg-blue-50/50 rounded-lg p-2.5 text-[11px] text-blue-800 self-start max-w-[85%] border border-blue-100/50'>Excellent. Implementing a visited Set correctly handles the cycles in O(1) time.</div>
+            <div className='surface-brand-soft rounded-lg p-2.5 text-[11px] text-brand-dark self-start max-w-[85%]'>Excellent. Implementing a visited Set correctly handles the cycles in O(1) time.</div>
           </div>
         </div>
       )}
@@ -209,7 +209,7 @@ function DemoCard({ pulse = false, activeId = 'ai-interview' }: { pulse?: boolea
 
       {activeId === 'scoring' && (
         <div className='mt-4 rounded-xl border border-gray-200/60 p-4 bg-white/80 backdrop-blur-sm flex items-center gap-4'>
-           <div className='h-14 w-14 rounded-full border-[5px] border-green-500 flex items-center justify-center shrink-0 shadow-sm'>
+           <div className='h-14 w-14 rounded-full border-[5px] border-brand-light flex items-center justify-center shrink-0 shadow-sm'>
              <span className='text-lg font-bold text-gray-900 tracking-tight'>8.5</span>
            </div>
            <div className='flex flex-col gap-0.5'>
