@@ -7,6 +7,7 @@ import {
   markQuestionAnswered,
   appendChatMessages,
 } from '@/lib/interview-redis';
+import { getInterviewSessionForAccess } from '@/lib/interview-session';
 
 export async function POST(
   req: NextRequest,
@@ -24,18 +25,16 @@ export async function POST(
     const body = await req.json();
     const { attemptId } = body;
 
-    // 1. Fetch Redis state
+    // 1. Enforce DB existence, ownership, and strict expiry
+    const dbSession = await getInterviewSessionForAccess(userId, sessionId);
+    if (!dbSession || dbSession.status !== 'in_progress') {
+      return NextResponse.json({ error: 'Interview session is no longer active or expired' }, { status: 403 });
+    }
+
+    // 2. Fetch Redis state (now guaranteed to be legally in_progress by DB)
     const state = await getInterviewState(sessionId);
-    if (!state) {
-      return NextResponse.json({ error: 'Session not found or expired' }, { status: 404 });
-    }
-
-    if (state.userId !== userId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
-    if (state.status !== 'in_progress') {
-      return NextResponse.json({ error: 'Interview is no longer active' }, { status: 400 });
+    if (!state || state.status !== 'in_progress') {
+      return NextResponse.json({ error: 'Interview state is not active' }, { status: 400 });
     }
 
     const currentSlot = state.questionSlots[state.currentQuestionIndex];

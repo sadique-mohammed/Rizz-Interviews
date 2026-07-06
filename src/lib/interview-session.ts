@@ -11,7 +11,10 @@ import type {
 export function isSessionExpired(session: SessionTiming, now: Date = new Date()): boolean {
   const totalDurationMs = session.duration * 60 * 1000;
   if (totalDurationMs <= 0) return true;
-  return (now.getTime() - new Date(session.startedAt).getTime()) >= totalDurationMs;
+  
+  // 60-second grace period for network latency and final auto-submits
+  const GRACE_PERIOD_MS = 60 * 1000;
+  return (now.getTime() - new Date(session.startedAt).getTime()) >= (totalDurationMs + GRACE_PERIOD_MS);
 }
 
 export function getExpectedQuestionsCount(duration: number, _difficulty: string): number {
