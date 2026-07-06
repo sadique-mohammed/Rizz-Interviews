@@ -873,7 +873,7 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
               </div>
 
               <p className='text-sm text-gray-600 leading-relaxed font-medium'>
-                You can continue chatting with the AI interviewer to discuss your approach, ask follow-up questions, or explore edge cases.
+                Your answer has been successfully recorded. Please proceed to the next question when you are ready.
               </p>
 
               <div className='pt-2'>
