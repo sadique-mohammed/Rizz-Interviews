@@ -7,6 +7,7 @@ import { Panel, Group, Separator } from 'react-resizable-panels';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Send, AlertCircle, Loader2, Lightbulb, Bot, User, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { clearInterviewStorage } from '@/lib/utils';
 import InterviewModeHeader from '@/components/interview/interview-mode-header';
 import { toast } from 'sonner';
 import type { RedisInterviewState, RedisQuestionSlot, RedisChatMessage } from '@/types/interviewRedis';
@@ -624,6 +625,8 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
 
   const handleEnd = React.useCallback(async () => {
     try {
+      clearInterviewStorage(sessionId);
+
       const res = await fetch(`/api/interviews/${sessionId}/complete`, {
         method: 'PATCH',
       });

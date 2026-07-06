@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { clearInterviewStorage, cleanupOrphanedStorage } from '@/lib/utils';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -244,9 +245,10 @@ export default function InterviewSessionCard({
   const [isAbandoning, setIsAbandoning] = React.useState(false);
   const [localActiveSession, setLocalActiveSession] = React.useState(activeSession);
 
-  // Sync prop changes
+  // Sync prop changes and clean up orphaned localStorage keys
   React.useEffect(() => {
     setLocalActiveSession(activeSession);
+    cleanupOrphanedStorage(activeSession?.id || null);
   }, [activeSession]);
 
   const isLocked = !!localActiveSession;
@@ -309,6 +311,7 @@ export default function InterviewSessionCard({
       }
 
       toast.success('Session abandoned. You can start a new one.');
+      clearInterviewStorage(localActiveSession.id);
       setLocalActiveSession(null);
       setShowAbandonModal(false);
     } catch (error) {
