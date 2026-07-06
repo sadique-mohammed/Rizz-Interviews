@@ -1,0 +1,57 @@
+[
+  {
+    "slug": "frontend-developer",
+    "title": "Frontend Developer",
+    "description": "Master component architecture, state management, and modern web vitals.",
+    "commonQuestions": [
+      "Explain the Virtual DOM and how React reconciliation works.",
+      "What is the difference between client-side rendering (CSR) and server-side rendering (SSR)?",
+      "How do you optimize Core Web Vitals (LCP, FID, CLS) in a frontend application?"
+    ],
+    "promptInjection": "The user is interviewing for a Frontend Developer role. Focus on UI architecture, React, state management, performance optimization, and browser APIs."
+  },
+  {
+    "slug": "backend-engineer",
+    "title": "Backend Engineer",
+    "description": "Practice system design, database indexing, and scalable microservices.",
+    "commonQuestions": [
+      "How would you design a scalable rate limiter for a public API?",
+      "Explain the differences between SQL and NoSQL databases, and when to use each.",
+      "What is the CAP theorem and how does it apply to distributed systems?"
+    ],
+    "promptInjection": "The user is interviewing for a Backend Engineer role. Focus on API design, database architecture, distributed systems, concurrency, and performance tuning."
+  },
+  {
+    "slug": "fullstack-developer",
+    "title": "Full-Stack Developer",
+    "description": "Demonstrate expertise across the entire stack, from UI to database schemas.",
+    "commonQuestions": [
+      "Walk me through the architecture of a modern Next.js application with a Postgres database.",
+      "How do you handle authentication and authorization in a full-stack web application?",
+      "Explain how you would implement real-time communication (e.g., WebSockets) in a full-stack app."
+    ],
+    "promptInjection": "The user is interviewing for a Full-Stack Developer role. Focus on both frontend architecture (React/Next.js) and backend integration, including databases and APIs."
+  },
+  {
+    "slug": "data-scientist",
+    "title": "Data Scientist",
+    "description": "Ace your interview on machine learning models, statistical analysis, and Python.",
+    "commonQuestions": [
+      "Explain the difference between supervised and unsupervised learning.",
+      "How do you handle missing or imbalanced data in a dataset?",
+      "What is the bias-variance tradeoff in machine learning?"
+    ],
+    "promptInjection": "The user is interviewing for a Data Scientist role. Focus on statistical analysis, machine learning algorithms, data cleaning, and Python/SQL skills."
+  },
+  {
+    "slug": "react-developer",
+    "title": "React Developer",
+    "description": "Deep dive into React hooks, context, concurrent features, and ecosystem tooling.",
+    "commonQuestions": [
+      "How does the useEffect hook work, and what are common pitfalls with dependency arrays?",
+      "Explain the difference between useMemo and useCallback.",
+      "How do you manage global state in a large-scale React application?"
+    ],
+    "promptInjection": "The user is interviewing specifically for a React Developer role. Ask deep technical questions about React hooks, rendering lifecycles, and component design patterns."
+  }
+]
