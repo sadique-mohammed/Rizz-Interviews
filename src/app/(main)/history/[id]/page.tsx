@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import Loading from '@/components/dashboard/loader';
 import { formatDateFull } from '@/lib/formatters';
+import { getExpectedQuestionsCount } from '@/lib/interview-session';
 import { getDifficultyBadgeClass, getStatusBadgeClass, getStatusLabel } from '@/lib/styles';
 import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
@@ -48,14 +49,7 @@ const getLanguageLabel = (language: string): string => {
   }
 };
 
-const getExpectedQuestionsCount = (duration: number, difficulty: string): number => {
-  let expectedTimePerQuestion = 15;
-  if (difficulty === 'easy') expectedTimePerQuestion = 6;
-  else if (difficulty === 'medium') expectedTimePerQuestion = 10;
-  else if (difficulty === 'hard') expectedTimePerQuestion = 15;
 
-  return Math.max(1, Math.floor(duration / expectedTimePerQuestion));
-};
 
 const generateOverallFeedback = (interview: any) => {
   if (!interview || !interview.questions) return null;

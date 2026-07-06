@@ -86,7 +86,7 @@ export async function POST(
     }
 
     const defaultCode = (bankRow.starterCode as Record<string, string>)?.[language] || '';
-    const userMessages = state.chatMessages.filter(m => m.role === 'user');
+    const userMessages = state.chatMessages.filter(m => m.role === 'user' && m.questionPosition === currentSlot.position);
     const hasInteracted = userMessages.length > 0;
     
     let isZeroEffortTimeout = false;

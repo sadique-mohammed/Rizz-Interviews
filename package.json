@@ -9,10 +9,12 @@
     "reconcile:interviews": "node scripts/reconcile-stale-in-progress.mjs",
     "db:push": "node scripts/db-push.mjs",
     "db:seed:question-bank": "node scripts/seed-question-bank.mjs",
-    "db:sync:question-bank": "node scripts/db-sync-question-bank.mjs"
+    "db:sync:question-bank": "node scripts/db-sync-question-bank.mjs",
+    "typecheck": "tsc -p tsconfig.check.json --noEmit"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.32.0",
+    "@emotion/is-prop-valid": "^1.4.0",
     "@google/genai": "^2.10.0",
     "@monaco-editor/react": "^4.7.0",
     "@neondatabase/serverless": "^1.0.2",
