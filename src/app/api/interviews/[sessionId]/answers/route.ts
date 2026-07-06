@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { db } from '@/db';
 import { questionBank, answerAttempts } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { getInterviewState, appendChatMessages } from '@/lib/interview-redis';
+import { getInterviewState, appendChatMessages, updateActiveQuestionState } from '@/lib/interview-redis';
 import { evaluateAnswer } from '@/lib/ai/evaluate-answer';
 import type { EvaluationRequest } from '@/lib/ai/types';
 import { getInterviewSessionForAccess } from '@/lib/interview-session';
@@ -187,7 +187,6 @@ export async function POST(
     await appendChatMessages(sessionId, [userMsg, aiMsg]);
 
     // Save chosenNextAction for the next-question traversal
-    const { updateActiveQuestionState } = await import('@/lib/interview-redis');
     await updateActiveQuestionState(sessionId, {
       chosenNextAction: evalResult.nextAction,
     });
