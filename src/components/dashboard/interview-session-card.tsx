@@ -438,6 +438,9 @@ export default function InterviewSessionCard({
                     <SelectValue placeholder='Select duration' />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value='1' className='cursor-pointer text-amber-700 font-semibold bg-amber-50 focus:bg-amber-100 focus:text-amber-800'>
+                      1 min (Testing)
+                    </SelectItem>
                     <SelectItem value='15' className='cursor-pointer'>
                       15 minutes
                     </SelectItem>
