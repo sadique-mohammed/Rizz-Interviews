@@ -4,6 +4,7 @@ import { db } from '@/db';
 import { interviews } from '@/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { deleteInterviewState } from '@/lib/interview-redis';
+import { calculateAndFinalizeInterview } from '@/lib/interview-session';
 
 interface RouteContext {
   params: Promise<{ sessionId: string }>;
@@ -44,7 +45,6 @@ export async function PATCH(req: NextRequest, context: RouteContext): Promise<Ne
     const now = new Date();
     
     // Check answerAttempts for completion status and update DB
-    const { calculateAndFinalizeInterview } = await import('@/lib/interview-session');
     const nextStatus = await calculateAndFinalizeInterview(sessionId, now);
 
     // Clear Redis active session

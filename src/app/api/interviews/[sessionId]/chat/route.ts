@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { z } from 'zod';
-import { getInterviewState, getTranscriptWindow, appendChatMessages, updateActiveQuestionState } from '@/lib/interview-redis';
+import { getInterviewState, updateInterviewState, getTranscriptWindow, applyChatMessages, applyActiveQuestionState } from '@/lib/interview-redis';
 import { generateInterviewChat } from '@/lib/ai/interview-chat';
 import type { ChatRequest } from '@/lib/ai/types';
 import { getInterviewSessionForAccess } from '@/lib/interview-session';
+import { Ratelimit } from '@upstash/ratelimit';
+import { redis } from '@/lib/redis';
+
+const ratelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(20, '1 m'),
+});
 
 const chatSchema = z.object({
   message: z.string().min(1).max(2000),
@@ -19,6 +26,12 @@ export async function POST(
     const { userId } = await auth();
     if (!userId) {
       throw new Error('Unauthenticated');
+    }
+
+    const identifier = userId;
+    const { success: rateLimitSuccess } = await ratelimit.limit(identifier);
+    if (!rateLimitSuccess) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const resolvedParams = await params;
@@ -97,15 +110,17 @@ export async function POST(
       kind: (isHintRequest ? 'hint' : 'message') as any,
     };
 
-    await appendChatMessages(sessionId, [userMsg, aiMsg]);
+    applyChatMessages(state, [userMsg, aiMsg]);
 
     // Update hints if dispensed
     if (aiResponse.newHintIndex !== undefined) {
-      await updateActiveQuestionState(sessionId, {
+      applyActiveQuestionState(state, {
         hintIndex: aiResponse.newHintIndex,
         hintsUsed: state.activeQuestionState.hintsUsed + 1,
       });
     }
+
+    await updateInterviewState(sessionId, state);
 
     // 5. Return response
     return NextResponse.json(aiResponse);

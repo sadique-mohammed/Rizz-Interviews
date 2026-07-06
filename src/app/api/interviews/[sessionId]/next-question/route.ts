@@ -4,10 +4,14 @@ import { db } from '@/db';
 import { questions } from '@/db/schema';
 import {
   getInterviewState,
-  markQuestionAnswered,
-  appendChatMessages,
+  updateInterviewState,
+  applyMarkQuestionAnswered,
+  applyPromoteNextQuestion,
+  applyChatMessages,
 } from '@/lib/interview-redis';
 import { getInterviewSessionForAccess } from '@/lib/interview-session';
+import { resolveNextBuffer, fetchAdaptiveBuffers } from '@/lib/question-bank';
+import { generateTransition } from '@/lib/ai/interview-chat';
 
 export async function POST(
   req: NextRequest,
@@ -50,7 +54,7 @@ export async function POST(
     }
 
     // 3. Record the answer in history
-    await markQuestionAnswered(sessionId, {
+    applyMarkQuestionAnswered(state, {
       sessionQuestionId: currentSlot.sessionQuestionId,
       questionBankId: currentSlot.questionBankId,
       position: currentSlot.position,
@@ -61,11 +65,11 @@ export async function POST(
     });
 
     // 4. Determine buffer to pop (fallback cascade)
-    const { resolveNextBuffer } = await import('@/lib/question-bank');
     const resolved = resolveNextBuffer(chosenNextAction, state.pendingBuffers);
 
     // Total exhaustion -> force end
     if (!resolved) {
+      await updateInterviewState(sessionId, state);
       return NextResponse.json({ success: true, hasNext: false });
     }
 
@@ -79,11 +83,28 @@ export async function POST(
     if (bufferToPop.difficulty === 'hard') minRequiredMins = 5;
 
     if (remainingMins < minRequiredMins) {
+      await updateInterviewState(sessionId, state);
       return NextResponse.json({ success: true, hasNext: false, reason: 'time_limit' });
     }
 
-    // 5. Insert Postgres row for new question
     const nextPosition = state.questionSlots.length;
+    
+    // 5. Refill buffers synchronously if under cap, and generate dynamic AI transition in parallel
+    let newBuffers = state.pendingBuffers;
+    let dynamicTransition = '';
+    
+    // We can fetch adaptive buffers and generate transition concurrently
+    const [fetchedBuffers, transitionText] = await Promise.all([
+      (nextPosition + 1 < state.maxQuestions) 
+        ? fetchAdaptiveBuffers(state.domain, bufferToPop.difficultyScore, state.seenQuestionBankIds)
+        : Promise.resolve({}),
+      generateTransition(bufferToPop.title)
+    ]);
+    
+    newBuffers = fetchedBuffers;
+    dynamicTransition = transitionText;
+
+    // 6. Insert Postgres row for new question (Stateful operation happens after AI calls)
     const [sessionQuestion] = await db
       .insert(questions)
       .values({
@@ -93,32 +114,15 @@ export async function POST(
       })
       .returning({ id: questions.id });
 
-    // 6. Refill buffers synchronously if under cap
-    let newBuffers = state.pendingBuffers;
-    if (nextPosition + 1 < state.maxQuestions) {
-      const { fetchAdaptiveBuffers } = await import('@/lib/question-bank');
-      // current state.seenQuestionBankIds is slightly stale since bufferToPop isn't added?
-      // Actually bufferToPop WAS added to seenQuestionBankIds when it was fetched! So seenQuestionBankIds is perfectly accurate.
-      newBuffers = await fetchAdaptiveBuffers(state.domain, bufferToPop.difficultyScore, state.seenQuestionBankIds);
-    } else {
-      // Empty out buffers if we hit the cap so we don't hold them in memory
-      newBuffers = {};
-    }
-
     // 7. Late-stage Redis Commit (Promote buffer)
-    const { promoteNextQuestion } = await import('@/lib/interview-redis');
-    const newState = await promoteNextQuestion(sessionId, bufferKeyToPromote, sessionQuestion.id, newBuffers);
+    const promoteSuccess = applyPromoteNextQuestion(state, bufferKeyToPromote, sessionQuestion.id, newBuffers);
 
-    if (!newState) {
+    if (!promoteSuccess) {
        return NextResponse.json({ error: 'Failed to promote question' }, { status: 500 });
     }
 
-    // 8. Generate dynamic AI transition message
-    const { generateTransition } = await import('@/lib/ai/interview-chat');
-    const dynamicTransition = await generateTransition(bufferToPop.title);
-
-    // 9. Append a transition message to chat
-    await appendChatMessages(sessionId, [
+    // 8. Append a transition message to chat
+    applyChatMessages(state, [
       {
         id: crypto.randomUUID(),
         role: 'ai' as const,
@@ -128,6 +132,8 @@ export async function POST(
         kind: 'message' as const,
       }
     ]);
+
+    await updateInterviewState(sessionId, state);
 
     return NextResponse.json({
       success: true,

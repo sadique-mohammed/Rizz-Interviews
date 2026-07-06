@@ -4,15 +4,15 @@ import { z } from 'zod';
 import { db } from '@/db';
 import { questionBank, answerAttempts } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { getInterviewState, appendChatMessages, updateActiveQuestionState } from '@/lib/interview-redis';
+import { getInterviewState, updateInterviewState, applyChatMessages, applyActiveQuestionState } from '@/lib/interview-redis';
 import { evaluateAnswer } from '@/lib/ai/evaluate-answer';
 import type { EvaluationRequest } from '@/lib/ai/types';
 import { getInterviewSessionForAccess } from '@/lib/interview-session';
 import { Ratelimit } from '@upstash/ratelimit';
-import { Redis } from '@upstash/redis';
+import { redis } from '@/lib/redis';
 
 const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
+  redis,
   limiter: Ratelimit.slidingWindow(10, '1 m'),
 });
 
@@ -184,12 +184,14 @@ export async function POST(
       kind: 'evaluation' as const,
     };
 
-    await appendChatMessages(sessionId, [userMsg, aiMsg]);
+    applyChatMessages(state, [userMsg, aiMsg]);
 
     // Save chosenNextAction for the next-question traversal
-    await updateActiveQuestionState(sessionId, {
+    applyActiveQuestionState(state, {
       chosenNextAction: evalResult.nextAction,
     });
+
+    await updateInterviewState(sessionId, state);
 
     // NOTE: Question advancement is NOT done here.
     // The frontend will call /next-question when the user is ready to move on.

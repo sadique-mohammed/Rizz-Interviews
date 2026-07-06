@@ -14,12 +14,16 @@ const createInterviewSchema = z.object({
 });
 
 import { Ratelimit } from '@upstash/ratelimit';
-import { Redis } from '@upstash/redis';
+import { redis } from '@/lib/redis';
+import { fetchAdaptiveBuffers } from '@/lib/question-bank';
+import { generateGreeting } from '@/lib/ai/interview-chat';
 
 const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
+  redis,
   limiter: Ratelimit.slidingWindow(5, '1 m'),
 });
+
+
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
@@ -49,18 +53,21 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // Determine max questions cap based on duration
     const maxQuestions = duration === 15 ? 5 : duration === 30 ? 10 : 15;
 
-    // 1. Fetch the 1st active question
-    const bankQuestions = await db
-      .select()
-      .from(questionBank)
-      .where(
-        and(
-          eq(questionBank.domain, domain),
-          eq(questionBank.difficulty, difficulty)
+    // 1. Fetch the 1st active question and the user in parallel
+    const [bankQuestions, localUser] = await Promise.all([
+      db
+        .select()
+        .from(questionBank)
+        .where(
+          and(
+            eq(questionBank.domain, domain),
+            eq(questionBank.difficulty, difficulty)
+          )
         )
-      )
-      .orderBy(sql`RANDOM()`)
-      .limit(1);
+        .orderBy(sql`RANDOM()`)
+        .limit(1),
+      db.select({ name: users.name }).from(users).where(eq(users.id, userId))
+    ]);
 
     if (bankQuestions.length === 0) {
       return NextResponse.json(
@@ -70,16 +77,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     const activeQ = bankQuestions[0];
+    const candidateName = localUser[0]?.name?.split(' ')[0] || 'the candidate';
     const seenQuestionBankIds = [activeQ.id];
 
-    // 2. Fetch the initial adaptive buffers
-    const { fetchAdaptiveBuffers } = await import('@/lib/question-bank');
-    const pendingBuffers = await fetchAdaptiveBuffers(domain, activeQ.difficultyScore, seenQuestionBankIds);
-
-    // Record buffer IDs into the seen ledger
-    if (pendingBuffers.harder) seenQuestionBankIds.push(pendingBuffers.harder.questionBankId);
-    if (pendingBuffers.easier) seenQuestionBankIds.push(pendingBuffers.easier.questionBankId);
-    if (pendingBuffers.same_topic) seenQuestionBankIds.push(pendingBuffers.same_topic.questionBankId);
+    // 2. Fetch buffers and generate greeting in parallel
+    const [pendingBuffers, dynamicGreeting] = await Promise.all([
+      fetchAdaptiveBuffers(domain, activeQ.difficultyScore, seenQuestionBankIds),
+      generateGreeting(candidateName),
+    ]);
 
     // 3. Create the interview row
     let interview;
@@ -96,7 +101,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         .returning({ id: interviews.id });
       interview = result[0];
     } catch (error: any) {
-      // Postgres error code 23505 = unique_violation
       if (error.code === '23505' && error.constraint === 'interviews_one_active_per_user_idx') {
         const existing = await db.query.interviews.findFirst({
           where: and(eq(interviews.userId, userId), eq(interviews.status, 'in_progress')),
@@ -109,6 +113,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       }
       throw error;
     }
+
+    // Record buffer IDs into the seen ledger
+    if (pendingBuffers.harder) seenQuestionBankIds.push(pendingBuffers.harder.questionBankId);
+    if (pendingBuffers.easier) seenQuestionBankIds.push(pendingBuffers.easier.questionBankId);
+    if (pendingBuffers.same_topic) seenQuestionBankIds.push(pendingBuffers.same_topic.questionBankId);
 
     // 4. Create the active session question in Postgres
     const [sessionQuestion] = await db
@@ -139,11 +148,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       },
     ];
 
-    // 6. Generate dynamic AI greeting
-    const [localUser] = await db.select({ name: users.name }).from(users).where(eq(users.id, userId));
-    const candidateName = localUser?.name?.split(' ')[0] || 'the candidate';
-    const { generateGreeting } = await import('@/lib/ai/interview-chat');
-    const dynamicGreeting = await generateGreeting(candidateName);
+    // 6. Generate dynamic AI greeting (already done in parallel)
 
     // 7. Initialize the Redis state
     const state: RedisInterviewState = {

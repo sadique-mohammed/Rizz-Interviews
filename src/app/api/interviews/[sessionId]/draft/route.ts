@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { z } from 'zod';
-import { getInterviewState, updateActiveQuestionState } from '@/lib/interview-redis';
+import { getInterviewState, updateInterviewState, applyActiveQuestionState } from '@/lib/interview-redis';
 import { getInterviewSessionForAccess } from '@/lib/interview-session';
 
 const draftSchema = z.object({
@@ -44,12 +44,14 @@ export async function PUT(
     }
 
     // Update draft fields in Redis
-    await updateActiveQuestionState(sessionId, {
+    applyActiveQuestionState(state, {
       draftCode: code,
       draftLanguage: language,
       draftExplanation: explanation,
       lastDraftSavedAt: new Date().toISOString(),
     });
+
+    await updateInterviewState(sessionId, state);
 
     return NextResponse.json({ success: true });
   } catch (error) {

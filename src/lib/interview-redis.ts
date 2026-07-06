@@ -9,6 +9,7 @@ import type {
   RedisChatSummary,
   RedisAnsweredQuestion,
 } from '@/types/interviewRedis';
+import { resolveNextBuffer } from '@/lib/question-bank';
 
 // ---------------------------------------------------------------------------
 // Key builders
@@ -73,15 +74,10 @@ export async function updateInterviewState(
   state: RedisInterviewState,
 ): Promise<void> {
   const key = interviewStateKey(sessionId);
-  const ttl = await redis.ttl(key);
+  const remainingMs = new Date(state.expiresAt).getTime() - Date.now();
+  const ttl = Math.max(Math.ceil(remainingMs / 1000), 60);
 
-  if (ttl > 0) {
-    await redis.set(key, JSON.stringify(state), { ex: ttl });
-  } else {
-    // Fallback: use original duration-based TTL
-    const fallbackTtl = state.duration * 60 * 2;
-    await redis.set(key, JSON.stringify(state), { ex: fallbackTtl });
-  }
+  await redis.set(key, JSON.stringify(state), { ex: ttl });
 }
 
 /**
@@ -139,13 +135,22 @@ export async function updateActiveQuestionState(
   const state = await getInterviewState(sessionId);
   if (!state) return null;
 
+  applyActiveQuestionState(state, updates);
+  await updateInterviewState(sessionId, state);
+  return state;
+}
+
+/**
+ * Pure mutator for active question state.
+ */
+export function applyActiveQuestionState(
+  state: RedisInterviewState,
+  updates: Partial<RedisActiveQuestionState>,
+): void {
   state.activeQuestionState = {
     ...state.activeQuestionState,
     ...updates,
   };
-
-  await updateInterviewState(sessionId, state);
-  return state;
 }
 
 // ---------------------------------------------------------------------------
@@ -177,9 +182,19 @@ export async function appendChatMessages(
   const state = await getInterviewState(sessionId);
   if (!state) return null;
 
-  state.chatMessages.push(...messages);
+  applyChatMessages(state, messages);
   await updateInterviewState(sessionId, state);
   return state;
+}
+
+/**
+ * Pure mutator to append chat messages.
+ */
+export function applyChatMessages(
+  state: RedisInterviewState,
+  messages: RedisChatMessage[],
+): void {
+  state.chatMessages.push(...messages);
 }
 
 /**
@@ -213,22 +228,28 @@ export async function markQuestionAnswered(
   const state = await getInterviewState(sessionId);
   if (!state) return null;
 
-  // Mark current slot as answered
+  applyMarkQuestionAnswered(state, answered);
+  await updateInterviewState(sessionId, state);
+  return state;
+}
+
+/**
+ * Pure mutator to mark a question as answered.
+ */
+export function applyMarkQuestionAnswered(
+  state: RedisInterviewState,
+  answered: RedisAnsweredQuestion,
+): void {
   const currentSlot = state.questionSlots[state.currentQuestionIndex];
   if (currentSlot) {
     currentSlot.status = 'answered';
   }
 
-  // Record the answered question reference
   state.answeredQuestions.push(answered);
   
-  // Store the chosen next action in the active state for the immediate transition
   if (answered.nextAction) {
     state.activeQuestionState.chosenNextAction = answered.nextAction;
   }
-
-  await updateInterviewState(sessionId, state);
-  return state;
 }
 
 /**
@@ -245,17 +266,28 @@ export async function promoteNextQuestion(
   const state = await getInterviewState(sessionId);
   if (!state) return null;
 
-  const { resolveNextBuffer } = await import('@/lib/question-bank');
-  const resolved = resolveNextBuffer(chosenBufferKey, state.pendingBuffers);
+  const success = applyPromoteNextQuestion(state, chosenBufferKey, sessionQuestionId, newBuffers);
+  if (!success) return null;
 
-  if (!resolved) {
-    // Complete exhaustion
-    return null;
-  }
+  await updateInterviewState(sessionId, state);
+  return state;
+}
+
+/**
+ * Pure mutator to promote a buffer.
+ * Returns true if successful, false if exhausted.
+ */
+export function applyPromoteNextQuestion(
+  state: RedisInterviewState,
+  chosenBufferKey: 'harder' | 'easier' | 'same_topic',
+  sessionQuestionId: string,
+  newBuffers: RedisInterviewState['pendingBuffers'],
+): boolean {
+  const resolved = resolveNextBuffer(chosenBufferKey, state.pendingBuffers);
+  if (!resolved) return false;
 
   const { buffer: bufferToPop } = resolved;
 
-  // Promote the buffer
   const nextPosition = state.questionSlots.length;
   const newSlot: RedisQuestionSlot = {
     ...bufferToPop,
@@ -266,19 +298,14 @@ export async function promoteNextQuestion(
 
   state.questionSlots.push(newSlot);
   state.currentQuestionIndex = nextPosition;
-
-  // Reset active state for the new question
   state.activeQuestionState = createFreshActiveQuestionState();
-
-  // Replace buffers and record new IDs in the seen ledger
   state.pendingBuffers = newBuffers;
   
   if (newBuffers.harder) state.seenQuestionBankIds.push(newBuffers.harder.questionBankId);
   if (newBuffers.easier) state.seenQuestionBankIds.push(newBuffers.easier.questionBankId);
   if (newBuffers.same_topic) state.seenQuestionBankIds.push(newBuffers.same_topic.questionBankId);
 
-  await updateInterviewState(sessionId, state);
-  return state;
+  return true;
 }
 
 
