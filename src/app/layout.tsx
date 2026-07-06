@@ -66,6 +66,9 @@ export const metadata: Metadata = {
     description: 'Master technical interviews with AI-powered practice sessions.',
     images: ['/interview.png'],
   },
+  verification: {
+    google: 'EiG6rZQFaYQOK6FwDYrt1wOMTo-qi5vRIIL4X1F09gU',
+  },
 };
 
 export default function RootLayout({
