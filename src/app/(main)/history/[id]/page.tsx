@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import Loading from '@/components/dashboard/loader';
 import { formatDateFull } from '@/lib/formatters';
-import { getExpectedQuestionsCount } from '@/lib/interview-session';
+import { getExpectedQuestionsCount } from '@/lib/scoring';
 import { getDifficultyBadgeClass, getStatusBadgeClass, getStatusLabel } from '@/lib/styles';
 import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';

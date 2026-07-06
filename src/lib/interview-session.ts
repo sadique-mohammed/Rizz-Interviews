@@ -7,6 +7,7 @@ import type {
   ActiveSessionRecord,
   InterviewSessionRecord,
 } from '@/types/interviewSession';
+import { getExpectedQuestionsCount } from '@/lib/scoring';
 
 export function isSessionExpired(session: SessionTiming, now: Date = new Date()): boolean {
   const totalDurationMs = session.duration * 60 * 1000;
@@ -17,17 +18,7 @@ export function isSessionExpired(session: SessionTiming, now: Date = new Date())
   return (now.getTime() - new Date(session.startedAt).getTime()) >= (totalDurationMs + GRACE_PERIOD_MS);
 }
 
-export function getExpectedQuestionsCount(duration: number, _difficulty: string): number {
-  // 15 mins: 1 question expected (no penalty if they only do 1)
-  if (duration <= 15) return 1;
-  
-  // 30 mins and 45 mins: 3 questions expected
-  // (If they do 3 or 4, they won't be penalized because the denominator scales up)
-  if (duration <= 45) return 3;
 
-  // Fallback for > 45 mins
-  return 4;
-}
 
 export async function calculateAndFinalizeInterview(
   sessionId: string,
