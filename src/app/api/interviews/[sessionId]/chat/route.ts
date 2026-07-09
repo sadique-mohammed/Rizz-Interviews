@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { z } from 'zod';
-import { getInterviewState, updateInterviewState, getTranscriptWindow, applyChatMessages, applyActiveQuestionState } from '@/lib/interview-redis';
+import {
+  getInterviewState,
+  updateInterviewState,
+  getTranscriptWindow,
+  applyChatMessages,
+  applyActiveQuestionState,
+} from '@/lib/interview-redis';
 import { generateInterviewChat } from '@/lib/ai/interview-chat';
 import type { ChatRequest } from '@/lib/ai/types';
 import { getInterviewSessionForAccess } from '@/lib/interview-session';
@@ -20,7 +26,7 @@ const chatSchema = z.object({
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ sessionId: string }> }
+  { params }: { params: Promise<{ sessionId: string }> },
 ): Promise<NextResponse> {
   try {
     const { userId } = await auth();
@@ -49,7 +55,10 @@ export async function POST(
     // 1. Enforce DB existence, ownership, and strict expiry
     const dbSession = await getInterviewSessionForAccess(userId, sessionId);
     if (!dbSession || dbSession.status !== 'in_progress') {
-      return NextResponse.json({ error: 'Interview session is no longer active or expired' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Interview session is no longer active or expired' },
+        { status: 403 },
+      );
     }
 
     // 2. Fetch Redis state (now guaranteed to be legally in_progress by DB)
@@ -65,7 +74,7 @@ export async function POST(
 
     // 2. Prepare ChatRequest
     const transcriptWindow = getTranscriptWindow(state, 15);
-    
+
     const chatReq: ChatRequest = {
       sessionId,
       userMessage: message,
@@ -100,7 +109,7 @@ export async function POST(
       questionPosition: currentSlot.position,
       kind: (isHintRequest ? 'hint' : 'message') as any,
     };
-    
+
     const aiMsg = {
       id: crypto.randomUUID(),
       role: 'ai' as const,
@@ -124,7 +133,6 @@ export async function POST(
 
     // 5. Return response
     return NextResponse.json(aiResponse);
-
   } catch (error) {
     console.error('Chat endpoint error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

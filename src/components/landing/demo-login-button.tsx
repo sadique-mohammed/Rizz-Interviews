@@ -10,14 +10,14 @@ export default function DemoLoginButton({ className }: { className?: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, setActive, isLoaded } = useSignIn();
   const router = useRouter();
-  
+
   const handleDemoLogin = async () => {
     if (!isLoaded) return;
     setIsLoading(true);
     try {
       const res = await fetch('/api/demo-login', { method: 'POST' });
       const data = await res.json();
-      
+
       if (data.ticket) {
         const result = await signIn.create({
           strategy: 'ticket',
@@ -35,24 +35,25 @@ export default function DemoLoginButton({ className }: { className?: string }) {
       }
     } catch (e) {
       console.error(e);
-      const errorMessage = e instanceof Error ? e.message : 'Failed to start demo session. Please try again.';
+      const errorMessage =
+        e instanceof Error ? e.message : 'Failed to start demo session. Please try again.';
       alert(errorMessage);
       setIsLoading(false);
     }
   };
 
   return (
-    <button 
+    <button
       onClick={handleDemoLogin}
       disabled={isLoading}
       className={cn(
-        "inline-flex items-center justify-center rounded-xl px-10 py-2 text-sm font-semibold btn-invert hover:shadow-lg transition-all duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed",
-        className
+        'inline-flex items-center justify-center rounded-xl px-10 py-2 text-sm font-semibold btn-invert hover:shadow-lg transition-all duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed',
+        className,
       )}
     >
       {isLoading ? (
         <>
-          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          <Loader2 className='w-4 h-4 animate-spin mr-2' />
           Authenticating...
         </>
       ) : (

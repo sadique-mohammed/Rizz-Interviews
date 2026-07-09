@@ -10,7 +10,9 @@ import { eq, and, sql } from 'drizzle-orm';
 const createInterviewSchema = z.object({
   domain: z.enum(['DSA', 'Web Dev']),
   difficulty: z.enum(['easy', 'medium', 'hard']),
-  duration: z.coerce.number().pipe(z.union([z.literal(1), z.literal(15), z.literal(30), z.literal(45)])),
+  duration: z.coerce
+    .number()
+    .pipe(z.union([z.literal(1), z.literal(15), z.literal(30), z.literal(45)])),
 });
 
 import { Ratelimit } from '@upstash/ratelimit';
@@ -22,8 +24,6 @@ const ratelimit = new Ratelimit({
   redis,
   limiter: Ratelimit.slidingWindow(5, '1 m'),
 });
-
-
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     const { domain, difficulty, duration } = validation.data;
-    
+
     // Determine max questions cap based on duration
     const maxQuestions = duration === 15 ? 5 : duration === 30 ? 10 : 15;
 
@@ -58,21 +58,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       db
         .select()
         .from(questionBank)
-        .where(
-          and(
-            eq(questionBank.domain, domain),
-            eq(questionBank.difficulty, difficulty)
-          )
-        )
+        .where(and(eq(questionBank.domain, domain), eq(questionBank.difficulty, difficulty)))
         .orderBy(sql`RANDOM()`)
         .limit(1),
-      db.select({ name: users.name }).from(users).where(eq(users.id, userId))
+      db.select({ name: users.name }).from(users).where(eq(users.id, userId)),
     ]);
 
     if (bankQuestions.length === 0) {
       return NextResponse.json(
         { error: 'No questions available for this domain and difficulty.' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -117,7 +112,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // Record buffer IDs into the seen ledger
     if (pendingBuffers.harder) seenQuestionBankIds.push(pendingBuffers.harder.questionBankId);
     if (pendingBuffers.easier) seenQuestionBankIds.push(pendingBuffers.easier.questionBankId);
-    if (pendingBuffers.same_topic) seenQuestionBankIds.push(pendingBuffers.same_topic.questionBankId);
+    if (pendingBuffers.same_topic)
+      seenQuestionBankIds.push(pendingBuffers.same_topic.questionBankId);
 
     // 4. Create the active session question in Postgres
     const [sessionQuestion] = await db

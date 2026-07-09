@@ -3,5 +3,5 @@ export interface Recording {
   interviewId: string;
   videoUrl?: string;
   transcriptUrl?: string;
-  recordingStatus?: "pending" | "completed" | "failed";
+  recordingStatus?: 'pending' | 'completed' | 'failed';
 }

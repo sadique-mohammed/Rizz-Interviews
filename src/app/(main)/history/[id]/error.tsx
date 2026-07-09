@@ -35,7 +35,7 @@ export default function Error({
         <div className='flex gap-3 justify-center'>
           <button
             onClick={reset}
-          className='btn-brand inline-flex items-center justify-center px-6 py-3 font-semibold rounded-lg'
+            className='btn-brand inline-flex items-center justify-center px-6 py-3 font-semibold rounded-lg'
           >
             Try again
           </button>

@@ -1,11 +1,6 @@
 import 'server-only';
 
-import {
-  getChatConfig,
-  isMockMode,
-  isForceFailure,
-  aiLog,
-} from './config';
+import { getChatConfig, isMockMode, isForceFailure, aiLog } from './config';
 import { callGroqForChat } from './groq';
 import { callGeminiForChat } from './gemini';
 import { mockInterviewChat } from './mock';
@@ -54,7 +49,8 @@ Hint State: ${hintState.hintsUsed}/${hintState.totalHints} hints used`;
   if (transcriptWindow.recentMessages.length > 0) {
     prompt += '\n\nRecent Conversation:';
     for (const msg of transcriptWindow.recentMessages) {
-      const label = msg.role === 'user' ? 'Candidate' : msg.role === 'ai' ? 'Interviewer' : 'System';
+      const label =
+        msg.role === 'user' ? 'Candidate' : msg.role === 'ai' ? 'Interviewer' : 'System';
       prompt += `\n${label}: ${msg.text}`;
     }
   }
@@ -152,7 +148,10 @@ export async function generateInterviewChat(req: ChatRequest): Promise<ChatRespo
       return response;
     } catch (error) {
       const isTransient = error instanceof AITransientError;
-      aiLog('chat', `Attempt ${i + 1} failed (transient=${isTransient}): ${error instanceof Error ? error.message : String(error)}`);
+      aiLog(
+        'chat',
+        `Attempt ${i + 1} failed (transient=${isTransient}): ${error instanceof Error ? error.message : String(error)}`,
+      );
 
       if (isTransient) {
         errors.push(error);
@@ -168,7 +167,8 @@ export async function generateInterviewChat(req: ChatRequest): Promise<ChatRespo
   aiLog('chat', 'All chat models failed, returning safe fallback');
 
   const safeFallback: ChatResponse = {
-    reply: "I'm having a moment — could you repeat that or continue with your approach? I want to make sure I give you a thoughtful response.",
+    reply:
+      "I'm having a moment — could you repeat that or continue with your approach? I want to make sure I give you a thoughtful response.",
     provider: 'mock',
     model: 'local-fallback',
     apiMode: 'mock',
@@ -190,23 +190,50 @@ export async function generateInterviewChat(req: ChatRequest): Promise<ChatRespo
 // ---------------------------------------------------------------------------
 
 export async function generateGreeting(candidateName: string = 'the candidate'): Promise<string> {
-  const interviewerNames = ['Alex', 'Sam', 'Jordan', 'Taylor', 'Casey', 'Riley', 'Morgan', 'Avery', 'Drew', 'Harper'];
-  const interviewerRoles = ['backend services', 'infrastructure', 'frontend architecture', 'core platform', 'machine learning', 'payments', 'search and discovery'];
-  
+  const interviewerNames = [
+    'Alex',
+    'Sam',
+    'Jordan',
+    'Taylor',
+    'Casey',
+    'Riley',
+    'Morgan',
+    'Avery',
+    'Drew',
+    'Harper',
+  ];
+  const interviewerRoles = [
+    'backend services',
+    'infrastructure',
+    'frontend architecture',
+    'core platform',
+    'machine learning',
+    'payments',
+    'search and discovery',
+  ];
+
   const randomName = interviewerNames[Math.floor(Math.random() * interviewerNames.length)];
   const randomRole = interviewerRoles[Math.floor(Math.random() * interviewerRoles.length)];
 
   const systemPrompt = `You are a senior software engineer at a top tech company conducting a mock interview. The candidate, ${candidateName}, has just joined the room. Write a short, friendly opening message introducing yourself (your name is ${randomName} from the ${randomRole} team), welcome the candidate (by name if provided), and ask how they are doing or if they are ready to begin. 
 
 CRITICAL: Do NOT introduce the coding problem yet. Keep it to 2-3 sentences max. Be conversational and human.`;
-  
+
   const config = getChatConfig();
-  
+
   try {
     if (config.primary.provider === 'groq') {
-      return await callGroqForChat(systemPrompt, "The candidate just joined. Greet them.", config.primary.model);
+      return await callGroqForChat(
+        systemPrompt,
+        'The candidate just joined. Greet them.',
+        config.primary.model,
+      );
     } else {
-      return await callGeminiForChat("The candidate just joined. Greet them.", config.primary.model, systemPrompt);
+      return await callGeminiForChat(
+        'The candidate just joined. Greet them.',
+        config.primary.model,
+        systemPrompt,
+      );
     }
   } catch (error) {
     aiLog('chat', `Failed to generate dynamic greeting: ${error}`);
@@ -222,12 +249,20 @@ Next problem title: ${nextQuestionTitle}
 CRITICAL: Keep it to 2-3 sentences. Be conversational and human. Do NOT explain the problem description or logic. Just mention the title and ask them to walk you through their first instincts before they start coding.`;
 
   const config = getChatConfig();
-  
+
   try {
     if (config.primary.provider === 'groq') {
-      return await callGroqForChat(systemPrompt, "Introduce the next problem.", config.primary.model);
+      return await callGroqForChat(
+        systemPrompt,
+        'Introduce the next problem.',
+        config.primary.model,
+      );
     } else {
-      return await callGeminiForChat("Introduce the next problem.", config.primary.model, systemPrompt);
+      return await callGeminiForChat(
+        'Introduce the next problem.',
+        config.primary.model,
+        systemPrompt,
+      );
     }
   } catch (error) {
     aiLog('chat', `Failed to generate dynamic transition: ${error}`);

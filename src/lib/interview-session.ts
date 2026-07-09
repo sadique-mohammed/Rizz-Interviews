@@ -12,13 +12,11 @@ import { getExpectedQuestionsCount } from '@/lib/scoring';
 export function isSessionExpired(session: SessionTiming, now: Date = new Date()): boolean {
   const totalDurationMs = session.duration * 60 * 1000;
   if (totalDurationMs <= 0) return true;
-  
+
   // 60-second grace period for network latency and final auto-submits
   const GRACE_PERIOD_MS = 60 * 1000;
-  return (now.getTime() - new Date(session.startedAt).getTime()) >= (totalDurationMs + GRACE_PERIOD_MS);
+  return now.getTime() - new Date(session.startedAt).getTime() >= totalDurationMs + GRACE_PERIOD_MS;
 }
-
-
 
 export async function calculateAndFinalizeInterview(
   sessionId: string,
@@ -53,7 +51,7 @@ export async function calculateAndFinalizeInterview(
 
     // Filter out 0-effort auto-submissions
     attempts = attempts.filter(
-      (a) => !(a.score === 0 && a.explanation === 'Auto-submitted when time expired.')
+      (a) => !(a.score === 0 && a.explanation === 'Auto-submitted when time expired.'),
     );
 
     if (attempts.length > 0) {
@@ -75,7 +73,7 @@ export async function calculateAndFinalizeInterview(
 
       const expectedQuestions = getExpectedQuestionsCount(interview.duration, interview.difficulty);
       const denominatorQuestions = Math.max(expectedQuestions, bestScores.size);
-      
+
       const maxPossible = denominatorQuestions * 10;
       totalScore = Math.round((sum / maxPossible) * 100);
     }
@@ -97,7 +95,9 @@ export async function calculateAndFinalizeInterview(
   return status;
 }
 
-export async function reconcileUserActiveSession(userId: string): Promise<ActiveSessionRecord | null> {
+export async function reconcileUserActiveSession(
+  userId: string,
+): Promise<ActiveSessionRecord | null> {
   const sessions = await db
     .select({
       id: interviews.id,

@@ -138,8 +138,8 @@ function AbandonModal({ session, onKeep, onConfirmAbandon, isAbandoning }: Aband
         <p className='mb-6 text-sm leading-relaxed text-gray-600'>
           Your <span className='font-medium text-gray-800'>{session.domain}</span> (
           <span className='capitalize'>{session.difficulty}</span>) session from{' '}
-          <span className='font-medium text-gray-800'>{getTimeAgo(session.startedAt)}</span> will
-          be marked as abandoned. Progress won&apos;t be saved.
+          <span className='font-medium text-gray-800'>{getTimeAgo(session.startedAt)}</span> will be
+          marked as abandoned. Progress won&apos;t be saved.
         </p>
 
         <div className='flex items-center justify-end gap-3'>
@@ -232,9 +232,7 @@ function ActiveSessionBanner({ session, onResume, onAbandon }: ActiveSessionBann
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
-export default function InterviewSessionCard({
-  activeSession = null,
-}: InterviewSessionCardProps) {
+export default function InterviewSessionCard({ activeSession = null }: InterviewSessionCardProps) {
   const router = useRouter();
 
   const [selectedType, setSelectedType] = React.useState('DSA');
@@ -355,9 +353,7 @@ export default function InterviewSessionCard({
             )}
 
             <div>
-              <label className='text-sm font-medium text-gray-700 mb-3 block'>
-                Interview Type
-              </label>
+              <label className='text-sm font-medium text-gray-700 mb-3 block'>Interview Type</label>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
                 {interviewTypes.map((type) => {
                   const Icon = type.icon;
@@ -430,10 +426,7 @@ export default function InterviewSessionCard({
               </div>
 
               <div>
-                <label
-                  htmlFor='duration'
-                  className='text-sm font-medium text-gray-700 mb-2 block'
-                >
+                <label htmlFor='duration' className='text-sm font-medium text-gray-700 mb-2 block'>
                   Session Duration
                 </label>
                 <Select value={selectedDuration} onValueChange={setSelectedDuration}>
@@ -441,7 +434,10 @@ export default function InterviewSessionCard({
                     <SelectValue placeholder='Select duration' />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value='1' className='cursor-pointer bg-brand/8 font-semibold text-brand focus:bg-brand/14 focus:text-brand-dark'>
+                    <SelectItem
+                      value='1'
+                      className='cursor-pointer bg-brand/8 font-semibold text-brand focus:bg-brand/14 focus:text-brand-dark'
+                    >
                       1 min (Testing)
                     </SelectItem>
                     <SelectItem value='15' className='cursor-pointer'>

@@ -131,4 +131,3 @@ export interface RedisInterviewState {
   /** References to submitted & evaluated answers. */
   answeredQuestions: RedisAnsweredQuestion[];
 }
-

@@ -6,11 +6,24 @@ import dynamic from 'next/dynamic';
 import { Panel, Group, Separator } from 'react-resizable-panels';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Send, AlertCircle, Loader2, Lightbulb, Bot, User, ArrowRight, CheckCircle2 } from 'lucide-react';
+import {
+  Send,
+  AlertCircle,
+  Loader2,
+  Lightbulb,
+  Bot,
+  User,
+  ArrowRight,
+  CheckCircle2,
+} from 'lucide-react';
 import { clearInterviewStorage } from '@/lib/utils';
 import InterviewModeHeader from '@/components/interview/interview-mode-header';
 import { toast } from 'sonner';
-import type { RedisInterviewState, RedisQuestionSlot, RedisChatMessage } from '@/types/interviewRedis';
+import type {
+  RedisInterviewState,
+  RedisQuestionSlot,
+  RedisChatMessage,
+} from '@/types/interviewRedis';
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
   ssr: false,
@@ -59,9 +72,18 @@ function TypingIndicator() {
         <div>
           <span className='mb-1 block text-[10px] font-semibold text-brand'>Nexus AI</span>
           <div className='flex items-center gap-1 rounded-lg rounded-tl-none border border-brand/15 bg-brand/8 px-3 py-2.5'>
-            <span className='h-1.5 w-1.5 animate-bounce rounded-full bg-brand/70' style={{ animationDelay: '0ms' }} />
-            <span className='h-1.5 w-1.5 animate-bounce rounded-full bg-brand/70' style={{ animationDelay: '150ms' }} />
-            <span className='h-1.5 w-1.5 animate-bounce rounded-full bg-brand/70' style={{ animationDelay: '300ms' }} />
+            <span
+              className='h-1.5 w-1.5 animate-bounce rounded-full bg-brand/70'
+              style={{ animationDelay: '0ms' }}
+            />
+            <span
+              className='h-1.5 w-1.5 animate-bounce rounded-full bg-brand/70'
+              style={{ animationDelay: '150ms' }}
+            />
+            <span
+              className='h-1.5 w-1.5 animate-bounce rounded-full bg-brand/70'
+              style={{ animationDelay: '300ms' }}
+            />
           </div>
         </div>
       </div>
@@ -367,13 +389,13 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
 
   const { sessionId, domain, difficulty, duration, questionSlots, currentQuestionIndex } = state;
   const question = questionSlots[currentQuestionIndex];
-  
+
   const requiresCode = true; // Web Dev and DSA both expect code in our simplified model
   const languages = domain === 'DSA' ? DSA_LANGUAGES : WEBDEV_LANGUAGES;
 
   // ── Editor state (hydrated from localStorage on refresh) ──
   const storageKeyBase = `nexus_draft_${sessionId}_${currentQuestionIndex}`;
-  
+
   const [language, setLanguage] = React.useState(() => {
     const saved = state.activeQuestionState.draftLanguage;
     if (saved && languages.some((l) => l.value === saved)) return saved;
@@ -404,30 +426,32 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
   // Hydrate from localStorage after SSR
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
-      const localLang = localStorage.getItem(`${storageKeyBase}_lang`) || localStorage.getItem(`nexus_preferred_lang_${sessionId}`);
+      const localLang =
+        localStorage.getItem(`${storageKeyBase}_lang`) ||
+        localStorage.getItem(`nexus_preferred_lang_${sessionId}`);
       const localMap = localStorage.getItem(`${storageKeyBase}_codeMap`);
       const localExpl = localStorage.getItem(`${storageKeyBase}_expl`);
-      
+
       if (localLang && languages.some((l) => l.value === localLang)) {
         setLanguage(localLang);
       }
-      
+
       if (localMap) {
         try {
           const parsed = JSON.parse(localMap);
-          setCodeMap(prev => ({ ...prev, ...parsed }));
+          setCodeMap((prev) => ({ ...prev, ...parsed }));
         } catch (e) {
           // Ignore parse errors
         }
       }
-      
+
       if (localExpl !== null) {
         setExplanation(localExpl);
       }
     }
     setIsHydrated(true);
   }, [storageKeyBase, languages]);
-  
+
   // Initialize timer relative to session startedAt + duration
   const [timeLeft, setTimeLeft] = React.useState(() => {
     const expires = new Date(state.expiresAt).getTime();
@@ -507,14 +531,17 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
   }, [messages, isAiTyping]);
 
   // ── Handlers ──
-  const handleLanguageChange = React.useCallback((newLang: string) => {
-    setLanguage(newLang);
-    setValidationError('');
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(`${storageKeyBase}_lang`, newLang);
-      localStorage.setItem(`nexus_preferred_lang_${sessionId}`, newLang);
-    }
-  }, [storageKeyBase, sessionId]);
+  const handleLanguageChange = React.useCallback(
+    (newLang: string) => {
+      setLanguage(newLang);
+      setValidationError('');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`${storageKeyBase}_lang`, newLang);
+        localStorage.setItem(`nexus_preferred_lang_${sessionId}`, newLang);
+      }
+    },
+    [storageKeyBase, sessionId],
+  );
 
   const handleCodeChange = React.useCallback(
     (value: string | undefined) => {
@@ -531,17 +558,20 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
     [language, storageKeyBase],
   );
 
-  const handleExplanationChange = React.useCallback((value: string) => {
-    setExplanation(value);
-    setValidationError('');
-    if (typeof window !== 'undefined') localStorage.setItem(`${storageKeyBase}_expl`, value);
-  }, [storageKeyBase]);
+  const handleExplanationChange = React.useCallback(
+    (value: string) => {
+      setExplanation(value);
+      setValidationError('');
+      if (typeof window !== 'undefined') localStorage.setItem(`${storageKeyBase}_expl`, value);
+    },
+    [storageKeyBase],
+  );
 
   // ── Send a chat message ──
   const sendChatMessage = React.useCallback(
     async (text: string, isHintRequest = false) => {
       if (!text.trim() && !isHintRequest) return;
-      
+
       const newMsgId = crypto.randomUUID();
       const userMsg: RedisChatMessage = {
         id: newMsgId,
@@ -549,39 +579,42 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
         text: isHintRequest ? 'Can I get a hint?' : text.trim(),
         timestamp: new Date().toISOString(),
       };
-      
+
       setMessages((prev) => [...prev, userMsg]);
       setIsAiTyping(true);
-      
+
       try {
         const res = await fetch(`/api/interviews/${sessionId}/chat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: userMsg.text, isHintRequest }),
         });
-        
+
         if (!res.ok) {
-           toast.error('Failed to send message');
-           setIsAiTyping(false);
-           return;
+          toast.error('Failed to send message');
+          setIsAiTyping(false);
+          return;
         }
-        
+
         const data = await res.json();
-        
-        setMessages((prev) => [...prev, {
-          id: crypto.randomUUID(),
-          role: 'ai',
-          text: data.reply,
-          timestamp: new Date().toISOString()
-        }]);
-        
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            role: 'ai',
+            text: data.reply,
+            timestamp: new Date().toISOString(),
+          },
+        ]);
+
         if (data.newHintIndex !== undefined) {
-           setHintIndex(data.newHintIndex);
+          setHintIndex(data.newHintIndex);
         }
       } catch (err) {
-         toast.error('Error sending message');
+        toast.error('Error sending message');
       } finally {
-         setIsAiTyping(false);
+        setIsAiTyping(false);
       }
     },
     [sessionId],
@@ -664,7 +697,12 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
 
       setMessages((prev) => [
         ...prev,
-        { id: crypto.randomUUID(), role: 'user', text: `[Submitted ${language} solution]\n\nExplanation: ${explanation}`, timestamp: new Date().toISOString() },
+        {
+          id: crypto.randomUUID(),
+          role: 'user',
+          text: `[Submitted ${language} solution]\n\nExplanation: ${explanation}`,
+          timestamp: new Date().toISOString(),
+        },
       ]);
 
       try {
@@ -675,7 +713,7 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
             code: currentCode,
             language,
             explanation: explanation.trim() || (force ? 'Auto-submitted when time expired.' : ''),
-            timeSpentSeconds: duration * 60 - timeLeft
+            timeSpentSeconds: duration * 60 - timeLeft,
           }),
         });
 
@@ -692,19 +730,19 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
         }
 
         const data = await response.json();
-        
+
         setMessages((prev) => [
           ...prev,
           {
             id: crypto.randomUUID(),
             role: 'ai',
             text: data.interviewerReply,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           },
         ]);
-        
+
         setIsSubmitting(false);
-        
+
         // Track the evaluation result for the transition UI
         setHasSubmitted(true);
         setHasNextQuestion(data.hasNextQuestion ?? false);
@@ -720,7 +758,16 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
         setIsSubmitting(false);
       }
     },
-    [currentCode, explanation, language, duration, timeLeft, sessionId, validateSubmission, handleEnd],
+    [
+      currentCode,
+      explanation,
+      language,
+      duration,
+      timeLeft,
+      sessionId,
+      validateSubmission,
+      handleEnd,
+    ],
   );
 
   // ── Auto-End/Submit when time runs out ──
@@ -789,12 +836,10 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
     }
   }, [sessionId, lastAttemptId, handleEnd, router]);
 
-
-
   if (!question) {
     return (
-      <div className="flex flex-col h-screen items-center justify-center bg-[#fafafa]">
-        <h2 className="text-2xl font-bold mb-4">No active question</h2>
+      <div className='flex flex-col h-screen items-center justify-center bg-[#fafafa]'>
+        <h2 className='text-2xl font-bold mb-4'>No active question</h2>
         <Button onClick={handleEnd}>Complete Interview</Button>
       </div>
     );
@@ -813,7 +858,9 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
       <div className='flex-1 min-h-0 relative'>
         <Group orientation='horizontal' className='h-full w-full'>
           <Panel defaultSize={30} minSize={20} id='question-pane'>
-            <div className={`h-full w-full transition-all duration-500 bg-white ${hasSubmitted ? 'opacity-40 blur-sm pointer-events-none' : ''}`}>
+            <div
+              className={`h-full w-full transition-all duration-500 bg-white ${hasSubmitted ? 'opacity-40 blur-sm pointer-events-none' : ''}`}
+            >
               <QuestionPanel question={question} />
             </div>
           </Panel>
@@ -838,7 +885,9 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
           </Separator>
 
           <Panel defaultSize={35} minSize={30} id='editor-pane'>
-            <div className={`h-full w-full transition-all duration-500 bg-white ${hasSubmitted ? 'opacity-40 blur-sm pointer-events-none' : ''}`}>
+            <div
+              className={`h-full w-full transition-all duration-500 bg-white ${hasSubmitted ? 'opacity-40 blur-sm pointer-events-none' : ''}`}
+            >
               <EditorPane
                 requiresCode={requiresCode}
                 languages={languages}
@@ -873,7 +922,8 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
               </div>
 
               <p className='text-sm text-gray-600 leading-relaxed font-medium'>
-                Your answer has been successfully recorded. Please proceed to the next question when you are ready.
+                Your answer has been successfully recorded. Please proceed to the next question when
+                you are ready.
               </p>
 
               <div className='pt-2'>
@@ -907,4 +957,3 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
     </div>
   );
 }
-

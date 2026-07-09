@@ -5,7 +5,10 @@ import { interviews, questions, answerAttempts, recordings, questionBank } from 
 import { and, eq, inArray, ne, asc } from 'drizzle-orm';
 import { questionBankToMarkdown } from '@/lib/question-bank';
 
-export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }): Promise<NextResponse> {
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+): Promise<NextResponse> {
   try {
     const { id } = await params;
     const { userId } = await auth();
@@ -26,7 +29,13 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         status: interviews.status,
       })
       .from(interviews)
-      .where(and(eq(interviews.id, id), eq(interviews.userId, userId), ne(interviews.status, 'abandoned')))
+      .where(
+        and(
+          eq(interviews.id, id),
+          eq(interviews.userId, userId),
+          ne(interviews.status, 'abandoned'),
+        ),
+      )
       .limit(1);
 
     if (interviewResult.length === 0) {

@@ -15,7 +15,7 @@ import { generateTransition } from '@/lib/ai/interview-chat';
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ sessionId: string }> }
+  { params }: { params: Promise<{ sessionId: string }> },
 ): Promise<NextResponse> {
   try {
     const { userId } = await auth();
@@ -32,7 +32,10 @@ export async function POST(
     // 1. Enforce DB existence, ownership, and strict expiry
     const dbSession = await getInterviewSessionForAccess(userId, sessionId);
     if (!dbSession || dbSession.status !== 'in_progress') {
-      return NextResponse.json({ error: 'Interview session is no longer active or expired' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Interview session is no longer active or expired' },
+        { status: 403 },
+      );
     }
 
     // 2. Fetch Redis state (now guaranteed to be legally in_progress by DB)
@@ -88,19 +91,19 @@ export async function POST(
     }
 
     const nextPosition = state.questionSlots.length;
-    
+
     // 5. Refill buffers synchronously if under cap, and generate dynamic AI transition in parallel
     let newBuffers = state.pendingBuffers;
     let dynamicTransition = '';
-    
+
     // We can fetch adaptive buffers and generate transition concurrently
     const [fetchedBuffers, transitionText] = await Promise.all([
-      (nextPosition + 1 < state.maxQuestions) 
+      nextPosition + 1 < state.maxQuestions
         ? fetchAdaptiveBuffers(state.domain, bufferToPop.difficultyScore, state.seenQuestionBankIds)
         : Promise.resolve({}),
-      generateTransition(bufferToPop.title)
+      generateTransition(bufferToPop.title),
     ]);
-    
+
     newBuffers = fetchedBuffers;
     dynamicTransition = transitionText;
 
@@ -115,10 +118,15 @@ export async function POST(
       .returning({ id: questions.id });
 
     // 7. Late-stage Redis Commit (Promote buffer)
-    const promoteSuccess = applyPromoteNextQuestion(state, bufferKeyToPromote, sessionQuestion.id, newBuffers);
+    const promoteSuccess = applyPromoteNextQuestion(
+      state,
+      bufferKeyToPromote,
+      sessionQuestion.id,
+      newBuffers,
+    );
 
     if (!promoteSuccess) {
-       return NextResponse.json({ error: 'Failed to promote question' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to promote question' }, { status: 500 });
     }
 
     // 8. Append a transition message to chat
@@ -130,7 +138,7 @@ export async function POST(
         timestamp: new Date().toISOString(),
         questionPosition: nextPosition,
         kind: 'message' as const,
-      }
+      },
     ]);
 
     await updateInterviewState(sessionId, state);
@@ -139,7 +147,6 @@ export async function POST(
       success: true,
       hasNext: true,
     });
-
   } catch (error) {
     console.error('Next question error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

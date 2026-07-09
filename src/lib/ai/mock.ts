@@ -7,12 +7,7 @@ import 'server-only';
  * UI/database/Redis flow without external API calls.
  */
 
-import type {
-  EvaluationRequest,
-  EvaluationResult,
-  ChatRequest,
-  ChatResponse,
-} from './types';
+import type { EvaluationRequest, EvaluationResult, ChatRequest, ChatResponse } from './types';
 
 // ---------------------------------------------------------------------------
 // Mock evaluation
@@ -112,7 +107,8 @@ export function mockInterviewChat(req: ChatRequest): ChatResponse {
       reply = `Here's a hint: ${hint}`;
       newHintIndex = req.hintState.hintIndex + 1;
     } else {
-      reply = "You've used all available hints. Try to work through the rest on your own — you've got this.";
+      reply =
+        "You've used all available hints. Try to work through the rest on your own — you've got this.";
     }
   } else if (msg.includes('solution') || msg.includes('answer') || msg.includes('tell me')) {
     reply = MOCK_RESPONSES.solution_request;

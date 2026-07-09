@@ -36,14 +36,11 @@ export async function PATCH(req: NextRequest, context: RouteContext): Promise<Ne
     }
 
     if (session.status !== 'in_progress') {
-      return NextResponse.json(
-        { error: 'Session is not in progress' },
-        { status: 409 },
-      );
+      return NextResponse.json({ error: 'Session is not in progress' }, { status: 409 });
     }
 
     const now = new Date();
-    
+
     // Check answerAttempts for completion status and update DB
     const nextStatus = await calculateAndFinalizeInterview(sessionId, now);
 

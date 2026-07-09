@@ -31,12 +31,13 @@ export default function InterviewModeHeader({
 
   React.useEffect(() => {
     // Zoom animation at 5 mins, 1 min, 30 sec, and last 10 seconds
-    const shouldAnimate = timeLeft === 300 || timeLeft === 60 || timeLeft === 30 || (timeLeft <= 10 && timeLeft > 0);
-    
+    const shouldAnimate =
+      timeLeft === 300 || timeLeft === 60 || timeLeft === 30 || (timeLeft <= 10 && timeLeft > 0);
+
     if (shouldAnimate) {
       setAnimateScale(true);
       const timer = setTimeout(() => setAnimateScale(false), 500);
-      
+
       // Play tick sound for last 10 seconds
       if (timeLeft <= 10) {
         try {
@@ -45,27 +46,27 @@ export default function InterviewModeHeader({
           }
           const ctx = audioCtxRef.current;
           if (ctx.state === 'suspended') ctx.resume();
-          
+
           const osc = ctx.createOscillator();
           const gainNode = ctx.createGain();
-          
+
           osc.type = 'sine';
           osc.frequency.setValueAtTime(800, ctx.currentTime);
           osc.frequency.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-          
+
           gainNode.gain.setValueAtTime(1, ctx.currentTime);
           gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-          
+
           osc.connect(gainNode);
           gainNode.connect(ctx.destination);
-          
+
           osc.start(ctx.currentTime);
           osc.stop(ctx.currentTime + 0.1);
         } catch (e) {
           // ignore audio context errors
         }
       }
-      
+
       return () => clearTimeout(timer);
     }
   }, [timeLeft]);
@@ -95,9 +96,15 @@ export default function InterviewModeHeader({
           </div>
         </div>
 
-        <div className={`flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-4 py-1.5 transition-all duration-300 ${animateScale ? 'scale-125 border-destructive/30 bg-destructive/10 shadow-lg' : ''}`}>
-          <Clock className={`h-4 w-4 ${timerColor(timeLeft)} ${animateScale ? 'text-destructive animate-pulse' : ''}`} />
-          <span className={`font-mono text-sm font-semibold tabular-nums ${timerColor(timeLeft)} ${animateScale ? 'text-destructive font-bold' : ''}`}>
+        <div
+          className={`flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-4 py-1.5 transition-all duration-300 ${animateScale ? 'scale-125 border-destructive/30 bg-destructive/10 shadow-lg' : ''}`}
+        >
+          <Clock
+            className={`h-4 w-4 ${timerColor(timeLeft)} ${animateScale ? 'text-destructive animate-pulse' : ''}`}
+          />
+          <span
+            className={`font-mono text-sm font-semibold tabular-nums ${timerColor(timeLeft)} ${animateScale ? 'text-destructive font-bold' : ''}`}
+          >
             {formatTime(timeLeft)}
           </span>
         </div>

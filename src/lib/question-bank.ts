@@ -7,21 +7,24 @@ import type { QuestionBankQuestion } from '@/types/questionBank';
 type QuestionBankRow = typeof questionBank.$inferSelect;
 
 function asStringArray(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : [];
 }
 
 function asCodeMap(value: unknown): Record<string, string> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
 
   return Object.fromEntries(
-    Object.entries(value).filter((entry): entry is [string, string] => typeof entry[1] === 'string'),
+    Object.entries(value).filter(
+      (entry): entry is [string, string] => typeof entry[1] === 'string',
+    ),
   );
 }
 
-export function questionBankToMarkdown(question: Pick<
-  QuestionBankQuestion,
-  'title' | 'description' | 'examples' | 'constraints'
->): string {
+export function questionBankToMarkdown(
+  question: Pick<QuestionBankQuestion, 'title' | 'description' | 'examples' | 'constraints'>,
+): string {
   const lines = [`## ${question.title}`, '', question.description];
 
   if (question.examples.length > 0) {
@@ -57,7 +60,6 @@ function mapQuestion(row: QuestionBankRow & { sessionQuestionId: string }): Ques
   };
 }
 
-
 import type { RedisQuestionSlot } from '@/types/interviewRedis';
 
 type BufferSlot = Omit<RedisQuestionSlot, 'position' | 'sessionQuestionId' | 'status'>;
@@ -83,9 +85,10 @@ export async function fetchAdaptiveBuffers(
   seenIds: string[],
 ): Promise<{ harder?: BufferSlot; easier?: BufferSlot; same_topic?: BufferSlot }> {
   // Option B: Bulk Fallback Strategy
-  const baseCond = seenIds.length > 0 
-    ? and(eq(questionBank.domain, domain), notInArray(questionBank.id, seenIds))
-    : eq(questionBank.domain, domain);
+  const baseCond =
+    seenIds.length > 0
+      ? and(eq(questionBank.domain, domain), notInArray(questionBank.id, seenIds))
+      : eq(questionBank.domain, domain);
 
   const fetchSlot = async (condition: any) => {
     const [row] = await db
@@ -102,21 +105,26 @@ export async function fetchAdaptiveBuffers(
   const [harder, easier, same_topic] = await Promise.all([
     fetchSlot(gt(questionBank.difficultyScore, currentScore)),
     fetchSlot(lt(questionBank.difficultyScore, currentScore)),
-    fetchSlot(eq(questionBank.difficultyScore, currentScore))
+    fetchSlot(eq(questionBank.difficultyScore, currentScore)),
   ]);
 
   const buffers = { harder, easier, same_topic };
-  
+
   // Bulk Fallback for missing buffers
   const missingCount = (!harder ? 1 : 0) + (!easier ? 1 : 0) + (!same_topic ? 1 : 0);
   if (missingCount > 0) {
     // Exclude the ones we just fetched in the specific queries
-    const newlyFetchedIds = [harder?.questionBankId, easier?.questionBankId, same_topic?.questionBankId].filter(Boolean) as string[];
+    const newlyFetchedIds = [
+      harder?.questionBankId,
+      easier?.questionBankId,
+      same_topic?.questionBankId,
+    ].filter(Boolean) as string[];
     const bulkExcludeIds = [...seenIds, ...newlyFetchedIds];
-    
-    const bulkBaseCond = bulkExcludeIds.length > 0
-      ? and(eq(questionBank.domain, domain), notInArray(questionBank.id, bulkExcludeIds))
-      : eq(questionBank.domain, domain);
+
+    const bulkBaseCond =
+      bulkExcludeIds.length > 0
+        ? and(eq(questionBank.domain, domain), notInArray(questionBank.id, bulkExcludeIds))
+        : eq(questionBank.domain, domain);
 
     const fallbacks = await db
       .select()
@@ -139,16 +147,20 @@ export async function fetchAdaptiveBuffers(
 
 export function resolveNextBuffer(
   chosenNextAction: 'harder' | 'easier' | 'same_topic' | 'follow_up' | 'end_interview' | undefined,
-  pendingBuffers: { harder?: BufferSlot; easier?: BufferSlot; same_topic?: BufferSlot }
+  pendingBuffers: { harder?: BufferSlot; easier?: BufferSlot; same_topic?: BufferSlot },
 ): { key: 'harder' | 'easier' | 'same_topic'; buffer: BufferSlot } | undefined {
   let initialKey: 'harder' | 'easier' | 'same_topic' = 'same_topic';
   if (chosenNextAction === 'harder') initialKey = 'harder';
   if (chosenNextAction === 'easier') initialKey = 'easier';
 
-  if (pendingBuffers[initialKey]) return { key: initialKey, buffer: pendingBuffers[initialKey] as BufferSlot };
-  if (pendingBuffers['same_topic']) return { key: 'same_topic', buffer: pendingBuffers['same_topic'] as BufferSlot };
-  if (pendingBuffers['harder']) return { key: 'harder', buffer: pendingBuffers['harder'] as BufferSlot };
-  if (pendingBuffers['easier']) return { key: 'easier', buffer: pendingBuffers['easier'] as BufferSlot };
+  if (pendingBuffers[initialKey])
+    return { key: initialKey, buffer: pendingBuffers[initialKey] as BufferSlot };
+  if (pendingBuffers['same_topic'])
+    return { key: 'same_topic', buffer: pendingBuffers['same_topic'] as BufferSlot };
+  if (pendingBuffers['harder'])
+    return { key: 'harder', buffer: pendingBuffers['harder'] as BufferSlot };
+  if (pendingBuffers['easier'])
+    return { key: 'easier', buffer: pendingBuffers['easier'] as BufferSlot };
 
   return undefined;
 }

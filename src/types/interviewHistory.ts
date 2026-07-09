@@ -26,4 +26,3 @@ export interface Interview {
   totalScore: number | null; // null until completed
   status: Status;
 }
-

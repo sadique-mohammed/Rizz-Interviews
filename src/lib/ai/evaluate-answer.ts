@@ -1,11 +1,6 @@
 import 'server-only';
 
-import {
-  getEvaluationConfig,
-  isMockMode,
-  isForceFailure,
-  aiLog,
-} from './config';
+import { getEvaluationConfig, isMockMode, isForceFailure, aiLog } from './config';
 import { callGeminiForEvaluation } from './gemini';
 import { callGroqForEvaluation } from './groq';
 import { mockEvaluateAnswer } from './mock';
@@ -19,9 +14,10 @@ import type { EvaluationRequest, EvaluationResult } from './types';
 function buildEvaluationPrompt(req: EvaluationRequest): string {
   const { question: q, candidate: c } = req;
 
-  const solutionForLang = c.language && q.optimalSolution[c.language]
-    ? q.optimalSolution[c.language]
-    : Object.values(q.optimalSolution)[0] || 'No optimal solution available';
+  const solutionForLang =
+    c.language && q.optimalSolution[c.language]
+      ? q.optimalSolution[c.language]
+      : Object.values(q.optimalSolution)[0] || 'No optimal solution available';
 
   return `You are a senior software engineer conducting a mock technical interview.
 
@@ -116,7 +112,11 @@ export async function evaluateAnswer(req: EvaluationRequest): Promise<Evaluation
     model: string;
     isFallback: boolean;
   }> = [
-    { provider: config.primary.provider as 'gemini' | 'groq', model: config.primary.model, isFallback: false },
+    {
+      provider: config.primary.provider as 'gemini' | 'groq',
+      model: config.primary.model,
+      isFallback: false,
+    },
     ...config.fallbacks.map((f) => ({
       provider: f.provider as 'gemini' | 'groq',
       model: f.model,
@@ -132,9 +132,15 @@ export async function evaluateAnswer(req: EvaluationRequest): Promise<Evaluation
     const isFallback = i > 0;
 
     try {
-      aiLog('evaluate', `Attempt ${i + 1}/${attempts.length}: ${attempt.provider}/${attempt.model}`);
+      aiLog(
+        'evaluate',
+        `Attempt ${i + 1}/${attempts.length}: ${attempt.provider}/${attempt.model}`,
+      );
 
-      let result: Omit<EvaluationResult, 'provider' | 'model' | 'apiMode' | 'store' | 'fallbackUsed'>;
+      let result: Omit<
+        EvaluationResult,
+        'provider' | 'model' | 'apiMode' | 'store' | 'fallbackUsed'
+      >;
 
       if (attempt.provider === 'gemini') {
         result = await callGeminiForEvaluation(prompt, attempt.model);
@@ -159,7 +165,10 @@ export async function evaluateAnswer(req: EvaluationRequest): Promise<Evaluation
       }
     } catch (error) {
       const isTransient = error instanceof AITransientError || error instanceof AISchemaError;
-      aiLog('evaluate', `Attempt ${i + 1} failed (transient=${isTransient}): ${error instanceof Error ? error.message : String(error)}`);
+      aiLog(
+        'evaluate',
+        `Attempt ${i + 1} failed (transient=${isTransient}): ${error instanceof Error ? error.message : String(error)}`,
+      );
 
       if (isTransient) {
         errors.push(error);
@@ -173,7 +182,5 @@ export async function evaluateAnswer(req: EvaluationRequest): Promise<Evaluation
 
   // All attempts failed
   const errorSummary = errors.map((e) => e.message).join('; ');
-  throw new Error(
-    `[evaluate-answer] All evaluation models failed. Errors: ${errorSummary}`,
-  );
+  throw new Error(`[evaluate-answer] All evaluation models failed. Errors: ${errorSummary}`);
 }

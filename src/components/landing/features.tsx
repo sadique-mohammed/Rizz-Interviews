@@ -94,7 +94,13 @@ const TABS: Tab[] = [
 ];
 
 // DemoCard component - uses CSS for tilt instead of framer-motion
-function DemoCard({ pulse = false, activeId = 'ai-interview' }: { pulse?: boolean; activeId?: string }) {
+function DemoCard({
+  pulse = false,
+  activeId = 'ai-interview',
+}: {
+  pulse?: boolean;
+  activeId?: string;
+}) {
   const color = 'bg-brand/10 text-brand';
   const ref = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ rX: 0, rY: 0 });
@@ -144,7 +150,13 @@ function DemoCard({ pulse = false, activeId = 'ai-interview' }: { pulse?: boolea
         <div className='mt-4 rounded-xl border border-gray-200/60 p-4 bg-white/80 backdrop-blur-sm'>
           <div className='flex items-center gap-3'>
             <div className='h-9 w-9 rounded-md bg-gradient-to-br from-brand/20 to-brand/10 flex items-center justify-center'>
-              <Image src='/favicon.svg' alt='Nexus AI' width={24} height={24} className='absolute' />
+              <Image
+                src='/favicon.svg'
+                alt='Nexus AI'
+                width={24}
+                height={24}
+                className='absolute'
+              />
             </div>
             <div className='flex-1'>
               <div className='text-sm font-medium text-gray-900'>Nexus AI Interviewer</div>
@@ -169,13 +181,19 @@ function DemoCard({ pulse = false, activeId = 'ai-interview' }: { pulse?: boolea
       {activeId === 'feedback-scoring' && (
         <div className='mt-4 rounded-xl border border-gray-200/60 p-4 bg-white/80 backdrop-blur-sm'>
           <div className='flex gap-3 items-start'>
-             <div className='h-6 w-6 rounded-full bg-brand/10 flex items-center justify-center shrink-0 mt-0.5'>
-               <Bot className="h-3.5 w-3.5 text-brand" />
-             </div>
-             <div className='flex flex-col gap-1'>
-               <span className="text-xs font-semibold text-gray-900">Nexus AI</span>
-               <p className="text-[11px] text-gray-600 leading-relaxed">Great job finding the base case. Your time complexity is <span className="font-mono text-brand bg-brand/10 px-1 rounded font-semibold">O(N^2)</span>. Can you optimize it using a Hash Map?</p>
-             </div>
+            <div className='h-6 w-6 rounded-full bg-brand/10 flex items-center justify-center shrink-0 mt-0.5'>
+              <Bot className='h-3.5 w-3.5 text-brand' />
+            </div>
+            <div className='flex flex-col gap-1'>
+              <span className='text-xs font-semibold text-gray-900'>Nexus AI</span>
+              <p className='text-[11px] text-gray-600 leading-relaxed'>
+                Great job finding the base case. Your time complexity is{' '}
+                <span className='font-mono text-brand bg-brand/10 px-1 rounded font-semibold'>
+                  O(N^2)
+                </span>
+                . Can you optimize it using a Hash Map?
+              </p>
+            </div>
           </div>
         </div>
       )}
@@ -183,12 +201,16 @@ function DemoCard({ pulse = false, activeId = 'ai-interview' }: { pulse?: boolea
       {activeId === 'conversation' && (
         <div className='mt-4 rounded-xl border border-gray-200/60 p-4 bg-white/80 backdrop-blur-sm flex flex-col gap-3'>
           <div className='flex justify-between items-center pb-2 border-b border-gray-100'>
-             <span className='text-xs font-semibold text-gray-900'>Session History</span>
-             <span className='text-[10px] text-gray-500'>2 mins ago</span>
+            <span className='text-xs font-semibold text-gray-900'>Session History</span>
+            <span className='text-[10px] text-gray-500'>2 mins ago</span>
           </div>
           <div className='flex flex-col gap-2'>
-            <div className='bg-gray-50 rounded-lg p-2.5 text-[11px] text-gray-700 self-end max-w-[85%] border border-gray-100'>I think we can use a Set to track visited nodes.</div>
-            <div className='surface-brand-soft rounded-lg p-2.5 text-[11px] text-brand-dark self-start max-w-[85%]'>Excellent. Implementing a visited Set correctly handles the cycles in O(1) time.</div>
+            <div className='bg-gray-50 rounded-lg p-2.5 text-[11px] text-gray-700 self-end max-w-[85%] border border-gray-100'>
+              I think we can use a Set to track visited nodes.
+            </div>
+            <div className='surface-brand-soft rounded-lg p-2.5 text-[11px] text-brand-dark self-start max-w-[85%]'>
+              Excellent. Implementing a visited Set correctly handles the cycles in O(1) time.
+            </div>
           </div>
         </div>
       )}
@@ -196,26 +218,28 @@ function DemoCard({ pulse = false, activeId = 'ai-interview' }: { pulse?: boolea
       {activeId === 'recordings' && (
         <div className='mt-4 rounded-xl border border-gray-200/60 p-4 bg-white/80 backdrop-blur-sm'>
           <div className='aspect-video rounded-lg bg-gray-900 overflow-hidden relative flex items-center justify-center group cursor-pointer shadow-inner'>
-             <PlayCircle className='h-10 w-10 text-white/80 group-hover:scale-110 transition-transform duration-300' />
-             <div className='absolute bottom-3 left-3 right-3 flex items-center gap-2'>
-               <div className='text-[9px] text-white font-medium'>14:02</div>
-               <div className='h-1 flex-1 bg-white/20 rounded-full overflow-hidden'>
-                 <div className='h-full bg-red-500 w-1/3 rounded-full' />
-               </div>
-             </div>
+            <PlayCircle className='h-10 w-10 text-white/80 group-hover:scale-110 transition-transform duration-300' />
+            <div className='absolute bottom-3 left-3 right-3 flex items-center gap-2'>
+              <div className='text-[9px] text-white font-medium'>14:02</div>
+              <div className='h-1 flex-1 bg-white/20 rounded-full overflow-hidden'>
+                <div className='h-full bg-red-500 w-1/3 rounded-full' />
+              </div>
+            </div>
           </div>
         </div>
       )}
 
       {activeId === 'scoring' && (
         <div className='mt-4 rounded-xl border border-gray-200/60 p-4 bg-white/80 backdrop-blur-sm flex items-center gap-4'>
-           <div className='h-14 w-14 rounded-full border-[5px] border-brand-light flex items-center justify-center shrink-0 shadow-sm'>
-             <span className='text-lg font-bold text-gray-900 tracking-tight'>8.5</span>
-           </div>
-           <div className='flex flex-col gap-0.5'>
-             <span className='text-sm font-bold text-gray-900'>Strong Performance</span>
-             <span className='text-[11px] text-gray-500 leading-snug'>You passed 4/5 test cases and optimized the brute force correctly.</span>
-           </div>
+          <div className='h-14 w-14 rounded-full border-[5px] border-brand-light flex items-center justify-center shrink-0 shadow-sm'>
+            <span className='text-lg font-bold text-gray-900 tracking-tight'>8.5</span>
+          </div>
+          <div className='flex flex-col gap-0.5'>
+            <span className='text-sm font-bold text-gray-900'>Strong Performance</span>
+            <span className='text-[11px] text-gray-500 leading-snug'>
+              You passed 4/5 test cases and optimized the brute force correctly.
+            </span>
+          </div>
         </div>
       )}
       <div className='mt-4 flex items-center gap-2 text-[11px] text-gray-500'>

@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -195,7 +195,9 @@
 
 /* Premium gradient-border button: white base, hover -> gradient fill */
 .btn-gradient {
-  background: linear-gradient(#ffffff, #ffffff) padding-box, var(--brand-gradient) border-box;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    var(--brand-gradient) border-box;
   border: 1px solid transparent;
   color: #004e64;
   /* dark teal text */
@@ -203,18 +205,21 @@
 }
 
 .btn-gradient:hover {
-  background: var(--brand-gradient) padding-box, var(--brand-gradient) border-box;
+  background:
+    var(--brand-gradient) padding-box,
+    var(--brand-gradient) border-box;
   color: #ffffff;
   box-shadow: 0 8px 24px rgba(0, 165, 207, 0.28);
   /* bright blue glow */
 }
 
 .page-shell {
-  background-image:
-    linear-gradient(180deg,
-      rgba(0, 165, 207, 0.04) 0%,
-      rgba(0, 165, 207, 0.02) 20%,
-      #ffffff 60%);
+  background-image: linear-gradient(
+    180deg,
+    rgba(0, 165, 207, 0.04) 0%,
+    rgba(0, 165, 207, 0.02) 20%,
+    #ffffff 60%
+  );
 }
 
 .surface-brand {
@@ -248,7 +253,10 @@
   background-color: var(--color-brand);
   color: #ffffff;
   box-shadow: 0 4px 14px rgba(0, 165, 207, 0.25);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
   cursor: pointer;
 }
 
@@ -261,7 +269,11 @@
   border: 1px solid rgba(0, 165, 207, 0.18);
   background: rgba(0, 165, 207, 0.08);
   color: #004e64;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
   cursor: pointer;
 }
 
@@ -277,7 +289,7 @@
 }
 
 .border-t-gradient::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0 auto auto 0;
   height: 1px;
@@ -320,7 +332,11 @@
   /* dark teal border */
   border-radius: 0.75rem;
   /* match rounded-xl */
-  transition: color .2s ease, background-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
   cursor: pointer;
 }
 
@@ -368,7 +384,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   .animate-marquee-forward,
   .animate-marquee-reverse {
     animation: none;
@@ -401,7 +416,6 @@
 }
 
 @keyframes voice-bar {
-
   0%,
   100% {
     transform: scaleY(1);
@@ -441,19 +455,37 @@
 
 /* Pipeline section animations */
 @keyframes pipeline-step-in {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes pipeline-line-grow {
-  from { transform: scaleY(0); }
-  to   { transform: scaleY(1); }
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
 }
 
 @keyframes pipeline-check-pop {
-  0%   { opacity: 0; transform: scale(0.3); }
-  60%  { transform: scale(1.15); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .pipeline-step {
@@ -482,7 +514,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   .animate-fade-in-up,
   .animate-fade-in-down,
   .animate-voice-bar,

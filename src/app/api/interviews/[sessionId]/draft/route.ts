@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { z } from 'zod';
-import { getInterviewState, updateInterviewState, applyActiveQuestionState } from '@/lib/interview-redis';
+import {
+  getInterviewState,
+  updateInterviewState,
+  applyActiveQuestionState,
+} from '@/lib/interview-redis';
 import { getInterviewSessionForAccess } from '@/lib/interview-session';
 
 const draftSchema = z.object({
@@ -12,7 +16,7 @@ const draftSchema = z.object({
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: Promise<{ sessionId: string }> }
+  { params }: { params: Promise<{ sessionId: string }> },
 ): Promise<NextResponse> {
   try {
     const { userId } = await auth();
@@ -34,7 +38,10 @@ export async function PUT(
     // Enforce DB existence, ownership, and strict expiry
     const dbSession = await getInterviewSessionForAccess(userId, sessionId);
     if (!dbSession || dbSession.status !== 'in_progress') {
-      return NextResponse.json({ error: 'Interview session is no longer active or expired' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Interview session is no longer active or expired' },
+        { status: 403 },
+      );
     }
 
     // Verify state in Redis (now guaranteed to be legally in_progress by DB)

@@ -4,7 +4,12 @@ import { z } from 'zod';
 import { db } from '@/db';
 import { questionBank, answerAttempts } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { getInterviewState, updateInterviewState, applyChatMessages, applyActiveQuestionState } from '@/lib/interview-redis';
+import {
+  getInterviewState,
+  updateInterviewState,
+  applyChatMessages,
+  applyActiveQuestionState,
+} from '@/lib/interview-redis';
 import { evaluateAnswer } from '@/lib/ai/evaluate-answer';
 import type { EvaluationRequest } from '@/lib/ai/types';
 import { getInterviewSessionForAccess } from '@/lib/interview-session';
@@ -25,12 +30,14 @@ const answerSchema = z.object({
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ sessionId: string }> }
+  { params }: { params: Promise<{ sessionId: string }> },
 ): Promise<NextResponse> {
   try {
     const { userId } = await auth();
     if (!userId) {
-      console.warn('Unauthorized access attempt: No userId provided to /api/interviews/[sessionId]/answers');
+      console.warn(
+        'Unauthorized access attempt: No userId provided to /api/interviews/[sessionId]/answers',
+      );
       throw new Error('Unauthenticated');
     }
 
@@ -55,7 +62,10 @@ export async function POST(
     // 1. Enforce DB existence, ownership, and strict expiry
     const dbSession = await getInterviewSessionForAccess(userId, sessionId);
     if (!dbSession || dbSession.status !== 'in_progress') {
-      return NextResponse.json({ error: 'Interview session is no longer active or expired' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Interview session is no longer active or expired' },
+        { status: 403 },
+      );
     }
 
     // 2. Fetch Redis state (now guaranteed to be legally in_progress by DB)
@@ -86,9 +96,11 @@ export async function POST(
     }
 
     const defaultCode = (bankRow.starterCode as Record<string, string>)?.[language] || '';
-    const userMessages = state.chatMessages.filter(m => m.role === 'user' && m.questionPosition === currentSlot.position);
+    const userMessages = state.chatMessages.filter(
+      (m) => m.role === 'user' && m.questionPosition === currentSlot.position,
+    );
     const hasInteracted = userMessages.length > 0;
-    
+
     let isZeroEffortTimeout = false;
     let finalExplanation = explanation;
 
@@ -97,7 +109,9 @@ export async function POST(
         isZeroEffortTimeout = true;
       } else {
         explanation = 'Auto-submitted when time expired. (Partial effort)';
-        finalExplanation = explanation + '\n\nNote to evaluator: The candidate ran out of time. They made partial progress either in chat or by writing partial code. Please evaluate what they have and award partial credit (e.g. 2-5 points) for their effort and logical direction, even if the code does not fully compile or run.';
+        finalExplanation =
+          explanation +
+          '\n\nNote to evaluator: The candidate ran out of time. They made partial progress either in chat or by writing partial code. Please evaluate what they have and award partial credit (e.g. 2-5 points) for their effort and logical direction, even if the code does not fully compile or run.';
       }
     }
 
@@ -117,7 +131,7 @@ export async function POST(
         strengths: [],
         improvements: ['Time management'],
         nextAction: 'end_interview' as const,
-        interviewerReply: "Looks like we ran out of time before you could get started on this one.",
+        interviewerReply: 'Looks like we ran out of time before you could get started on this one.',
         provider: 'mock' as const,
         model: 'mock',
         apiMode: 'mock' as const,
@@ -153,17 +167,20 @@ export async function POST(
     }
 
     // 5. Store attempt in Postgres immediately (Durability)
-    const [attempt] = await db.insert(answerAttempts).values({
-      questionId: currentSlot.sessionQuestionId,
-      userId,
-      code,
-      language,
-      explanation,
-      hintsUsed: state.activeQuestionState.hintsUsed,
-      aiFeedback: evalResult.codeFeedback,
-      evaluationResult: evalResult,
-      score: evalResult.score,
-    }).returning({ id: answerAttempts.id });
+    const [attempt] = await db
+      .insert(answerAttempts)
+      .values({
+        questionId: currentSlot.sessionQuestionId,
+        userId,
+        code,
+        language,
+        explanation,
+        hintsUsed: state.activeQuestionState.hintsUsed,
+        aiFeedback: evalResult.codeFeedback,
+        evaluationResult: evalResult,
+        score: evalResult.score,
+      })
+      .returning({ id: answerAttempts.id });
 
     // 6. Append evaluator chat messages to transcript
     const userMsg = {
@@ -208,10 +225,8 @@ export async function POST(
       attemptId: attempt.id,
       hasNextQuestion,
     });
-
   } catch (error) {
     console.error('Answer endpoint error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-

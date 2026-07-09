@@ -33,26 +33,62 @@ const EVALUATION_JSON_SCHEMA = {
   type: 'object' as const,
   properties: {
     score: { type: 'integer' as const, description: 'Overall score 0-10' },
-    isCorrect: { type: 'boolean' as const, description: 'Whether the solution is functionally correct' },
-    confidence: { type: 'string' as const, enum: ['low', 'medium', 'high'], description: 'Confidence in the evaluation' },
-    codeFeedback: { type: 'string' as const, description: 'Feedback on the code quality and correctness' },
-    communicationFeedback: { type: 'string' as const, description: 'Feedback on explanation clarity' },
-    complexityFeedback: { type: 'string' as const, description: 'Feedback on time/space complexity understanding' },
+    isCorrect: {
+      type: 'boolean' as const,
+      description: 'Whether the solution is functionally correct',
+    },
+    confidence: {
+      type: 'string' as const,
+      enum: ['low', 'medium', 'high'],
+      description: 'Confidence in the evaluation',
+    },
+    codeFeedback: {
+      type: 'string' as const,
+      description: 'Feedback on the code quality and correctness',
+    },
+    communicationFeedback: {
+      type: 'string' as const,
+      description: 'Feedback on explanation clarity',
+    },
+    complexityFeedback: {
+      type: 'string' as const,
+      description: 'Feedback on time/space complexity understanding',
+    },
     edgeCaseFeedback: { type: 'string' as const, description: 'Feedback on edge case handling' },
     hintPenalty: { type: 'integer' as const, description: 'Penalty for hints used, 0-3' },
-    strengths: { type: 'array' as const, items: { type: 'string' as const }, description: 'Key strengths' },
-    improvements: { type: 'array' as const, items: { type: 'string' as const }, description: 'Areas to improve' },
+    strengths: {
+      type: 'array' as const,
+      items: { type: 'string' as const },
+      description: 'Key strengths',
+    },
+    improvements: {
+      type: 'array' as const,
+      items: { type: 'string' as const },
+      description: 'Areas to improve',
+    },
     nextAction: {
       type: 'string' as const,
       enum: ['follow_up', 'same_topic', 'harder', 'easier', 'end_interview'],
       description: 'Recommended next action',
     },
-    interviewerReply: { type: 'string' as const, description: 'Natural interviewer response to the candidate' },
+    interviewerReply: {
+      type: 'string' as const,
+      description: 'Natural interviewer response to the candidate',
+    },
   },
   required: [
-    'score', 'isCorrect', 'confidence', 'codeFeedback', 'communicationFeedback',
-    'complexityFeedback', 'edgeCaseFeedback', 'hintPenalty', 'strengths',
-    'improvements', 'nextAction', 'interviewerReply',
+    'score',
+    'isCorrect',
+    'confidence',
+    'codeFeedback',
+    'communicationFeedback',
+    'complexityFeedback',
+    'edgeCaseFeedback',
+    'hintPenalty',
+    'strengths',
+    'improvements',
+    'nextAction',
+    'interviewerReply',
   ],
 };
 
@@ -94,11 +130,7 @@ export async function callGeminiForEvaluation(
     const text = interaction.output_text;
 
     if (!text) {
-      throw new AITransientError(
-        'Gemini returned empty response',
-        'gemini',
-        model,
-      );
+      throw new AITransientError('Gemini returned empty response', 'gemini', model);
     }
 
     aiLog('gemini', 'Raw evaluation response', text);
@@ -162,11 +194,7 @@ export async function callGeminiForChat(
     const text = interaction.output_text;
 
     if (!text) {
-      throw new AITransientError(
-        'Gemini returned empty chat response',
-        'gemini',
-        model,
-      );
+      throw new AITransientError('Gemini returned empty chat response', 'gemini', model);
     }
 
     aiLog('gemini', 'Chat response received', { length: text.length });
@@ -189,8 +217,9 @@ export async function callGeminiForChat(
 /** Promise that rejects after a timeout — used with Promise.race. */
 function rejectAfterTimeout(ms: number): Promise<never> {
   return new Promise((_, reject) =>
-    setTimeout(() => reject(new AITransientError(`Timeout after ${ms}ms`, 'gemini', 'unknown')), ms),
+    setTimeout(
+      () => reject(new AITransientError(`Timeout after ${ms}ms`, 'gemini', 'unknown')),
+      ms,
+    ),
   );
 }
-
-

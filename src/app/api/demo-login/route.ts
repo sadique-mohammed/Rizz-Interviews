@@ -15,12 +15,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     // 1. IP-based Rate Limiting
     const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'anonymous';
-    const { success, limit, remaining, reset } = await ratelimit.limit(`ratelimit_demo_login_${ip}`);
+    const { success, limit, remaining, reset } = await ratelimit.limit(
+      `ratelimit_demo_login_${ip}`,
+    );
 
     if (!success) {
       console.warn(`[RateLimit] Demo login blocked for IP: ${ip}`);
       return NextResponse.json(
-        { error: 'Demo account creation rate limit exceeded. Only 3 demo accounts can be created per hour to prevent abuse. Please sign up with your own email to continue practicing.' },
+        {
+          error:
+            'Demo account creation rate limit exceeded. Only 3 demo accounts can be created per hour to prevent abuse. Please sign up with your own email to continue practicing.',
+        },
         {
           status: 429,
           headers: {
@@ -28,12 +33,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             'X-RateLimit-Remaining': remaining.toString(),
             'X-RateLimit-Reset': reset.toString(),
           },
-        }
+        },
       );
     }
 
     const client = await clerkClient();
-    
+
     // Generate a random 8-character string for the guest email
     const randomId = crypto.randomUUID().split('-')[0];
     const demoEmail = `guest-${randomId}@demo.nexus-ai.com`;
@@ -58,9 +63,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ ticket: token.token });
   } catch (error) {
     console.error('Failed to create demo user:', error);
-    return NextResponse.json(
-      { error: 'Failed to create demo session' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create demo session' }, { status: 500 });
   }
 }

@@ -30,8 +30,6 @@ const SyntaxHighlighter = dynamic<React.ComponentProps<typeof PrismType>>(
   { ssr: false, loading: () => <div className='animate-pulse bg-gray-200 h-32 rounded' /> },
 ) as typeof PrismType;
 
-
-
 const getLanguageLabel = (language: string): string => {
   switch (language) {
     case 'javascript':
@@ -49,28 +47,27 @@ const getLanguageLabel = (language: string): string => {
   }
 };
 
-
-
 const generateOverallFeedback = (interview: any) => {
   if (!interview || !interview.questions) return null;
-  
+
   const allStrengths: string[] = [];
   const allWeaknesses: string[] = [];
   let attemptedQuestionsCount = 0;
-  
+
   interview.questions.forEach((q: any) => {
     if (q.attempts && q.attempts.length > 0) {
       // Filter out 0-effort auto-submits exactly like the backend does
       const validAttempts = q.attempts.filter(
-        (a: any) => !(a.score === 0 && a.explanation === 'Auto-submitted when time expired.')
+        (a: any) => !(a.score === 0 && a.explanation === 'Auto-submitted when time expired.'),
       );
 
       if (validAttempts.length > 0) {
         attemptedQuestionsCount++;
-        const bestAttempt = validAttempts.reduce((best: any, current: any) => 
-          (current.score || 0) > (best.score || 0) ? current : best
-        , validAttempts[0]);
-        
+        const bestAttempt = validAttempts.reduce(
+          (best: any, current: any) => ((current.score || 0) > (best.score || 0) ? current : best),
+          validAttempts[0],
+        );
+
         if (bestAttempt.evaluationResult) {
           if (bestAttempt.evaluationResult.strengths) {
             allStrengths.push(...bestAttempt.evaluationResult.strengths);
@@ -84,16 +81,16 @@ const generateOverallFeedback = (interview: any) => {
   });
 
   const expectedCount = getExpectedQuestionsCount(interview.duration, interview.difficulty);
-  
+
   const uniqueStrengths = Array.from(new Set(allStrengths)).slice(0, 3);
   const uniqueWeaknesses = Array.from(new Set(allWeaknesses)).slice(0, 3);
-  
+
   return {
     attemptedCount: attemptedQuestionsCount,
     expectedCount,
     strengths: uniqueStrengths,
     weaknesses: uniqueWeaknesses,
-    hasPenalty: attemptedQuestionsCount < expectedCount
+    hasPenalty: attemptedQuestionsCount < expectedCount,
   };
 };
 
@@ -112,7 +109,7 @@ export default function InterviewDetailPage() {
         const cached = sessionStorage.getItem(CACHE_KEY);
         if (cached) {
           const { data, status } = JSON.parse(cached);
-          
+
           // Only serve from cache if the interview is fully completed or abandoned
           if (status === 'completed' || status === 'abandoned') {
             setInterview(data);
@@ -231,7 +228,9 @@ export default function InterviewDetailPage() {
               </div>
               <div>
                 <p className='text-xs uppercase tracking-wide text-gray-600'>Duration</p>
-                <p className='text-lg font-semibold text-brand-dark'>{interview.duration} minutes</p>
+                <p className='text-lg font-semibold text-brand-dark'>
+                  {interview.duration} minutes
+                </p>
               </div>
             </div>
             {interview.totalScore !== null && (
@@ -240,7 +239,9 @@ export default function InterviewDetailPage() {
                   <Trophy className='h-5 w-5' />
                 </div>
                 <div>
-                  <p className='text-xs uppercase tracking-wide text-brand-secondary'>Overall score</p>
+                  <p className='text-xs uppercase tracking-wide text-brand-secondary'>
+                    Overall score
+                  </p>
                   <p className='text-lg font-semibold text-brand-dark'>{interview.totalScore}%</p>
                 </div>
               </div>
@@ -251,7 +252,9 @@ export default function InterviewDetailPage() {
               </div>
               <div>
                 <p className='text-xs uppercase tracking-wide text-brand/80'>Questions</p>
-                <p className='text-lg font-semibold text-brand-dark'>{interview.questions.length}</p>
+                <p className='text-lg font-semibold text-brand-dark'>
+                  {interview.questions.length}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -260,18 +263,40 @@ export default function InterviewDetailPage() {
             <div className='px-6 pb-6'>
               <div className='rounded-xl bg-slate-50 border border-slate-200 p-6'>
                 <h3 className='text-lg font-semibold text-slate-900 mb-4'>Overall Feedback</h3>
-                
+
                 {/* Score Justification */}
                 <div className='mb-6 p-4 rounded-lg bg-white border border-slate-100 shadow-sm'>
                   <p className='text-sm text-slate-700 leading-relaxed'>
                     <span className='font-semibold text-slate-900'>Pacing & Overall Speed: </span>
-                    You completed <span className='font-semibold'>{overallFeedback.attemptedCount}</span> question(s) during your <span className='font-semibold'>{interview.duration} minute {interview.difficulty}</span> interview. 
+                    You completed{' '}
+                    <span className='font-semibold'>{overallFeedback.attemptedCount}</span>{' '}
+                    question(s) during your{' '}
+                    <span className='font-semibold'>
+                      {interview.duration} minute {interview.difficulty}
+                    </span>{' '}
+                    interview.
                     {overallFeedback.attemptedCount > overallFeedback.expectedCount ? (
-                      <span className='font-medium text-brand-secondary'> Your pacing was exceptionally fast, demonstrating a strong ability to write working code quickly under time constraints. You moved through the problems with highly impressive speed!</span>
+                      <span className='font-medium text-brand-secondary'>
+                        {' '}
+                        Your pacing was exceptionally fast, demonstrating a strong ability to write
+                        working code quickly under time constraints. You moved through the problems
+                        with highly impressive speed!
+                      </span>
                     ) : overallFeedback.attemptedCount === overallFeedback.expectedCount ? (
-                      <span className='font-medium text-brand-secondary'> Your pacing was excellent and perfectly aligned with what is expected for this difficulty level. You demonstrated a solid balance of speed and accuracy.</span>
+                      <span className='font-medium text-brand-secondary'>
+                        {' '}
+                        Your pacing was excellent and perfectly aligned with what is expected for
+                        this difficulty level. You demonstrated a solid balance of speed and
+                        accuracy.
+                      </span>
                     ) : (
-                      <span className='text-rose-700 font-medium'> While focus on quality is important, your overall pacing was slower than what is typically expected for this time limit. In a real interview setting, completing more problems within the time limit is crucial, which slightly impacted your final score.</span>
+                      <span className='text-rose-700 font-medium'>
+                        {' '}
+                        While focus on quality is important, your overall pacing was slower than
+                        what is typically expected for this time limit. In a real interview setting,
+                        completing more problems within the time limit is crucial, which slightly
+                        impacted your final score.
+                      </span>
                     )}
                   </p>
                 </div>
@@ -286,7 +311,10 @@ export default function InterviewDetailPage() {
                       </h4>
                       <ul className='space-y-2'>
                         {overallFeedback.strengths.map((s, i) => (
-                          <li key={i} className='text-sm text-slate-600 leading-relaxed flex items-start gap-2'>
+                          <li
+                            key={i}
+                            className='text-sm text-slate-600 leading-relaxed flex items-start gap-2'
+                          >
                             <span className='mt-0.5 text-brand-secondary'>•</span> {s}
                           </li>
                         ))}
@@ -303,7 +331,10 @@ export default function InterviewDetailPage() {
                       </h4>
                       <ul className='space-y-2'>
                         {overallFeedback.weaknesses.map((w, i) => (
-                          <li key={i} className='text-sm text-slate-600 leading-relaxed flex items-start gap-2'>
+                          <li
+                            key={i}
+                            className='text-sm text-slate-600 leading-relaxed flex items-start gap-2'
+                          >
                             <span className='text-rose-500 mt-0.5'>•</span> {w}
                           </li>
                         ))}
@@ -413,7 +444,10 @@ const RealInterviewQuestions = ({
                           </h3>
                           <ul className='space-y-1.5 rounded-lg border border-brand/20 bg-brand/5 p-3 shadow-xs'>
                             {q.questionBank.constraints.map((c: string, i: number) => (
-                              <li key={i} className='flex items-start gap-2 text-xs font-medium text-gray-700'>
+                              <li
+                                key={i}
+                                className='flex items-start gap-2 text-xs font-medium text-gray-700'
+                              >
                                 <span className='mt-0.5 text-brand'>•</span>
                                 <span>{c}</span>
                               </li>
@@ -517,7 +551,9 @@ const RealInterviewQuestions = ({
                     </div>
                     {attempt.aiFeedback && (
                       <div className='surface-brand-soft rounded-lg p-4'>
-                        <p className='text-sm font-medium text-brand-dark mb-1'>Nexus AI Feedback</p>
+                        <p className='text-sm font-medium text-brand-dark mb-1'>
+                          Nexus AI Feedback
+                        </p>
                         <p className='text-sm text-slate-700 whitespace-pre-line'>
                           {attempt.aiFeedback}
                         </p>
@@ -548,4 +584,3 @@ const RealInterviewQuestions = ({
     </>
   );
 };
-

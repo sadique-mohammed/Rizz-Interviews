@@ -90,7 +90,9 @@ export default async function HistoryPage() {
                     <ArrowRight className='h-5 w-5' />
                   </div>
                   <div>
-                    <p className='text-xs uppercase tracking-wide text-brand-secondary'>Avg. score</p>
+                    <p className='text-xs uppercase tracking-wide text-brand-secondary'>
+                      Avg. score
+                    </p>
                     <p className='text-lg font-semibold text-brand-dark'>
                       {averageScore !== null ? `${averageScore}%` : '—'}
                     </p>

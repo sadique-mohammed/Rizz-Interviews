@@ -27,49 +27,42 @@ const STEPS: PipelineStepData[] = [
   {
     icon: Rocket,
     title: 'Session Initialization',
-    description:
-      'Select DSA or Web Dev, set difficulty and duration. AI configures the session.',
+    description: 'Select DSA or Web Dev, set difficulty and duration. AI configures the session.',
   },
   {
     icon: Sparkles,
     title: 'Adaptive Question Generation',
     badge: 'Groq',
-    description:
-      'The AI generates a difficulty-calibrated problem tailored to your level.',
+    description: 'The AI generates a difficulty-calibrated problem tailored to your level.',
   },
   {
     icon: Code,
     title: 'Live Coding Environment',
-    description:
-      'Write your solution in the integrated editor with syntax highlighting.',
+    description: 'Write your solution in the integrated editor with syntax highlighting.',
   },
   {
     icon: MessagesSquare,
     title: 'Real-Time AI Conversation',
     badge: 'streaming',
-    description:
-      'Chat with the interviewer for hints, clarifications, and follow-ups.',
+    description: 'Chat with the interviewer for hints, clarifications, and follow-ups.',
   },
   {
     icon: Scan,
     title: 'Structured Evaluation',
     badge: 'Gemini Flash',
-    description:
-      'Your answer is scored across correctness, complexity, and communication.',
+    description: 'Your answer is scored across correctness, complexity, and communication.',
   },
   {
     icon: BarChart3,
     title: 'Instant Feedback Loop',
     badge: '0–10',
-    description:
-      'Per-question score with actionable improvements delivered immediately.',
+    description: 'Per-question score with actionable improvements delivered immediately.',
   },
   {
     icon: GitBranch,
     title: 'Difficulty Adaptation',
     badge: 'Session Context',
-    description:
-      'AI adjusts — harder problems if you ace it, follow-ups if you struggle.',
+    description: 'AI adjusts — harder problems if you ace it, follow-ups if you struggle.',
   },
   {
     icon: Trophy,
@@ -110,10 +103,7 @@ export default function InterviewPipeline() {
   }, []);
 
   return (
-    <section
-      id='how-it-works'
-      className='py-12 px-6 md:px-12 bg-white relative overflow-hidden'
-    >
+    <section id='how-it-works' className='py-12 px-6 md:px-12 bg-white relative overflow-hidden'>
       {/* Subtle grid background — matches Features section */}
       <div
         className='absolute inset-0 opacity-20'
@@ -135,10 +125,7 @@ export default function InterviewPipeline() {
         />
 
         {/* Pipeline container */}
-        <div
-          ref={sectionRef}
-          className={`mx-auto max-w-2xl ${visible ? 'pipeline-visible' : ''}`}
-        >
+        <div ref={sectionRef} className={`mx-auto max-w-2xl ${visible ? 'pipeline-visible' : ''}`}>
           {/* Status bar */}
           <div
             className='surface-brand rounded-xl px-5 py-3.5 flex items-center justify-between pipeline-step'
@@ -171,9 +158,7 @@ export default function InterviewPipeline() {
                 <div className='text-[10px] uppercase tracking-wider text-gray-400 font-medium'>
                   {m.label}
                 </div>
-                <div className='mt-1 text-lg font-bold text-gray-900'>
-                  {m.value}
-                </div>
+                <div className='mt-1 text-lg font-bold text-gray-900'>{m.value}</div>
               </div>
             ))}
           </div>
@@ -234,25 +219,18 @@ function PipelineStepCard({
       <div className='flex-1 surface-brand-soft rounded-xl p-4 transition-all duration-300 hover:border-brand/30 hover:bg-brand/5 hover:shadow-sm flex items-center gap-4'>
         <div className='flex-1 min-w-0'>
           <div className='flex items-center gap-2 flex-wrap'>
-            <h4 className='text-sm font-semibold text-gray-900'>
-              {step.title}
-            </h4>
+            <h4 className='text-sm font-semibold text-gray-900'>{step.title}</h4>
             {step.badge && (
               <span className='badge-brand-soft text-[10px] font-semibold px-2 py-0.5 rounded-full'>
                 {step.badge}
               </span>
             )}
           </div>
-          <p className='mt-1 text-xs text-gray-500 leading-relaxed'>
-            {step.description}
-          </p>
+          <p className='mt-1 text-xs text-gray-500 leading-relaxed'>{step.description}</p>
         </div>
 
         {/* Checkmark */}
-        <div
-          className='pipeline-check shrink-0'
-          style={{ animationDelay: `${checkDelay}ms` }}
-        >
+        <div className='pipeline-check shrink-0' style={{ animationDelay: `${checkDelay}ms` }}>
           <CheckCircle2 className='h-5 w-5 text-brand-secondary' />
         </div>
       </div>

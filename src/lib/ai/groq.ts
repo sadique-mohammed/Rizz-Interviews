@@ -1,12 +1,7 @@
 import 'server-only';
 
 import Groq from 'groq-sdk';
-import {
-  getGroqApiKey,
-  EVALUATION_TIMEOUT_MS,
-  CHAT_TIMEOUT_MS,
-  aiLog,
-} from './config';
+import { getGroqApiKey, EVALUATION_TIMEOUT_MS, CHAT_TIMEOUT_MS, aiLog } from './config';
 import { AITransientError, AISchemaError } from './types';
 import type { EvaluationResult } from './types';
 import { validateEvaluationShape } from './validation';
@@ -59,11 +54,7 @@ export async function callGroqForChat(
     const text = response.choices?.[0]?.message?.content;
 
     if (!text) {
-      throw new AITransientError(
-        'Groq returned empty chat response',
-        'groq',
-        model,
-      );
+      throw new AITransientError('Groq returned empty chat response', 'groq', model);
     }
 
     aiLog('groq', 'Chat response received', { length: text.length });
@@ -115,7 +106,8 @@ export async function callGroqForEvaluation(
         messages: [
           {
             role: 'system',
-            content: 'You are a senior software engineer evaluating a mock interview candidate. Return strict JSON only. Do not include any text outside the JSON object.',
+            content:
+              'You are a senior software engineer evaluating a mock interview candidate. Return strict JSON only. Do not include any text outside the JSON object.',
           },
           { role: 'user', content: prompt },
         ],
@@ -129,11 +121,7 @@ export async function callGroqForEvaluation(
     const text = response.choices?.[0]?.message?.content;
 
     if (!text) {
-      throw new AITransientError(
-        'Groq returned empty evaluation response',
-        'groq',
-        model,
-      );
+      throw new AITransientError('Groq returned empty evaluation response', 'groq', model);
     }
 
     aiLog('groq', 'Raw evaluation response', text);
@@ -199,5 +187,3 @@ function isGroqTransientError(error: unknown): boolean {
 
   return false;
 }
-
-

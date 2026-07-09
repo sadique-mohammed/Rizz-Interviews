@@ -30,10 +30,7 @@ export async function PATCH(req: NextRequest, context: RouteContext): Promise<Ne
     }
 
     if (session.status !== 'in_progress') {
-      return NextResponse.json(
-        { error: 'Session is not in progress' },
-        { status: 409 },
-      );
+      return NextResponse.json({ error: 'Session is not in progress' }, { status: 409 });
     }
 
     await db

@@ -35,9 +35,7 @@ export function userActiveInterviewKey(userId: string): string {
  * Called after Postgres interview row is created and active + lookahead
  * questions are selected. TTL = durationMinutes * 60 * 2.
  */
-export async function createInterviewState(
-  state: RedisInterviewState,
-): Promise<void> {
+export async function createInterviewState(state: RedisInterviewState): Promise<void> {
   const ttl = state.duration * 60 * 2;
   const key = interviewStateKey(state.sessionId);
 
@@ -48,9 +46,7 @@ export async function createInterviewState(
  * Read and parse the full interview session state from Redis.
  * Returns null if the key does not exist or has expired.
  */
-export async function getInterviewState(
-  sessionId: string,
-): Promise<RedisInterviewState | null> {
+export async function getInterviewState(sessionId: string): Promise<RedisInterviewState | null> {
   const raw = await redis.get<string>(interviewStateKey(sessionId));
   if (!raw) return null;
 
@@ -83,10 +79,7 @@ export async function updateInterviewState(
 /**
  * Delete session state and user pointer on complete/abandon.
  */
-export async function deleteInterviewState(
-  sessionId: string,
-  userId: string,
-): Promise<void> {
+export async function deleteInterviewState(sessionId: string, userId: string): Promise<void> {
   await Promise.all([
     redis.del(interviewStateKey(sessionId)),
     redis.del(userActiveInterviewKey(userId)),
@@ -114,9 +107,7 @@ export async function setUserActiveInterview(
  * Read the user's active interview session ID.
  * Returns null if no active session or pointer expired.
  */
-export async function getUserActiveInterview(
-  userId: string,
-): Promise<string | null> {
+export async function getUserActiveInterview(userId: string): Promise<string | null> {
   return redis.get<string>(userActiveInterviewKey(userId));
 }
 
@@ -190,10 +181,7 @@ export async function appendChatMessages(
 /**
  * Pure mutator to append chat messages.
  */
-export function applyChatMessages(
-  state: RedisInterviewState,
-  messages: RedisChatMessage[],
-): void {
+export function applyChatMessages(state: RedisInterviewState, messages: RedisChatMessage[]): void {
   state.chatMessages.push(...messages);
 }
 
@@ -246,7 +234,7 @@ export function applyMarkQuestionAnswered(
   }
 
   state.answeredQuestions.push(answered);
-  
+
   if (answered.nextAction) {
     state.activeQuestionState.chosenNextAction = answered.nextAction;
   }
@@ -300,15 +288,13 @@ export function applyPromoteNextQuestion(
   state.currentQuestionIndex = nextPosition;
   state.activeQuestionState = createFreshActiveQuestionState();
   state.pendingBuffers = newBuffers;
-  
+
   if (newBuffers.harder) state.seenQuestionBankIds.push(newBuffers.harder.questionBankId);
   if (newBuffers.easier) state.seenQuestionBankIds.push(newBuffers.easier.questionBankId);
   if (newBuffers.same_topic) state.seenQuestionBankIds.push(newBuffers.same_topic.questionBankId);
 
   return true;
 }
-
-
 
 // ---------------------------------------------------------------------------
 // Transcript windowing helpers
@@ -334,10 +320,7 @@ export function getTranscriptWindow(
  * Check if the transcript needs a rolling summary update.
  * Trigger when total messages exceed the threshold.
  */
-export function needsSummaryUpdate(
-  state: RedisInterviewState,
-  threshold: number = 20,
-): boolean {
+export function needsSummaryUpdate(state: RedisInterviewState, threshold: number = 20): boolean {
   return state.chatMessages.length > threshold;
 }
 

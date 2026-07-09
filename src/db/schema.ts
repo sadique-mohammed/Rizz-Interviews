@@ -1,5 +1,16 @@
 import { sql } from 'drizzle-orm';
-import { boolean, integer, jsonb, pgTable, text, timestamp, uuid, varchar, uniqueIndex, index } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+  uniqueIndex,
+  index,
+} from 'drizzle-orm/pg-core';
 
 // Users - clerk_id is the primary key (permanent identifier from Clerk)
 export const users = pgTable('users', {
@@ -14,55 +25,63 @@ export const users = pgTable('users', {
 });
 
 // Interviews
-export const interviews = pgTable('interviews', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: varchar('user_id', { length: 255 })
-    .references(() => users.id)
-    .notNull(),
-  domain: varchar('domain', { length: 50 }).notNull(),
-  difficulty: varchar('difficulty', { length: 20 }).notNull(),
-  duration: integer('duration').notNull(),
-  startedAt: timestamp('started_at').defaultNow().notNull(),
-  endedAt: timestamp('ended_at'),
-  status: varchar('status', { length: 20 }).default('in_progress'),
-  totalScore: integer('total_score'),
-}, (table) => {
-  return {
-    activeIdx: uniqueIndex('interviews_one_active_per_user_idx')
-      .on(table.userId)
-      .where(sql`${table.status} = 'in_progress'`),
-  };
-});
+export const interviews = pgTable(
+  'interviews',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: varchar('user_id', { length: 255 })
+      .references(() => users.id)
+      .notNull(),
+    domain: varchar('domain', { length: 50 }).notNull(),
+    difficulty: varchar('difficulty', { length: 20 }).notNull(),
+    duration: integer('duration').notNull(),
+    startedAt: timestamp('started_at').defaultNow().notNull(),
+    endedAt: timestamp('ended_at'),
+    status: varchar('status', { length: 20 }).default('in_progress'),
+    totalScore: integer('total_score'),
+  },
+  (table) => {
+    return {
+      activeIdx: uniqueIndex('interviews_one_active_per_user_idx')
+        .on(table.userId)
+        .where(sql`${table.status} = 'in_progress'`),
+    };
+  },
+);
 
 // Question Bank
-export const questionBank = pgTable('question_bank', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  slug: varchar('slug', { length: 255 }).notNull().unique(),
-  domain: varchar('domain', { length: 20 }).notNull(),
-  difficulty: varchar('difficulty', { length: 20 }).notNull(),
-  difficultyScore: integer('difficulty_score').notNull(),
-  title: varchar('title', { length: 255 }).notNull(),
-  primaryTopic: varchar('primary_topic', { length: 100 }).notNull(),
-  secondaryTopic: varchar('secondary_topic', { length: 100 }),
-  description: text('description').notNull(),
-  examples: jsonb('examples').notNull(),
-  constraints: jsonb('constraints').notNull(),
-  requiresCode: boolean('requires_code').default(true).notNull(),
-  starterCode: jsonb('starter_code').notNull(),
-  optimalSolution: jsonb('optimal_solution').notNull(),
-  solutionExplanation: text('solution_explanation').notNull(),
-  timeComplexity: text('time_complexity').notNull(),
-  spaceComplexity: text('space_complexity').notNull(),
-  hints: jsonb('hints').notNull(),
-  followUpQuestions: jsonb('follow_up_questions').notNull(),
-  interviewerNotes: text('interviewer_notes').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, (table) => {
-  return {
-    domainDifficultyIdx: index('domain_difficulty_idx').on(table.domain, table.difficultyScore)
-  };
-});
+export const questionBank = pgTable(
+  'question_bank',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    slug: varchar('slug', { length: 255 }).notNull().unique(),
+    domain: varchar('domain', { length: 20 }).notNull(),
+    difficulty: varchar('difficulty', { length: 20 }).notNull(),
+    difficultyScore: integer('difficulty_score').notNull(),
+    title: varchar('title', { length: 255 }).notNull(),
+    primaryTopic: varchar('primary_topic', { length: 100 }).notNull(),
+    secondaryTopic: varchar('secondary_topic', { length: 100 }),
+    description: text('description').notNull(),
+    examples: jsonb('examples').notNull(),
+    constraints: jsonb('constraints').notNull(),
+    requiresCode: boolean('requires_code').default(true).notNull(),
+    starterCode: jsonb('starter_code').notNull(),
+    optimalSolution: jsonb('optimal_solution').notNull(),
+    solutionExplanation: text('solution_explanation').notNull(),
+    timeComplexity: text('time_complexity').notNull(),
+    spaceComplexity: text('space_complexity').notNull(),
+    hints: jsonb('hints').notNull(),
+    followUpQuestions: jsonb('follow_up_questions').notNull(),
+    interviewerNotes: text('interviewer_notes').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => {
+    return {
+      domainDifficultyIdx: index('domain_difficulty_idx').on(table.domain, table.difficultyScore),
+    };
+  },
+);
 
 export const questionBankTags = pgTable('question_bank_tags', {
   id: uuid('id').defaultRandom().primaryKey(),

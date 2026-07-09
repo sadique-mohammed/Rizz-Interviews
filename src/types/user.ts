@@ -1,4 +1,3 @@
-
 export interface UserInsert {
   id: string; // clerk_id
   name: string;

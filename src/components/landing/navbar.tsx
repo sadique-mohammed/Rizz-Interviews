@@ -33,7 +33,7 @@ export default function Navbar() {
           </div>
 
           <div className='flex items-center gap-3'>
-            <DemoLoginButton className="hidden md:inline-flex" />
+            <DemoLoginButton className='hidden md:inline-flex' />
             <Link
               href='/dashboard'
               className='inline-flex items-center justify-center rounded-xl px-10 py-2 text-sm font-semibold btn-invert transition-all duration-200'

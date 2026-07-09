@@ -42,7 +42,5 @@ export default async function InterviewPage({ params }: PageProps) {
     redirect(`/history/${sessionId}`);
   }
 
-  return (
-    <InterviewCanvas key={state.currentQuestionIndex} state={state} />
-  );
+  return <InterviewCanvas key={state.currentQuestionIndex} state={state} />;
 }
