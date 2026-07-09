@@ -33,9 +33,9 @@ const STEPS: PipelineStepData[] = [
   {
     icon: Sparkles,
     title: 'Adaptive Question Generation',
-    badge: 'LLM',
+    badge: 'Groq',
     description:
-      'Groq generates a difficulty-calibrated problem tailored to your level.',
+      'The AI generates a difficulty-calibrated problem tailored to your level.',
   },
   {
     icon: Code,
@@ -67,6 +67,7 @@ const STEPS: PipelineStepData[] = [
   {
     icon: GitBranch,
     title: 'Difficulty Adaptation',
+    badge: 'Session Context',
     description:
       'AI adjusts — harder problems if you ace it, follow-ups if you struggle.',
   },
@@ -74,7 +75,7 @@ const STEPS: PipelineStepData[] = [
     icon: Trophy,
     title: 'Session Analytics',
     description:
-      'Complete Q&A history, score breakdown, and exportable results.',
+      'Review your full code history, aggregated strengths & weaknesses, and detailed score breakdown.',
   },
 ];
 
@@ -111,7 +112,7 @@ export default function InterviewPipeline() {
   return (
     <section
       id='how-it-works'
-      className='py-24 px-6 md:px-12 bg-white relative overflow-hidden'
+      className='py-12 px-6 md:px-12 bg-white relative overflow-hidden'
     >
       {/* Subtle grid background — matches Features section */}
       <div

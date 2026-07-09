@@ -253,7 +253,9 @@ function Rail({ reverse, speed = 10 }: { reverse?: boolean; speed?: number }) {
 export default function LogoMarquee() {
   return (
     <section className='py-14 px-6 md:px-12 bg-white'>
+      
       <div className='mx-auto max-w-7xl'>
+        
         <div
           className='relative overflow-hidden rounded-2xl border bg-gradient-to-b from-gray-50 to-white p-6 md:p-8'
           style={{

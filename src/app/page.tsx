@@ -5,9 +5,9 @@ export default function Home() {
     <main className='font-sans'>
       <Navbar />
       <Hero />
-      <LogoMarquee />
-      <Features />
       <InterviewPipeline />
+      <Features />
+      <LogoMarquee />
       <EmailSignup />
       <Footer />
     </main>
