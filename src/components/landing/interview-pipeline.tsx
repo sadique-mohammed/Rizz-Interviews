@@ -220,7 +220,7 @@ function PipelineStepCard({
 
   return (
     <div
-      className='pipeline-step flex items-center gap-4 md:gap-6 relative'
+      className='pipeline-step flex items-center gap-4 md:gap-6 relative cursor-pointer group'
       style={{ animationDelay: `${delay}ms` }}
     >
       {/* Icon (Left Column) */}

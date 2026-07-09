@@ -199,6 +199,7 @@
   border: 1px solid transparent;
   color: #004e64;
   /* dark teal text */
+  cursor: pointer;
 }
 
 .btn-gradient:hover {
@@ -248,6 +249,7 @@
   color: #ffffff;
   box-shadow: 0 4px 14px rgba(0, 165, 207, 0.25);
   transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  cursor: pointer;
 }
 
 .btn-brand:hover {
@@ -260,6 +262,7 @@
   background: rgba(0, 165, 207, 0.08);
   color: #004e64;
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
 }
 
 .btn-brand-soft:hover {
@@ -289,6 +292,7 @@
   background: white;
   color: rgb(185, 28, 28);
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .btn-destructive-soft:hover {
@@ -317,6 +321,7 @@
   border-radius: 0.75rem;
   /* match rounded-xl */
   transition: color .2s ease, background-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  cursor: pointer;
 }
 
 .btn-invert:hover {

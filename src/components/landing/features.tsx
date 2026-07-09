@@ -131,7 +131,7 @@ function DemoCard({ pulse = false, activeId = 'ai-interview' }: { pulse?: boolea
         transform: `perspective(900px) rotateX(${tilt.rX}deg) rotateY(${tilt.rY}deg)`,
         transition: 'transform 0.15s ease-out',
       }}
-      className='relative overflow-hidden rounded-2xl border border-gray-200/60 bg-gradient-to-br from-white to-gray-50/50 p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 h-fit'
+      className='relative overflow-hidden rounded-2xl border border-gray-200/60 bg-gradient-to-br from-white to-gray-50/50 p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 h-fit cursor-pointer'
     >
       {/* shimmer sweep - CSS animation */}
       {pulse && !prefersReducedMotion && (
@@ -383,7 +383,7 @@ export default function Features() {
                     {tabStats[active].map((s) => (
                       <div
                         key={s.k}
-                        className='rounded-xl border border-gray-200 bg-white/80 p-3 text-center hover:-translate-y-0.5 transition-transform duration-200'
+                        className='rounded-xl border border-gray-200 bg-white/80 p-3 text-center hover:-translate-y-0.5 transition-transform duration-200 cursor-pointer'
                       >
                         <div className='text-xs text-gray-500'>{s.k}</div>
                         <div className='mt-1 text-sm font-semibold text-gray-900'>{s.v}</div>
