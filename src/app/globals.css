@@ -434,14 +434,59 @@
   animation: shimmer 1.2s ease-in-out;
 }
 
+/* Pipeline section animations */
+@keyframes pipeline-step-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pipeline-line-grow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+@keyframes pipeline-check-pop {
+  0%   { opacity: 0; transform: scale(0.3); }
+  60%  { transform: scale(1.15); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.pipeline-step {
+  opacity: 0;
+}
+
+.pipeline-visible .pipeline-step {
+  animation: pipeline-step-in 0.5s ease-out forwards;
+}
+
+.pipeline-line {
+  transform: scaleY(0);
+  transform-origin: top;
+}
+
+.pipeline-visible .pipeline-line {
+  animation: pipeline-line-grow 1.4s ease-out 0.2s forwards;
+}
+
+.pipeline-check {
+  opacity: 0;
+}
+
+.pipeline-visible .pipeline-check {
+  animation: pipeline-check-pop 0.35s ease-out forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
 
   .animate-fade-in-up,
   .animate-fade-in-down,
   .animate-voice-bar,
-  .animate-shimmer {
-    animation: none;
-    opacity: 1;
-    transform: none;
+  .animate-shimmer,
+  .pipeline-step,
+  .pipeline-line,
+  .pipeline-check {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
