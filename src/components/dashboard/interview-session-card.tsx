@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { clearInterviewStorage, cleanupOrphanedStorage } from '@/lib/utils';
+import { clearInterviewStorage, cleanupOrphanedStorage, cn } from '@/lib/utils';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -86,14 +86,33 @@ interface AbandonModalProps {
   isAbandoning: boolean;
 }
 
-function AbandonModal({ session, onKeep, onConfirmAbandon, isAbandoning }: AbandonModalProps) {
+function AbandonModal({
+  session,
+  isOpen,
+  onKeep,
+  onConfirmAbandon,
+  isAbandoning,
+}: AbandonModalProps & { isOpen: boolean }) {
+  const [render, setRender] = React.useState(isOpen);
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
-    setMounted(true);
-  }, []);
+    if (isOpen) {
+      setRender(true);
+      // Wait for React to render the DOM node, then trigger transition
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setMounted(true));
+      });
+    } else {
+      setMounted(false);
+      // Wait for `--modal-close-dur` (150ms) + buffer before unmounting
+      const timer = setTimeout(() => setRender(false), 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   React.useEffect(() => {
+    if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onKeep();
     };
@@ -103,9 +122,9 @@ function AbandonModal({ session, onKeep, onConfirmAbandon, isAbandoning }: Aband
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
     };
-  }, [onKeep]);
+  }, [isOpen, onKeep]);
 
-  if (!mounted) return null;
+  if (!render) return null;
 
   return createPortal(
     <div
@@ -116,7 +135,10 @@ function AbandonModal({ session, onKeep, onConfirmAbandon, isAbandoning }: Aband
     >
       {/* Backdrop */}
       <div
-        className='absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200'
+        className={cn(
+          'absolute inset-0 bg-black/40 backdrop-blur-sm t-modal-backdrop',
+          mounted && 'is-open',
+        )}
         onClick={onKeep}
         role='button'
         tabIndex={-1}
@@ -127,7 +149,12 @@ function AbandonModal({ session, onKeep, onConfirmAbandon, isAbandoning }: Aband
       />
 
       {/* Modal */}
-      <div className='relative z-10 w-[90vw] max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl animate-in slide-in-from-bottom-4 fade-in duration-300'>
+      <div
+        className={cn(
+          'relative z-10 w-[90vw] max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl t-modal-content',
+          mounted && 'is-open',
+        )}
+      >
         <div className='mb-2 flex items-center gap-3'>
           <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/10'>
             <AlertTriangle className='h-5 w-5 text-destructive' />
@@ -473,9 +500,10 @@ export default function InterviewSessionCard({ activeSession = null }: Interview
       </Card>
 
       {/* Abandon confirmation modal */}
-      {showAbandonModal && localActiveSession && (
+      {localActiveSession && (
         <AbandonModal
           session={localActiveSession}
+          isOpen={showAbandonModal}
           onKeep={() => setShowAbandonModal(false)}
           onConfirmAbandon={handleConfirmAbandon}
           isAbandoning={isAbandoning}

@@ -4,6 +4,7 @@ import { db } from '@/db';
 import { users, interviews } from '@/db/schema';
 import { eq, desc, and, ne } from 'drizzle-orm';
 import { reconcileUserActiveSession } from '@/lib/interview-session';
+import { parseStreakData, updateStreakData } from '@/lib/streak';
 
 export async function GET(): Promise<NextResponse> {
   try {
@@ -12,12 +13,13 @@ export async function GET(): Promise<NextResponse> {
       throw new Error('Unauthenticated');
     }
 
-    // 1. Get only needed user fields (name, email for greeting)
+    // 1. Get user data including streak
     const dbUsers = await db
       .select({
         id: users.id,
         name: users.name,
         email: users.email,
+        streakData: users.streakData,
       })
       .from(users)
       .where(eq(users.id, userId))
@@ -27,10 +29,21 @@ export async function GET(): Promise<NextResponse> {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    const userRecord = dbUsers[0];
+
+    // Parse and update streak data
+    const currentStreakData = parseStreakData(userRecord.streakData);
+    const newStreakData = updateStreakData(currentStreakData, new Date());
+
+    // If streak data changed (i.e. first visit today), update DB
+    if (newStreakData.lastActivityDate !== currentStreakData.lastActivityDate) {
+      await db.update(users).set({ streakData: newStreakData }).where(eq(users.id, userId));
+    }
+
     // 2. Get the explicit active session for the user
     const activeSession = await reconcileUserActiveSession(userId);
 
-    // 3. Get only needed interview fields for RecentHistoryCard (3 most recent), excluding abandoned
+    // 3. Get recent interviews
     const recentInterviews = await db
       .select({
         id: interviews.id,
@@ -48,7 +61,12 @@ export async function GET(): Promise<NextResponse> {
 
     return NextResponse.json(
       {
-        user: dbUsers[0],
+        user: {
+          id: userRecord.id,
+          name: userRecord.name,
+          email: userRecord.email,
+        },
+        streakData: newStreakData,
         activeSession: activeSession || null,
         interviews: recentInterviews,
       },

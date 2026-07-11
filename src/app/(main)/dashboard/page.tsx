@@ -1,3 +1,4 @@
+import StreakCard from '@/components/dashboard/streak-card';
 import InterviewSessionCard from '@/components/dashboard/interview-session-card';
 import RecentHistoryCard from '@/components/dashboard/recent-history-card';
 import Footer from '@/components/landing/footer';
@@ -45,18 +46,13 @@ export default async function DashboardPage() {
     <>
       <div className='page-shell'>
         <div className='mx-auto mb-20 max-w-7xl px-6 py-10'>
-          <div className='mb-12 max-w-3xl'>
-            <h2 className='text-2xl font-bold text-gray-900 mb-1'>
+          <div className='mb-8 flex flex-col xl:flex-row xl:items-center justify-between gap-6'>
+            <h2 className='text-2xl font-bold text-gray-900 shrink-0'>
               {user?.name ? `Welcome back, ${user.name}!` : 'Welcome to Nexus!'}
             </h2>
-            <p className='text-gray-600'>
-              {user?.name
-                ? "Let's keep the momentum going. Practice for your next interview and ace it with confidence!"
-                : "You're all set. Start your first practice session and we'll track your progress here."}
-              {user?.email ? (
-                <span className='mt-2 block text-sm text-gray-500'>Signed in as {user.email}</span>
-              ) : null}
-            </p>
+            <div className='w-full xl:w-auto xl:flex-1 xl:max-w-[750px]'>
+              <StreakCard streakData={data?.streakData || {}} />
+            </div>
           </div>
 
           <div className='grid grid-cols-1 lg:grid-cols-3 gap-5'>
