@@ -75,7 +75,7 @@ const TABS: Tab[] = [
     bullets: ['Attempts logged', 'AI corrections', 'Session summaries'],
   },
   {
-    id: 'scoring',  
+    id: 'scoring',
     label: 'Scoring',
     icon: BadgeCheck,
     title: 'Smart scoring rubric.',

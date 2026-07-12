@@ -60,8 +60,7 @@ export default function InterviewModeHeader({
 
           osc.start(ctx.currentTime);
           osc.stop(ctx.currentTime + 0.1);
-        } catch (e) {
-        }
+        } catch (e) {}
       }
 
       return () => clearTimeout(timer);

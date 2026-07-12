@@ -46,9 +46,14 @@ export default async function DashboardPage() {
       <div className='page-shell'>
         <div className='mx-auto mb-20 max-w-7xl px-6 py-10'>
           <div className='mb-8 flex flex-col xl:flex-row xl:items-center justify-between gap-6'>
-            <h2 className='text-2xl font-bold text-gray-900 shrink-0'>
-              {user?.name ? `Welcome back, ${user.name}!` : 'Welcome to Nexus!'}
-            </h2>
+            <div className='flex flex-col gap-3'>
+              <h2 className='text-2xl font-bold text-gray-900 shrink-0'>
+                {user?.name ? `Welcome back, ${user.name}!` : 'Welcome to Nexus!'}
+              </h2>
+              <p className='text-gray-600'>
+                Your journey to a better tech interview starts here.
+              </p>
+            </div>
             <div className='w-full xl:w-auto xl:flex-1 xl:max-w-[750px]'>
               <StreakCard streakData={data?.streakData || {}} />
             </div>

@@ -421,8 +421,7 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
         try {
           const parsed = JSON.parse(localMap);
           setCodeMap((prev) => ({ ...prev, ...parsed }));
-        } catch (e) {
-        }
+        } catch (e) {}
       }
 
       if (localExpl !== null) {

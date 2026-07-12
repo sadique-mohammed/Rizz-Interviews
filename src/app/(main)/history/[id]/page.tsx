@@ -114,8 +114,7 @@ export default function InterviewDetailPage() {
             return;
           }
         }
-      } catch {
-      }
+      } catch {}
 
       try {
         setLoading(true);
@@ -149,8 +148,7 @@ export default function InterviewDetailPage() {
                 cachedAt: Date.now(),
               }),
             );
-          } catch {
-          }
+          } catch {}
         }
       } catch (error) {
         console.error(error);

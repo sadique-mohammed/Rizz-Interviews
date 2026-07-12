@@ -30,9 +30,17 @@ export default function AuthClientPage() {
       <div className='flex items-center justify-center h-screen bg-gradient-to-b from-brand/5 via-white to-white'>
         <SignedOut>
           {isSignUp ? (
-            <SignUp signInUrl="/auth" fallbackRedirectUrl="/dashboard" forceRedirectUrl="/dashboard" />
+            <SignUp
+              signInUrl='/auth'
+              fallbackRedirectUrl='/dashboard'
+              forceRedirectUrl='/dashboard'
+            />
           ) : (
-            <SignIn signUpUrl="/auth/sign-up" fallbackRedirectUrl="/dashboard" forceRedirectUrl="/dashboard" />
+            <SignIn
+              signUpUrl='/auth/sign-up'
+              fallbackRedirectUrl='/dashboard'
+              forceRedirectUrl='/dashboard'
+            />
           )}
         </SignedOut>
       </div>
