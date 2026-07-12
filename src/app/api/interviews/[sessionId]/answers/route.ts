@@ -59,7 +59,6 @@ export async function POST(
     const { code, language, timeSpentSeconds } = validation.data;
     let { explanation } = validation.data;
 
-    // 1. Enforce DB existence, ownership, and strict expiry
     const dbSession = await getInterviewSessionForAccess(userId, sessionId);
     if (!dbSession || dbSession.status !== 'in_progress') {
       return NextResponse.json(
@@ -68,7 +67,6 @@ export async function POST(
       );
     }
 
-    // 2. Fetch Redis state (now guaranteed to be legally in_progress by DB)
     const state = await getInterviewState(sessionId);
     if (!state || state.status !== 'in_progress') {
       return NextResponse.json({ error: 'Interview state is not active' }, { status: 400 });
@@ -79,7 +77,6 @@ export async function POST(
       return NextResponse.json({ error: 'No active question found to answer' }, { status: 400 });
     }
 
-    // 2. Fetch private question details from Postgres
     const bankRow = await db.query.questionBank.findFirst({
       where: eq(questionBank.id, currentSlot.questionBankId),
       columns: {
@@ -118,7 +115,6 @@ export async function POST(
     let evalResult;
 
     if (isZeroEffortTimeout) {
-      // 3. Fast-path: Skip the 6-second LLM call for 0-effort timeouts
       evalResult = {
         score: 0,
         isCorrect: false,
@@ -139,7 +135,6 @@ export async function POST(
         fallbackUsed: false,
       };
     } else {
-      // 3. Build EvaluationRequest
       const evalReq: EvaluationRequest = {
         question: {
           title: currentSlot.title,
@@ -162,11 +157,9 @@ export async function POST(
         },
       };
 
-      // 4. Call AI to evaluate
       evalResult = await evaluateAnswer(evalReq);
     }
 
-    // 5. Store attempt in Postgres immediately (Durability)
     const [attempt] = await db
       .insert(answerAttempts)
       .values({
@@ -182,7 +175,6 @@ export async function POST(
       })
       .returning({ id: answerAttempts.id });
 
-    // 6. Append evaluator chat messages to transcript
     const userMsg = {
       id: crypto.randomUUID(),
       role: 'user' as const,
@@ -203,18 +195,12 @@ export async function POST(
 
     applyChatMessages(state, [userMsg, aiMsg]);
 
-    // Save chosenNextAction for the next-question traversal
     applyActiveQuestionState(state, {
       chosenNextAction: evalResult.nextAction,
     });
 
     await updateInterviewState(sessionId, state);
 
-    // NOTE: Question advancement is NOT done here.
-    // The frontend will call /next-question when the user is ready to move on.
-    // This allows the AI to finish cross-questioning about the current question.
-
-    // 7. Return the evaluation result + attempt metadata to the client
     let hasNextQuestion = state.questionSlots.length < state.maxQuestions;
     if (evalResult.nextAction === 'end_interview') {
       hasNextQuestion = false;

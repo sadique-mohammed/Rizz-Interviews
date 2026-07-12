@@ -29,7 +29,6 @@ export async function POST(
     const body = await req.json();
     const { attemptId } = body;
 
-    // 1. Enforce DB existence, ownership, and strict expiry
     const dbSession = await getInterviewSessionForAccess(userId, sessionId);
     if (!dbSession || dbSession.status !== 'in_progress') {
       return NextResponse.json(
@@ -38,7 +37,6 @@ export async function POST(
       );
     }
 
-    // 2. Fetch Redis state (now guaranteed to be legally in_progress by DB)
     const state = await getInterviewState(sessionId);
     if (!state || state.status !== 'in_progress') {
       return NextResponse.json({ error: 'Interview state is not active' }, { status: 400 });
@@ -51,12 +49,10 @@ export async function POST(
 
     const chosenNextAction = state.activeQuestionState.chosenNextAction;
 
-    // 2. Defensive check for early end
     if (chosenNextAction === 'end_interview') {
       return NextResponse.json({ success: true, hasNext: false });
     }
 
-    // 3. Record the answer in history
     applyMarkQuestionAnswered(state, {
       sessionQuestionId: currentSlot.sessionQuestionId,
       questionBankId: currentSlot.questionBankId,
@@ -67,10 +63,8 @@ export async function POST(
       nextAction: chosenNextAction,
     });
 
-    // 4. Determine buffer to pop (fallback cascade)
     const resolved = resolveNextBuffer(chosenNextAction, state.pendingBuffers);
 
-    // Total exhaustion -> force end
     if (!resolved) {
       await updateInterviewState(sessionId, state);
       return NextResponse.json({ success: true, hasNext: false });
@@ -78,7 +72,6 @@ export async function POST(
 
     const { key: bufferKeyToPromote, buffer: bufferToPop } = resolved;
 
-    // 4.5 Check if remaining time is sufficient for the next question's difficulty
     const remainingMs = new Date(state.expiresAt).getTime() - Date.now();
     const remainingMins = remainingMs / (1000 * 60);
 
@@ -92,11 +85,9 @@ export async function POST(
 
     const nextPosition = state.questionSlots.length;
 
-    // 5. Refill buffers synchronously if under cap, and generate dynamic AI transition in parallel
     let newBuffers = state.pendingBuffers;
     let dynamicTransition = '';
 
-    // We can fetch adaptive buffers and generate transition concurrently
     const [fetchedBuffers, transitionText] = await Promise.all([
       nextPosition + 1 < state.maxQuestions
         ? fetchAdaptiveBuffers(state.domain, bufferToPop.difficultyScore, state.seenQuestionBankIds)
@@ -107,7 +98,6 @@ export async function POST(
     newBuffers = fetchedBuffers;
     dynamicTransition = transitionText;
 
-    // 6. Insert Postgres row for new question (Stateful operation happens after AI calls)
     const [sessionQuestion] = await db
       .insert(questions)
       .values({
@@ -117,7 +107,6 @@ export async function POST(
       })
       .returning({ id: questions.id });
 
-    // 7. Late-stage Redis Commit (Promote buffer)
     const promoteSuccess = applyPromoteNextQuestion(
       state,
       bufferKeyToPromote,
@@ -129,7 +118,6 @@ export async function POST(
       return NextResponse.json({ error: 'Failed to promote question' }, { status: 500 });
     }
 
-    // 8. Append a transition message to chat
     applyChatMessages(state, [
       {
         id: crypto.randomUUID(),

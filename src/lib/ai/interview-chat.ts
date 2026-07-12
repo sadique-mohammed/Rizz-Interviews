@@ -7,10 +7,6 @@ import { mockInterviewChat } from './mock';
 import { AITransientError } from './types';
 import type { ChatRequest, ChatResponse } from './types';
 
-// ---------------------------------------------------------------------------
-// System prompt
-// ---------------------------------------------------------------------------
-
 const INTERVIEWER_SYSTEM_PROMPT = `You are a senior software engineer running a mock technical interview. You are the interviewer, not a tutor and not a chatbot.
 
 If this is the candidate's first message, greet them, ease them in with one human sentence, and give a one-line rundown of the format before introducing the question.
@@ -27,7 +23,6 @@ For every reply:
 - Do not break character. You are the interviewer, not an AI assistant.
 - CRITICAL: Do not ask endless theoretical questions. Once the candidate has adequately explained a sound approach, tell them clearly to write their implementation in the code editor and click "Submit Code."`;
 
-// ---------------------------------------------------------------------------
 function buildChatPrompt(req: ChatRequest): string {
   const { questionContext: q, transcriptWindow, hintState } = req;
 
@@ -40,12 +35,10 @@ function buildChatPrompt(req: ChatRequest): string {
 
 Hint State: ${hintState.hintsUsed}/${hintState.totalHints} hints used`;
 
-  // Add transcript summary if available
   if (transcriptWindow.summary) {
     prompt += `\n\nConversation Summary:\n${transcriptWindow.summary}`;
   }
 
-  // Add recent messages
   if (transcriptWindow.recentMessages.length > 0) {
     prompt += '\n\nRecent Conversation:';
     for (const msg of transcriptWindow.recentMessages) {
@@ -55,7 +48,6 @@ Hint State: ${hintState.hintsUsed}/${hintState.totalHints} hints used`;
     }
   }
 
-  // Handle hint requests specifically
   if (req.isHintRequest) {
     if (hintState.hintIndex < hintState.totalHints) {
       const nextHint = q.hints[hintState.hintIndex];
@@ -69,17 +61,12 @@ Hint to provide: "${nextHint}"`;
 
   prompt += `\n\nCandidate's latest message: ${req.userMessage}`;
 
-  // If the conversation is just starting, remind the AI to introduce the problem
   if (transcriptWindow.recentMessages.length <= 2) {
     prompt += `\n\nCRITICAL INSTRUCTION: If you have not yet introduced the coding problem to the candidate, you MUST seamlessly transition from the current small talk/greeting into introducing the coding problem now. Introduce the problem BY ITS TITLE ONLY IN BOLD TEXT. Do NOT explain the problem description or logic (the candidate can read it on their screen). Explicitly ask them to walk you through their initial thoughts/approach before they write any code.`;
   }
 
   return prompt;
 }
-
-// ---------------------------------------------------------------------------
-// Chat orchestration
-// ---------------------------------------------------------------------------
 
 /**
  * Generate an interview chat response.
@@ -92,7 +79,6 @@ Hint to provide: "${nextHint}"`;
  * If all models fail, returns a safe local fallback message.
  */
 export async function generateInterviewChat(req: ChatRequest): Promise<ChatResponse> {
-  // Dev mock mode
   if (isMockMode()) {
     aiLog('chat', 'Using mock mode');
     return mockInterviewChat(req);
@@ -102,7 +88,6 @@ export async function generateInterviewChat(req: ChatRequest): Promise<ChatRespo
   const chatPrompt = buildChatPrompt(req);
   const errors: Error[] = [];
 
-  // Build attempt list
   const attempts: Array<{
     provider: 'gemini' | 'groq';
     model: string;
@@ -114,7 +99,6 @@ export async function generateInterviewChat(req: ChatRequest): Promise<ChatRespo
     })),
   ];
 
-  // If force-failure mode, skip the primary
   const startIndex = isForceFailure() ? 1 : 0;
 
   for (let i = startIndex; i < attempts.length; i++) {
@@ -140,7 +124,6 @@ export async function generateInterviewChat(req: ChatRequest): Promise<ChatRespo
         fallbackUsed: isFallback,
       };
 
-      // If this was a hint request and a hint was available, include updated index
       if (req.isHintRequest && req.hintState.hintIndex < req.hintState.totalHints) {
         response.newHintIndex = req.hintState.hintIndex + 1;
       }
@@ -158,12 +141,10 @@ export async function generateInterviewChat(req: ChatRequest): Promise<ChatRespo
         continue;
       }
 
-      // Non-transient — don't fallback, but for chat we still return a safe message
       break;
     }
   }
 
-  // All models failed — return safe local fallback
   aiLog('chat', 'All chat models failed, returning safe fallback');
 
   const safeFallback: ChatResponse = {
@@ -176,7 +157,6 @@ export async function generateInterviewChat(req: ChatRequest): Promise<ChatRespo
   };
 
   if (req.isHintRequest && req.hintState.hintIndex < req.hintState.totalHints) {
-    // Still dispense the hint even if AI formatting failed
     const hint = req.questionContext.hints[req.hintState.hintIndex];
     safeFallback.reply = `Here's a hint: ${hint}`;
     safeFallback.newHintIndex = req.hintState.hintIndex + 1;
@@ -184,10 +164,6 @@ export async function generateInterviewChat(req: ChatRequest): Promise<ChatRespo
 
   return safeFallback;
 }
-
-// ---------------------------------------------------------------------------
-// Dynamic Openers and Transitions
-// ---------------------------------------------------------------------------
 
 export async function generateGreeting(candidateName: string = 'the candidate'): Promise<string> {
   const interviewerNames = [

@@ -4,11 +4,6 @@
 
 import type { AIProvider, GeminiApiMode } from './config';
 
-// ---------------------------------------------------------------------------
-// Evaluation
-// ---------------------------------------------------------------------------
-
-/** Server-side context assembled before calling the evaluation model. */
 export interface EvaluationRequest {
   question: {
     title: string;
@@ -31,7 +26,6 @@ export interface EvaluationRequest {
   };
 }
 
-/** Structured evaluation response from AI models. */
 export interface EvaluationResult {
   score: number; // 0-10 integer
   isCorrect: boolean;
@@ -45,7 +39,6 @@ export interface EvaluationResult {
   improvements: string[];
   nextAction: 'follow_up' | 'same_topic' | 'harder' | 'easier' | 'end_interview';
   interviewerReply: string;
-  // Provider metadata
   provider: AIProvider;
   model: string;
   apiMode: GeminiApiMode | 'groq-chat' | 'mock';
@@ -53,17 +46,10 @@ export interface EvaluationResult {
   fallbackUsed: boolean;
 }
 
-// ---------------------------------------------------------------------------
-// Chat
-// ---------------------------------------------------------------------------
-
-/** Request context for interview chat. */
 export interface ChatRequest {
   sessionId: string;
   userMessage: string;
-  /** Is this message a hint request? */
   isHintRequest: boolean;
-  /** Active question public snapshot for context. */
   questionContext: {
     title: string;
     description: string;
@@ -73,13 +59,11 @@ export interface ChatRequest {
     difficulty: string;
     hints: string[];
   };
-  /** Current hint state from Redis. */
   hintState: {
     hintIndex: number;
     hintsUsed: number;
     totalHints: number;
   };
-  /** Bounded transcript window for the model prompt. */
   transcriptWindow: {
     summary: string | null;
     recentMessages: Array<{
@@ -89,22 +73,15 @@ export interface ChatRequest {
   };
 }
 
-/** Chat response from AI models. */
 export interface ChatResponse {
   reply: string;
   provider: AIProvider;
   model: string;
   apiMode: GeminiApiMode | 'groq-chat' | 'mock';
   fallbackUsed: boolean;
-  /** Updated hint index if a hint was dispensed. */
   newHintIndex?: number;
 }
 
-// ---------------------------------------------------------------------------
-// Error types
-// ---------------------------------------------------------------------------
-
-/** Indicates a transient failure eligible for fallback. */
 export class AITransientError extends Error {
   constructor(
     message: string,
@@ -117,7 +94,6 @@ export class AITransientError extends Error {
   }
 }
 
-/** Indicates the response could not be parsed as valid JSON / schema. */
 export class AISchemaError extends Error {
   constructor(
     message: string,

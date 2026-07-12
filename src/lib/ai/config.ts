@@ -10,10 +10,6 @@ import 'server-only';
  * when providers rotate model availability.
  */
 
-// ---------------------------------------------------------------------------
-// Provider types
-// ---------------------------------------------------------------------------
-
 export type AIProvider = 'gemini' | 'groq' | 'mock';
 export type GeminiApiMode = 'interactions';
 
@@ -23,20 +19,11 @@ export interface ModelConfig {
 }
 
 export interface FallbackModelConfig extends ModelConfig {
-  /** Original env string, e.g. "groq:openai/gpt-oss-20b" */
   raw: string;
 }
 
-// ---------------------------------------------------------------------------
-// Timeout constants (milliseconds)
-// ---------------------------------------------------------------------------
-
 export const EVALUATION_TIMEOUT_MS = 20_000;
 export const CHAT_TIMEOUT_MS = 8_000;
-
-// ---------------------------------------------------------------------------
-// Env var readers
-// ---------------------------------------------------------------------------
 
 function envOrDefault(key: string, fallback: string): string {
   return process.env[key] || fallback;
@@ -47,10 +34,6 @@ function envBool(key: string, fallback: boolean): boolean {
   if (!val) return fallback;
   return val === 'true' || val === '1';
 }
-
-// ---------------------------------------------------------------------------
-// Dev control helpers
-// ---------------------------------------------------------------------------
 
 export function isMockMode(): boolean {
   return envBool('AI_DEV_MOCK_MODE', false);
@@ -63,10 +46,6 @@ export function isForceFailure(): boolean {
 export function isVerboseLogging(): boolean {
   return envBool('AI_DEV_VERBOSE_LOGS', false);
 }
-
-// ---------------------------------------------------------------------------
-// Gemini config
-// ---------------------------------------------------------------------------
 
 export function getGeminiApiMode(): GeminiApiMode {
   return 'interactions';
@@ -82,19 +61,11 @@ export function getGeminiApiKey(): string {
   return key;
 }
 
-// ---------------------------------------------------------------------------
-// Groq config
-// ---------------------------------------------------------------------------
-
 export function getGroqApiKey(): string {
   const key = process.env.GROQ_API_KEY;
   if (!key) throw new Error('[ai/config] GROQ_API_KEY is not set');
   return key;
 }
-
-// ---------------------------------------------------------------------------
-// Evaluation model config
-// ---------------------------------------------------------------------------
 
 export function getEvaluationConfig(): {
   primary: ModelConfig;
@@ -114,10 +85,6 @@ export function getEvaluationConfig(): {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Chat model config
-// ---------------------------------------------------------------------------
-
 export function getChatConfig(): {
   primary: ModelConfig;
   fallbacks: FallbackModelConfig[];
@@ -135,10 +102,6 @@ export function getChatConfig(): {
     fallbacks: parseFallbackModels(fallbacksRaw),
   };
 }
-
-// ---------------------------------------------------------------------------
-// Fallback model parsing
-// ---------------------------------------------------------------------------
 
 /**
  * Parse comma-separated fallback model strings.
@@ -163,7 +126,6 @@ function parseFallbackModels(raw: string): FallbackModelConfig[] {
       };
     }
 
-    // No provider prefix — default to gemini for evaluation fallbacks
     return {
       provider: 'gemini' as AIProvider,
       model: trimmed,
@@ -171,10 +133,6 @@ function parseFallbackModels(raw: string): FallbackModelConfig[] {
     };
   });
 }
-
-// ---------------------------------------------------------------------------
-// Logging helper
-// ---------------------------------------------------------------------------
 
 export function aiLog(component: string, message: string, data?: unknown): void {
   if (!isVerboseLogging()) return;

@@ -13,11 +13,9 @@ export default function Navbar() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Auto-open drawer when ?startInterview=true is in the URL
   React.useEffect(() => {
     if (searchParams.get('startInterview') === 'true') {
       setIsDrawerOpen(true);
-      // Clear the param so back-navigation doesn't re-trigger
       router.replace(window.location.pathname, { scroll: false });
     }
   }, [searchParams, router]);

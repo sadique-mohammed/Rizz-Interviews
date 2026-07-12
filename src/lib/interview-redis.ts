@@ -11,23 +11,13 @@ import type {
 } from '@/types/interviewRedis';
 import { resolveNextBuffer } from '@/lib/question-bank';
 
-// ---------------------------------------------------------------------------
-// Key builders
-// ---------------------------------------------------------------------------
-
-/** Main session state key. TTL = durationMinutes * 60 * 2. */
 export function interviewStateKey(sessionId: string): string {
   return `interview:${sessionId}:state`;
 }
 
-/** User → active session pointer (cache only, not the authoritative lock). */
 export function userActiveInterviewKey(userId: string): string {
   return `user:${userId}:activeInterview`;
 }
-
-// ---------------------------------------------------------------------------
-// Create / Read / Delete session state
-// ---------------------------------------------------------------------------
 
 /**
  * Store initial interview state in Redis.
@@ -50,7 +40,6 @@ export async function getInterviewState(sessionId: string): Promise<RedisIntervi
   const raw = await redis.get<string>(interviewStateKey(sessionId));
   if (!raw) return null;
 
-  // @upstash/redis auto-deserializes JSON, so raw may already be an object
   if (typeof raw === 'object') return raw as unknown as RedisInterviewState;
 
   try {
@@ -86,10 +75,6 @@ export async function deleteInterviewState(sessionId: string, userId: string): P
   ]);
 }
 
-// ---------------------------------------------------------------------------
-// User active-session pointer (cache only)
-// ---------------------------------------------------------------------------
-
 /**
  * Set the user → active session pointer with TTL.
  * This is a cache pointer, NOT the authoritative lock (Postgres partial
@@ -110,10 +95,6 @@ export async function setUserActiveInterview(
 export async function getUserActiveInterview(userId: string): Promise<string | null> {
   return redis.get<string>(userActiveInterviewKey(userId));
 }
-
-// ---------------------------------------------------------------------------
-// Active question state updates
-// ---------------------------------------------------------------------------
 
 /**
  * Update the mutable active question state (drafts, hints).
@@ -143,10 +124,6 @@ export function applyActiveQuestionState(
     ...updates,
   };
 }
-
-// ---------------------------------------------------------------------------
-// Chat message operations
-// ---------------------------------------------------------------------------
 
 /**
  * Append a chat message to the session transcript.
@@ -199,10 +176,6 @@ export async function updateChatSummary(
   await updateInterviewState(sessionId, state);
   return state;
 }
-
-// ---------------------------------------------------------------------------
-// Question transition operations
-// ---------------------------------------------------------------------------
 
 /**
  * Mark the current active question as answered and record the attempt.
@@ -296,10 +269,6 @@ export function applyPromoteNextQuestion(
   return true;
 }
 
-// ---------------------------------------------------------------------------
-// Transcript windowing helpers
-// ---------------------------------------------------------------------------
-
 /**
  * Get the bounded chat context for model prompts.
  * Returns rolling summary + last N messages (default 15).
@@ -324,11 +293,6 @@ export function needsSummaryUpdate(state: RedisInterviewState, threshold: number
   return state.chatMessages.length > threshold;
 }
 
-// ---------------------------------------------------------------------------
-// Factory helpers
-// ---------------------------------------------------------------------------
-
-/** Create a fresh active question state. */
 export function createFreshActiveQuestionState(): RedisActiveQuestionState {
   return {
     hintIndex: 0,
@@ -340,7 +304,6 @@ export function createFreshActiveQuestionState(): RedisActiveQuestionState {
   };
 }
 
-/** Create a fresh chat summary. */
 export function createFreshChatSummary(): RedisChatSummary {
   return {
     text: '',

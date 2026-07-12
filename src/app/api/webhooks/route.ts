@@ -6,7 +6,6 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import type { UserInsert } from '@/types/user';
 
-// Zod schema for webhook payload validation
 const clerkUserSchema = z.object({
   id: z.string(),
   first_name: z.string().nullable(),
@@ -22,13 +21,10 @@ const clerkUserSchema = z.object({
   last_sign_in_at: z.number().nullable(),
 });
 
-// Zod schema for session event - contains user_id to fetch user data
 const clerkSessionSchema = z.object({
   user_id: z.string(),
 });
 
-// Helper function to sync user to database using atomic upsert
-// Note: neon-http driver doesn't support transactions, so we use onConflictDoUpdate
 async function syncUserToDatabase(userData: UserInsert & { updatedAt: Date }) {
   const result = await db
     .insert(users)
@@ -45,22 +41,17 @@ async function syncUserToDatabase(userData: UserInsert & { updatedAt: Date }) {
     })
     .returning({ id: users.id });
 
-  // Log based on whether this was likely an insert or update
-  // (we can't know for sure with upsert, but the operation succeeded)
   console.log(`[Webhook] Synced user: ${userData.email} (id: ${result[0]?.id})`);
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    // Verify webhook signature for security
     const evt = await verifyWebhook(req);
 
     const eventType = evt.type;
     console.log(`[Webhook] Event received: ${eventType}`);
 
-    // Handle user creation and updates
     if (eventType === 'user.created' || eventType === 'user.updated') {
-      // Validate payload with Zod
       const validationResult = clerkUserSchema.safeParse(evt.data);
 
       if (!validationResult.success) {
@@ -81,7 +72,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         last_sign_in_at,
       } = validationResult.data;
 
-      // Get primary email
       const primaryEmail = email_addresses.find((email) => email.id === primary_email_address_id);
 
       if (!primaryEmail) {
@@ -89,7 +79,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json({ error: 'No primary email address found' }, { status: 400 });
       }
 
-      // Prepare typed user data
       const userData: UserInsert & { updatedAt: Date } = {
         id: clerkId, // clerk_id is now the primary key
         name: `${first_name || ''} ${last_name || ''}`.trim() || 'User',
@@ -108,8 +97,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Handle session.created - Sync user if they don't exist in our DB yet
-    // This handles users created before webhook was set up
     if (eventType === 'session.created') {
       const sessionResult = clerkSessionSchema.safeParse(evt.data);
 
@@ -120,13 +107,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
       const { user_id: clerkId } = sessionResult.data;
 
-      // Check if user already exists in our database
       const existingUser = await db.query.users.findFirst({
         where: eq(users.id, clerkId),
       });
 
       if (existingUser) {
-        // User already synced, just update lastSignInAt
         await db
           .update(users)
           .set({ lastSignInAt: new Date(), updatedAt: new Date() })
@@ -139,7 +124,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         );
       }
 
-      // User doesn't exist - fetch from Clerk Backend API and create
       console.log(`[Webhook] User not in DB, fetching from Clerk: ${clerkId}`);
 
       const { clerkClient } = await import('@clerk/nextjs/server');
@@ -178,16 +162,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Handle user deletion - Keep user data for business/compliance reasons
     if (eventType === 'user.deleted') {
       const { id: clerkId } = evt.data as { id: string };
 
       console.log(`[Webhook] User deleted in Clerk: ${clerkId} - Keeping data for records`);
-
-      // NOTE: We intentionally do NOT delete the user from our database
-      // to preserve interview history, answers, and recordings for business analytics
-      // and potential compliance requirements. The clerkId will no longer be valid
-      // but historical data remains intact.
 
       return NextResponse.json(
         { success: true, message: 'User deletion acknowledged, data preserved' },
@@ -195,7 +173,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Handle unsupported event types gracefully
     console.log(`[Webhook] Unhandled event type: ${eventType}`);
     return NextResponse.json(
       { success: true, message: 'Event acknowledged but not processed' },

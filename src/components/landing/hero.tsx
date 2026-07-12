@@ -6,7 +6,6 @@ import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import DemoLoginButton from './demo-login-button';
 
-// CSS-based fade-in animation for critical above-the-fold content
 const fadeInUp = 'animate-fade-in-up';
 
 export default function Hero() {
@@ -60,7 +59,6 @@ export default function Hero() {
           </p>
         </div>
 
-        {/* Hero Card - Uses CSS for initial animation, vanilla JS for tilt */}
         <div
           className={`relative ${fadeInUp}`}
           style={{ animationDelay: '100ms' }}
@@ -73,7 +71,6 @@ export default function Hero() {
   );
 }
 
-// Interactive card with tilt effect using vanilla JS (no framer-motion)
 function HeroCard() {
   const cardRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ rX: 0, rY: 0 });
@@ -112,10 +109,8 @@ function HeroCard() {
       }}
       className='relative rounded-2xl overflow-hidden shadow-sm'
     >
-      {/* Gradient frame */}
       <div className='bg-tech-gradient relative rounded-2xl p-[1px]'>
         <div className='rounded-[14px] bg-white border border-gray-200 overflow-hidden'>
-          {/* Top meta bar */}
           <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200/80 bg-white/60 backdrop-blur-sm'>
             <div className='flex items-center gap-2'>
               <span className='inline-flex items-center gap-2 rounded-full bg-brand-light/20 px-2.5 py-1 text-xs font-medium text-brand-dark'>
@@ -127,9 +122,7 @@ function HeroCard() {
             <div className='text-xs text-gray-500'>30:42</div>
           </div>
 
-          {/* IDE Stage */}
           <div className='relative flex flex-col md:flex-row h-[300px] md:h-[360px] bg-white/40 backdrop-blur-sm'>
-            {/* Left Panel: Problem Statement */}
             <div className='w-full md:w-1/3 p-5 border-r border-gray-200/50 overflow-hidden relative flex-col hidden md:flex'>
               <div className='flex-1'>
                 <h3 className='text-sm font-bold text-gray-900 mb-2'>Invert Binary Tree</h3>
@@ -147,7 +140,6 @@ function HeroCard() {
                 </div>
               </div>
 
-              {/* AI bot PIP moved to bottom of left panel */}
               <div className='mt-auto pt-4 relative z-10'>
                 <div className='flex items-start gap-3 rounded-2xl bg-white/90 backdrop-blur-xl shadow-[0_4px_20px_rgb(0,0,0,0.06)] border border-gray-100/50 px-3 py-2.5 transform hover:-translate-y-1 transition-transform duration-300'>
                   <div className='mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full border border-brand/20 bg-gradient-to-tr from-brand/15 to-brand-secondary/10 shadow-inner'>
@@ -164,11 +156,9 @@ function HeroCard() {
                 </div>
               </div>
 
-              {/* Fade out bottom text to avoid overflow */}
               <div className='absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white/90 to-transparent pointer-events-none'></div>
             </div>
 
-            {/* Right Panel: Code Editor */}
             <div className='w-full md:w-2/3 flex flex-col bg-white/80 backdrop-blur-md relative'>
               <div className='flex px-4 py-2.5 bg-white/50 text-[11px] font-medium text-gray-400 font-mono border-b border-gray-100 shadow-sm z-10'>
                 <span className='flex items-center gap-2 text-gray-500'>
@@ -216,7 +206,6 @@ function HeroCard() {
                 <span className='ml-1 inline-block h-3.5 w-[1.5px] animate-pulse align-middle bg-brand'></span>
               </div>
 
-              {/* Candidate Voice Transcription */}
               <div className='absolute left-5 bottom-5 z-10'>
                 <div className='flex items-start gap-3 rounded-2xl bg-gray-900/90 backdrop-blur-md shadow-2xl border border-gray-700/50 px-4 py-3 max-w-[220px] sm:max-w-[280px]'>
                   <div className='flex gap-1 items-end h-3 shrink-0 mt-1'>
@@ -242,12 +231,10 @@ function HeroCard() {
             </div>
           </div>
 
-          {/* Controls */}
           <HeroControls />
         </div>
       </div>
 
-      {/* Subtle glow ring */}
       <div className='pointer-events-none absolute -inset-1 rounded-2xl ring-1 ring-gray-200/50' />
     </div>
   );

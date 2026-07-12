@@ -40,7 +40,6 @@ export default async function PracticeRolePage({ params }: { params: Promise<{ r
     <main className='font-sans min-h-screen bg-gray-50 flex flex-col'>
       <Navbar />
 
-      {/* Role Hero */}
       <section className='pt-32 pb-16 px-6 md:px-12 bg-white text-center border-b'>
         <div className='max-w-4xl mx-auto'>
           <span className='inline-block py-1 px-3 rounded-full bg-blue-50 text-blue-600 text-sm font-semibold mb-6'>
@@ -71,7 +70,6 @@ export default async function PracticeRolePage({ params }: { params: Promise<{ r
         </div>
       </section>
 
-      {/* Common Questions Section */}
       <section className='py-20 px-6 md:px-12 flex-1'>
         <div className='max-w-4xl mx-auto'>
           <h2 className='text-3xl font-bold text-gray-900 mb-12 text-center'>

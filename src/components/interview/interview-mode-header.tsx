@@ -30,7 +30,6 @@ export default function InterviewModeHeader({
   const audioCtxRef = React.useRef<AudioContext | null>(null);
 
   React.useEffect(() => {
-    // Zoom animation at 5 mins, 1 min, 30 sec, and last 10 seconds
     const shouldAnimate =
       timeLeft === 300 || timeLeft === 60 || timeLeft === 30 || (timeLeft <= 10 && timeLeft > 0);
 
@@ -38,7 +37,6 @@ export default function InterviewModeHeader({
       setAnimateScale(true);
       const timer = setTimeout(() => setAnimateScale(false), 500);
 
-      // Play tick sound for last 10 seconds
       if (timeLeft <= 10) {
         try {
           if (!audioCtxRef.current) {
@@ -63,7 +61,6 @@ export default function InterviewModeHeader({
           osc.start(ctx.currentTime);
           osc.stop(ctx.currentTime + 0.1);
         } catch (e) {
-          // ignore audio context errors
         }
       }
 

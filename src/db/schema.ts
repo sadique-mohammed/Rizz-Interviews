@@ -12,7 +12,6 @@ import {
   index,
 } from 'drizzle-orm/pg-core';
 
-// Users - clerk_id is the primary key (permanent identifier from Clerk)
 export const users = pgTable('users', {
   id: varchar('id', { length: 255 }).primaryKey(), // This IS the clerk_id
   name: varchar('name', { length: 100 }).notNull(),
@@ -25,7 +24,6 @@ export const users = pgTable('users', {
   streakData: jsonb('streak_data'),
 });
 
-// Interviews
 export const interviews = pgTable(
   'interviews',
   {
@@ -50,7 +48,6 @@ export const interviews = pgTable(
   },
 );
 
-// Question Bank
 export const questionBank = pgTable(
   'question_bank',
   {
@@ -92,7 +89,6 @@ export const questionBankTags = pgTable('question_bank_tags', {
   tag: varchar('tag', { length: 100 }).notNull(),
 });
 
-// Questions assigned to interview sessions
 export const questions = pgTable('questions', {
   id: uuid('id').defaultRandom().primaryKey(),
   interviewId: uuid('interview_id')
@@ -105,7 +101,6 @@ export const questions = pgTable('questions', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
-// Answer Attempts
 export const answerAttempts = pgTable('answer_attempts', {
   id: uuid('id').defaultRandom().primaryKey(),
   questionId: uuid('question_id')
@@ -124,7 +119,6 @@ export const answerAttempts = pgTable('answer_attempts', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
-// Recordings
 export const recordings = pgTable('recordings', {
   id: uuid('id').defaultRandom().primaryKey(),
   interviewId: uuid('interview_id')

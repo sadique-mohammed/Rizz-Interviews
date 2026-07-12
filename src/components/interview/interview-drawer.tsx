@@ -27,7 +27,6 @@ export default function InterviewDrawer({ isOpen, onClose }: InterviewDrawerProp
   const [loadError, setLoadError] = React.useState('');
   const [refreshKey, setRefreshKey] = React.useState(0);
 
-  // Ensure portal only renders on client
   React.useEffect(() => {
     setMounted(true);
   }, []);
@@ -73,7 +72,6 @@ export default function InterviewDrawer({ isOpen, onClose }: InterviewDrawerProp
     };
   }, [isOpen, mounted, refreshKey]);
 
-  // Close on Escape, lock body scroll, trap focus
   React.useEffect(() => {
     if (!isOpen) return;
 
@@ -110,7 +108,6 @@ export default function InterviewDrawer({ isOpen, onClose }: InterviewDrawerProp
     };
   }, [isOpen, onClose]);
 
-  // Auto-focus first focusable element when modal opens
   React.useEffect(() => {
     if (!isOpen || !contentRef.current) return;
     const first = contentRef.current.querySelector<HTMLElement>(FOCUSABLE);

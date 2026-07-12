@@ -17,7 +17,6 @@ export async function GET(
       throw new Error('Unauthenticated');
     }
 
-    // Get interview with ownership verification (returns 404 if not found or not owned)
     const interviewResult = await db
       .select({
         id: interviews.id,
@@ -44,7 +43,6 @@ export async function GET(
 
     const interview = interviewResult[0];
 
-    // 2. Get all questions for this interview
     const interviewQuestions = await db
       .select({
         id: questions.id,
@@ -62,7 +60,6 @@ export async function GET(
       .where(eq(questions.interviewId, id))
       .orderBy(asc(questions.position));
 
-    // 3. Get all answer attempts for these questions
     const questionIds = interviewQuestions.map((q) => q.id);
     const allAnswers =
       questionIds.length > 0
@@ -82,7 +79,6 @@ export async function GET(
             .where(inArray(answerAttempts.questionId, questionIds))
         : [];
 
-    // 4. Get all recordings for this interview
     const interviewRecordings = await db
       .select({
         id: recordings.id,
@@ -93,7 +89,6 @@ export async function GET(
       .from(recordings)
       .where(eq(recordings.interviewId, id));
 
-    // 5. Nest data structure
     const questionsWithAnswers = interviewQuestions.map((q) => {
       const bankQuestion = {
         id: q.bankId,

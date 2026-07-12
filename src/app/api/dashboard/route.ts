@@ -13,7 +13,6 @@ export async function GET(): Promise<NextResponse> {
       throw new Error('Unauthenticated');
     }
 
-    // 1. Get user data including streak
     const dbUsers = await db
       .select({
         id: users.id,
@@ -31,19 +30,15 @@ export async function GET(): Promise<NextResponse> {
 
     const userRecord = dbUsers[0];
 
-    // Parse and update streak data
     const currentStreakData = parseStreakData(userRecord.streakData);
     const newStreakData = updateStreakData(currentStreakData, new Date());
 
-    // If streak data changed (i.e. first visit today), update DB
     if (newStreakData.lastActivityDate !== currentStreakData.lastActivityDate) {
       await db.update(users).set({ streakData: newStreakData }).where(eq(users.id, userId));
     }
 
-    // 2. Get the explicit active session for the user
     const activeSession = await reconcileUserActiveSession(userId);
 
-    // 3. Get recent interviews
     const recentInterviews = await db
       .select({
         id: interviews.id,

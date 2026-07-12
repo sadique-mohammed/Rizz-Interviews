@@ -19,7 +19,6 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 
-// Lazy load framer-motion components - only loads when user scrolls to features section
 const MotionDiv = dynamic(() => import('framer-motion').then((mod) => mod.motion.div), {
   ssr: false,
   loading: () => <div className='animate-pulse bg-gray-100 rounded-2xl h-64' />,
@@ -76,15 +75,7 @@ const TABS: Tab[] = [
     bullets: ['Attempts logged', 'AI corrections', 'Session summaries'],
   },
   {
-    id: 'recordings',
-    label: 'Recordings',
-    icon: Shield,
-    title: 'Record and replay.',
-    copy: 'Optionally record sessions and auto-generate transcripts to review or share with mentors.',
-    bullets: ['Optional video', 'Auto transcripts', 'Shareable links'],
-  },
-  {
-    id: 'scoring',
+    id: 'scoring',  
     label: 'Scoring',
     icon: BadgeCheck,
     title: 'Smart scoring rubric.',
@@ -93,7 +84,6 @@ const TABS: Tab[] = [
   },
 ];
 
-// DemoCard component - uses CSS for tilt instead of framer-motion
 function DemoCard({
   pulse = false,
   activeId = 'ai-interview',
@@ -139,7 +129,6 @@ function DemoCard({
       }}
       className='relative overflow-hidden rounded-2xl border border-gray-200/60 bg-gradient-to-br from-white to-gray-50/50 p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 h-fit cursor-pointer'
     >
-      {/* shimmer sweep - CSS animation */}
       {pulse && !prefersReducedMotion && (
         <div className='pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer' />
       )}
@@ -250,13 +239,11 @@ function DemoCard({
   );
 }
 
-// Features component
 export default function Features() {
   const [active, setActive] = useState<string>(TABS[0].id); // default first tab
   const activeTab = TABS.find((t) => t.id === active) || TABS[0];
   const [pulse, setPulse] = useState(false);
 
-  // Map stats for each tab
   const tabStats: Record<string, { k: string; v: string }[]> = {
     'ai-interview': [
       { k: 'DSA coverage', v: '100%' },
@@ -285,7 +272,6 @@ export default function Features() {
     ],
   };
 
-  // Map DemoCard colors per tab
   const tabColors: Record<string, 'red' | 'purple' | 'blue'> = {
     'ai-interview': 'red',
     'feedback-scoring': 'purple',
@@ -315,7 +301,6 @@ export default function Features() {
           center
         />
 
-        {/* Pill Tabs */}
         <Tabs value={active} onValueChange={setActive} className='mt-4'>
           <div className='flex justify-center'>
             <TabsList className='relative flex max-w-full overflow-x-auto no-scrollbar p-1 bg-input/50 h-auto w-full gap-1 items-start flex-row tracking-normal leading-5 rounded-sm my-2 mx-0'>
@@ -343,7 +328,6 @@ export default function Features() {
             </TabsList>
           </div>
 
-          {/* Content */}
           <div className='mt-10'>
             <AnimatePresence mode='wait'>
               <MotionDiv
@@ -354,10 +338,8 @@ export default function Features() {
                 transition={{ duration: 0.4, ease: 'easeOut' }}
                 className='grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12'
               >
-                {/* Demo card */}
                 <DemoCard pulse={pulse} activeId={active} />
 
-                {/* Copy panel */}
                 <MotionDiv
                   layout
                   className='rounded-2xl border border-gray-200/60 bg-gradient-to-br from-gray-50/50 to-white p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow duration-300'
@@ -402,7 +384,6 @@ export default function Features() {
                     </MotionUl>
                   )}
 
-                  {/* Stats */}
                   <div className='mt-6 grid grid-cols-3 gap-3'>
                     {tabStats[active].map((s) => (
                       <div
@@ -415,7 +396,6 @@ export default function Features() {
                     ))}
                   </div>
 
-                  {/* CTA row */}
                   <div
                     className='mt-6 flex flex-wrap items-center gap-3 animate-fade-in-up'
                     style={{ animationDelay: '300ms' }}

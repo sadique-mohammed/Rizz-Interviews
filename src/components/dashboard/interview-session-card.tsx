@@ -26,8 +26,6 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { clearInterviewStorage, cleanupOrphanedStorage, cn } from '@/lib/utils';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 interface ActiveSession {
   id: string;
   domain: string;
@@ -39,8 +37,6 @@ interface ActiveSession {
 interface InterviewSessionCardProps {
   activeSession?: ActiveSession | null;
 }
-
-// ─── Constants ───────────────────────────────────────────────────────────────
 
 const interviewTypes = [
   {
@@ -56,8 +52,6 @@ const interviewTypes = [
     description: 'React, APIs, Performance, etc.',
   },
 ];
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function getTimeAgo(startedAt: string): string {
   const diff = Date.now() - new Date(startedAt).getTime();
@@ -76,8 +70,6 @@ function getRemainingTime(startedAt: string, durationMinutes: number): string {
   const mins = Math.floor(remaining / 60000);
   return `${mins} min remaining`;
 }
-
-// ─── Abandon Confirmation Modal ──────────────────────────────────────────────
 
 interface AbandonModalProps {
   session: ActiveSession;
@@ -99,13 +91,11 @@ function AbandonModal({
   React.useEffect(() => {
     if (isOpen) {
       setRender(true);
-      // Wait for React to render the DOM node, then trigger transition
       requestAnimationFrame(() => {
         requestAnimationFrame(() => setMounted(true));
       });
     } else {
       setMounted(false);
-      // Wait for `--modal-close-dur` (150ms) + buffer before unmounting
       const timer = setTimeout(() => setRender(false), 200);
       return () => clearTimeout(timer);
     }
@@ -133,7 +123,6 @@ function AbandonModal({
       aria-modal='true'
       aria-label='Abandon session confirmation'
     >
-      {/* Backdrop */}
       <div
         className={cn(
           'absolute inset-0 bg-black/40 backdrop-blur-sm t-modal-backdrop',
@@ -148,7 +137,6 @@ function AbandonModal({
         }}
       />
 
-      {/* Modal */}
       <div
         className={cn(
           'relative z-10 w-[90vw] max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl t-modal-content',
@@ -198,8 +186,6 @@ function AbandonModal({
     document.body,
   );
 }
-
-// ─── Active Session Banner ───────────────────────────────────────────────────
 
 interface ActiveSessionBannerProps {
   session: ActiveSession;
@@ -257,8 +243,6 @@ function ActiveSessionBanner({ session, onResume, onAbandon }: ActiveSessionBann
   );
 }
 
-// ─── Main Component ──────────────────────────────────────────────────────────
-
 export default function InterviewSessionCard({ activeSession = null }: InterviewSessionCardProps) {
   const router = useRouter();
 
@@ -270,7 +254,6 @@ export default function InterviewSessionCard({ activeSession = null }: Interview
   const [isAbandoning, setIsAbandoning] = React.useState(false);
   const [localActiveSession, setLocalActiveSession] = React.useState(activeSession);
 
-  // Sync prop changes and clean up orphaned localStorage keys
   React.useEffect(() => {
     setLocalActiveSession(activeSession);
     cleanupOrphanedStorage(activeSession?.id || null);
@@ -362,7 +345,6 @@ export default function InterviewSessionCard({ activeSession = null }: Interview
           </CardDescription>
         </CardHeader>
         <CardContent className='space-y-6'>
-          {/* Active session banner */}
           {localActiveSession && (
             <ActiveSessionBanner
               session={localActiveSession}
@@ -371,7 +353,6 @@ export default function InterviewSessionCard({ activeSession = null }: Interview
             />
           )}
 
-          {/* Form — disabled when there's an active session */}
           <div className={isLocked ? 'pointer-events-none opacity-40 select-none' : ''}>
             {isLocked && (
               <p className='mb-4 text-sm font-medium text-brand-dark'>
@@ -499,7 +480,6 @@ export default function InterviewSessionCard({ activeSession = null }: Interview
         </CardContent>
       </Card>
 
-      {/* Abandon confirmation modal */}
       {localActiveSession && (
         <AbandonModal
           session={localActiveSession}

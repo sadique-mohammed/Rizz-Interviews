@@ -1,4 +1,3 @@
-// app/history/page.tsx
 import HistoryList from '@/components/history/history-list';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

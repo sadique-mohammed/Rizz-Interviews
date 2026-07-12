@@ -14,22 +14,22 @@ export default function StreakCard({ streakData, className }: StreakCardProps) {
   const currentStreak = streakData.currentStreak || 0;
   const bestStreak = streakData.bestStreak || 0;
 
-  // Calculate next milestone
+
   const milestones = [3, 7, 14, 30, 50, 100, 365];
   let nextMilestone = milestones.find((m) => m > currentStreak) || currentStreak + 10;
   const daysToMilestone = nextMilestone - currentStreak;
 
-  // Format milestone label
+
   let milestoneLabel = `${nextMilestone} Days`;
   if (nextMilestone === 7) milestoneLabel = '1 Week';
   if (nextMilestone === 14) milestoneLabel = '2 Weeks';
   if (nextMilestone === 30) milestoneLabel = '1 Month';
 
-  // Get activity arrays
+
   const last7Days = getLast7DaysActivity(streakData.activityDays || []);
   const daysOfWeek = getDaysOfWeek();
 
-  // Progress ring calculation (percentage)
+
   let prevMilestone = milestones.slice().reverse().find((m) => m <= currentStreak) || 0;
   if (currentStreak === 0) prevMilestone = 0;
   const progressPercent = currentStreak === 0 ? 0 : Math.min(100, Math.max(0, ((currentStreak - prevMilestone) / (nextMilestone - prevMilestone)) * 100));
@@ -41,7 +41,7 @@ export default function StreakCard({ streakData, className }: StreakCardProps) {
       <CardContent className="p-2">
         <div className='grid grid-cols-1 md:grid-cols-3 gap-2'>
           
-          {/* Box 1: Current Streak */}
+
           <div className={boxClasses}>
             <div className='flex items-center space-x-2.5'>
               <div className='flex-shrink-0'>
@@ -66,7 +66,7 @@ export default function StreakCard({ streakData, className }: StreakCardProps) {
             </div>
           </div>
 
-          {/* Box 2: 7-Day History */}
+
           <div className={boxClasses}>
             <div className='flex flex-col justify-center w-full h-full'>
               <div className='flex items-center gap-1 mb-1'>
@@ -95,15 +95,15 @@ export default function StreakCard({ streakData, className }: StreakCardProps) {
             </div>
           </div>
 
-          {/* Box 3: Next Milestone */}
+
           <div className={boxClasses}>
             <div className='flex items-center space-x-2.5'>
               <div className='flex-shrink-0'>
                 <div className='relative w-8 h-8 flex items-center justify-center bg-gray-100 rounded-md transition-colors group-hover:bg-brand/12'>
-                  {/* Background Ring */}
+
                   <svg className='w-full h-full transform -rotate-90 absolute inset-0'>
                     <circle cx='16' cy='16' r='13' stroke='currentColor' strokeWidth='3' fill='transparent' className='text-gray-200 group-hover:text-brand/20 transition-colors' />
-                    {/* Progress Ring */}
+
                     <circle
                       cx='16'
                       cy='16'

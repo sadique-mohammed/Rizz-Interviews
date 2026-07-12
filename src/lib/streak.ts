@@ -20,17 +20,14 @@ export function parseStreakData(rawData: unknown): StreakData {
 }
 
 export function updateStreakData(streakData: StreakData, dateObj: Date = new Date()): StreakData {
-  // Convert date to YYYY-MM-DD
   const todayStr = dateObj.toISOString().split('T')[0];
 
   let { currentStreak, bestStreak, activityDays, lastActivityDate } = streakData;
 
   if (lastActivityDate === todayStr) {
-    // Already visited today
     return streakData;
   }
 
-  // Check if visited yesterday
   const yesterdayObj = new Date(dateObj);
   yesterdayObj.setDate(yesterdayObj.getDate() - 1);
   const yesterdayStr = yesterdayObj.toISOString().split('T')[0];
@@ -38,7 +35,6 @@ export function updateStreakData(streakData: StreakData, dateObj: Date = new Dat
   if (lastActivityDate === yesterdayStr) {
     currentStreak += 1;
   } else {
-    // Streak broken
     currentStreak = 1;
   }
 
@@ -46,9 +42,7 @@ export function updateStreakData(streakData: StreakData, dateObj: Date = new Dat
     bestStreak = currentStreak;
   }
 
-  // Add today to the list of active days
   activityDays.push(todayStr);
-  // Keep only the last 14 dates to prevent the array from growing indefinitely
   if (activityDays.length > 14) {
     activityDays = activityDays.slice(activityDays.length - 14);
   }
@@ -66,7 +60,6 @@ export function getLast7DaysActivity(
   referenceDate: Date = new Date(),
 ): boolean[] {
   const result: boolean[] = [];
-  // i = 6 means 6 days ago, i = 0 means today
   for (let i = 6; i >= 0; i--) {
     const d = new Date(referenceDate);
     d.setDate(d.getDate() - i);

@@ -9,10 +9,6 @@ import 'server-only';
 
 import type { EvaluationRequest, EvaluationResult, ChatRequest, ChatResponse } from './types';
 
-// ---------------------------------------------------------------------------
-// Mock evaluation
-// ---------------------------------------------------------------------------
-
 /**
  * Returns a deterministic evaluation result for offline testing.
  * Score varies based on code length and hints used to make testing realistic.
@@ -20,7 +16,6 @@ import type { EvaluationRequest, EvaluationResult, ChatRequest, ChatResponse } f
 export function mockEvaluateAnswer(req: EvaluationRequest): EvaluationResult {
   const { candidate } = req;
 
-  // Simple heuristic: longer code + explanation = higher score
   const codeLength = candidate.code.length;
   const explanationLength = candidate.explanation.length;
 
@@ -30,7 +25,6 @@ export function mockEvaluateAnswer(req: EvaluationRequest): EvaluationResult {
   if (explanationLength > 50) baseScore += 1;
   if (explanationLength > 150) baseScore += 1;
 
-  // Apply hint penalty
   const hintPenalty = Math.min(candidate.hintsUsed, 3);
   const finalScore = Math.max(0, Math.min(10, baseScore - hintPenalty));
 
@@ -75,11 +69,6 @@ export function mockEvaluateAnswer(req: EvaluationRequest): EvaluationResult {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Mock chat
-// ---------------------------------------------------------------------------
-
-/** Deterministic mock responses keyed by message type. */
 const MOCK_RESPONSES: Record<string, string> = {
   hint: "Here's something to think about: consider what data structure would let you look up values in constant time.",
   clarification:

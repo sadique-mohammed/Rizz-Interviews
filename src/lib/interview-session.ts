@@ -13,7 +13,6 @@ export function isSessionExpired(session: SessionTiming, now: Date = new Date())
   const totalDurationMs = session.duration * 60 * 1000;
   if (totalDurationMs <= 0) return true;
 
-  // 60-second grace period for network latency and final auto-submits
   const GRACE_PERIOD_MS = 60 * 1000;
   return now.getTime() - new Date(session.startedAt).getTime() >= totalDurationMs + GRACE_PERIOD_MS;
 }
@@ -49,7 +48,6 @@ export async function calculateAndFinalizeInterview(
       .innerJoin(questions, eq(answerAttempts.questionId, questions.id))
       .where(eq(questions.interviewId, sessionId));
 
-    // Filter out 0-effort auto-submissions
     attempts = attempts.filter(
       (a) => !(a.score === 0 && a.explanation === 'Auto-submitted when time expired.'),
     );

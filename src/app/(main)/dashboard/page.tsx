@@ -39,7 +39,6 @@ export default async function DashboardPage() {
   const user = data?.user ?? null;
   const interviews = Array.isArray(data?.interviews) ? data.interviews : [];
 
-  // Use explicit active session returned from API
   const activeSession = data?.activeSession ?? null;
 
   return (

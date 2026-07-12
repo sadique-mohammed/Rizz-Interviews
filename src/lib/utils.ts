@@ -26,17 +26,14 @@ export function cleanupOrphanedStorage(activeSessionId: string | null) {
     const key = localStorage.key(i);
     if (!key) continue;
 
-    // If it's an interview storage key
     if (
       key.startsWith('nexus_draft_') ||
       key.startsWith('nexus_preferred_lang_') ||
       key.startsWith('nexus_session_')
     ) {
-      // If there's an active session, don't remove its keys
       if (activeSessionId && key.includes(activeSessionId)) {
         continue;
       }
-      // Otherwise it's orphaned, remove it
       keysToRemove.push(key);
     }
   }

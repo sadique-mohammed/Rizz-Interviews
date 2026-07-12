@@ -50,10 +50,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     const { domain, difficulty, duration } = validation.data;
 
-    // Determine max questions cap based on duration
     const maxQuestions = duration === 15 ? 5 : duration === 30 ? 10 : 15;
 
-    // 1. Fetch the 1st active question and the user in parallel
     const [bankQuestions, localUser] = await Promise.all([
       db
         .select()
@@ -75,13 +73,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const candidateName = localUser[0]?.name?.split(' ')[0] || 'the candidate';
     const seenQuestionBankIds = [activeQ.id];
 
-    // 2. Fetch buffers and generate greeting in parallel
     const [pendingBuffers, dynamicGreeting] = await Promise.all([
       fetchAdaptiveBuffers(domain, activeQ.difficultyScore, seenQuestionBankIds),
       generateGreeting(candidateName),
     ]);
 
-    // 3. Create the interview row
     let interview;
     try {
       const result = await db
@@ -109,13 +105,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       throw error;
     }
 
-    // Record buffer IDs into the seen ledger
     if (pendingBuffers.harder) seenQuestionBankIds.push(pendingBuffers.harder.questionBankId);
     if (pendingBuffers.easier) seenQuestionBankIds.push(pendingBuffers.easier.questionBankId);
     if (pendingBuffers.same_topic)
       seenQuestionBankIds.push(pendingBuffers.same_topic.questionBankId);
 
-    // 4. Create the active session question in Postgres
     const [sessionQuestion] = await db
       .insert(questions)
       .values({
@@ -125,7 +119,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       })
       .returning({ id: questions.id });
 
-    // 5. Construct Redis Question Slots
     const questionSlots: RedisQuestionSlot[] = [
       {
         questionBankId: activeQ.id,
@@ -144,9 +137,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       },
     ];
 
-    // 6. Generate dynamic AI greeting (already done in parallel)
-
-    // 7. Initialize the Redis state
     const state: RedisInterviewState = {
       sessionId: interview.id,
       userId,
@@ -187,7 +177,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       answeredQuestions: [],
     };
 
-    // 8. Write to Redis
     await createInterviewState(state);
     await setUserActiveInterview(userId, interview.id, duration * 60 * 2);
 

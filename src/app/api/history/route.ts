@@ -11,7 +11,6 @@ export async function GET(): Promise<NextResponse> {
       throw new Error('Unauthenticated');
     }
 
-    // FK constraint ensures user exists
     const userInterviews = await db
       .select({
         id: interviews.id,

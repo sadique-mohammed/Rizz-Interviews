@@ -12,10 +12,6 @@ import { AITransientError, AISchemaError } from './types';
 import type { EvaluationResult } from './types';
 import { validateEvaluationShape } from './validation';
 
-// ---------------------------------------------------------------------------
-// Client singleton
-// ---------------------------------------------------------------------------
-
 let _client: GoogleGenAI | null = null;
 
 function getClient(): GoogleGenAI {
@@ -24,10 +20,6 @@ function getClient(): GoogleGenAI {
   }
   return _client;
 }
-
-// ---------------------------------------------------------------------------
-// Evaluation JSON schema (for structured output)
-// ---------------------------------------------------------------------------
 
 const EVALUATION_JSON_SCHEMA = {
   type: 'object' as const,
@@ -92,10 +84,6 @@ const EVALUATION_JSON_SCHEMA = {
   ],
 };
 
-// ---------------------------------------------------------------------------
-// Gemini Interactions API — Evaluation
-// ---------------------------------------------------------------------------
-
 /**
  * Call Gemini Interactions API for answer evaluation with structured JSON output.
  * Uses `store: false` — Redis/Postgres own state, not Gemini.
@@ -159,10 +147,6 @@ export async function callGeminiForEvaluation(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Gemini Interactions API — Chat (fallback for Groq)
-// ---------------------------------------------------------------------------
-
 /**
  * Call Gemini Interactions API for interview chat (used as fallback when Groq fails).
  * Returns plain text response.
@@ -210,11 +194,6 @@ export async function callGeminiForChat(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/** Promise that rejects after a timeout — used with Promise.race. */
 function rejectAfterTimeout(ms: number): Promise<never> {
   return new Promise((_, reject) =>
     setTimeout(

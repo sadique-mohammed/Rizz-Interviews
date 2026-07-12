@@ -56,7 +56,6 @@ const generateOverallFeedback = (interview: any) => {
 
   interview.questions.forEach((q: any) => {
     if (q.attempts && q.attempts.length > 0) {
-      // Filter out 0-effort auto-submits exactly like the backend does
       const validAttempts = q.attempts.filter(
         (a: any) => !(a.score === 0 && a.explanation === 'Auto-submitted when time expired.'),
       );
@@ -104,13 +103,11 @@ export default function InterviewDetailPage() {
   React.useEffect(() => {
     const CACHE_KEY = `interview_${params.id}`;
     const fetchInterviewDetail = async () => {
-      // Check sessionStorage before hitting the network
       try {
         const cached = sessionStorage.getItem(CACHE_KEY);
         if (cached) {
           const { data, status } = JSON.parse(cached);
 
-          // Only serve from cache if the interview is fully completed or abandoned
           if (status === 'completed' || status === 'abandoned') {
             setInterview(data);
             setLoading(false);
@@ -118,7 +115,6 @@ export default function InterviewDetailPage() {
           }
         }
       } catch {
-        // sessionStorage unavailable or parse error — fall through to network
       }
 
       try {
@@ -134,7 +130,6 @@ export default function InterviewDetailPage() {
 
         const interviewData = await res.json();
 
-        // Map answerAttempts → attempts
         if (interviewData.questions) {
           interviewData.questions = interviewData.questions.map((q: any) => ({
             ...q,
@@ -144,7 +139,6 @@ export default function InterviewDetailPage() {
 
         setInterview(interviewData);
 
-        // Cache in sessionStorage — completed interviews cached indefinitely
         if (interviewData.status === 'completed' || interviewData.status === 'abandoned') {
           try {
             sessionStorage.setItem(
@@ -156,7 +150,6 @@ export default function InterviewDetailPage() {
               }),
             );
           } catch {
-            // sessionStorage full or unavailable — silently skip
           }
         }
       } catch (error) {
@@ -200,7 +193,6 @@ export default function InterviewDetailPage() {
           </Button>
         </div>
 
-        {/* Overview */}
         <Card className='surface-brand mb-10 border'>
           <CardHeader className='pb-4'>
             <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
@@ -264,7 +256,6 @@ export default function InterviewDetailPage() {
               <div className='rounded-xl bg-slate-50 border border-slate-200 p-6'>
                 <h3 className='text-lg font-semibold text-slate-900 mb-4'>Overall Feedback</h3>
 
-                {/* Score Justification */}
                 <div className='mb-6 p-4 rounded-lg bg-white border border-slate-100 shadow-sm'>
                   <p className='text-sm text-slate-700 leading-relaxed'>
                     <span className='font-semibold text-slate-900'>Pacing & Overall Speed: </span>
@@ -302,7 +293,6 @@ export default function InterviewDetailPage() {
                 </div>
 
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                  {/* Strengths */}
                   {overallFeedback.strengths.length > 0 && (
                     <div className='space-y-3'>
                       <h4 className='flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-brand-secondary'>
@@ -322,7 +312,6 @@ export default function InterviewDetailPage() {
                     </div>
                   )}
 
-                  {/* Weaknesses */}
                   {overallFeedback.weaknesses.length > 0 && (
                     <div className='space-y-3'>
                       <h4 className='text-sm font-semibold uppercase tracking-wider text-rose-700 flex items-center gap-2'>
@@ -347,7 +336,6 @@ export default function InterviewDetailPage() {
           )}
         </Card>
 
-        {/* Questions */}
         <div className='space-y-6'>
           <div className='flex items-center justify-between'>
             <div>
@@ -393,7 +381,6 @@ const RealInterviewQuestions = ({
       {questions.map((q: any, idx: number) => (
         <Card key={q.id} className='border border-slate-200/80 shadow-sm'>
           <CardContent className='p-6 space-y-6'>
-            {/* AI Question */}
             <div className='flex gap-4'>
               <div className='flex-1'>
                 <div className='surface-brand-soft rounded-xl p-4'>
@@ -465,7 +452,6 @@ const RealInterviewQuestions = ({
               </div>
             </div>
 
-            {/* User Attempts */}
             {q.attempts.map((attempt: any, aIdx: number) => {
               const language = attempt.language || 'text';
 

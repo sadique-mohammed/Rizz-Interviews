@@ -7,10 +7,6 @@ import { mockEvaluateAnswer } from './mock';
 import { AITransientError, AISchemaError } from './types';
 import type { EvaluationRequest, EvaluationResult } from './types';
 
-// ---------------------------------------------------------------------------
-// Evaluation prompt builder
-// ---------------------------------------------------------------------------
-
 function buildEvaluationPrompt(req: EvaluationRequest): string {
   const { question: q, candidate: c } = req;
 
@@ -80,10 +76,6 @@ Return strict JSON only matching this schema:
 }`;
 }
 
-// ---------------------------------------------------------------------------
-// Evaluation orchestration
-// ---------------------------------------------------------------------------
-
 /**
  * Evaluate a candidate's answer submission.
  *
@@ -96,7 +88,6 @@ Return strict JSON only matching this schema:
  * Throws if all models fail (caller should handle gracefully).
  */
 export async function evaluateAnswer(req: EvaluationRequest): Promise<EvaluationResult> {
-  // Dev mock mode — bypass all external calls
   if (isMockMode()) {
     aiLog('evaluate', 'Using mock mode');
     return mockEvaluateAnswer(req);
@@ -106,7 +97,6 @@ export async function evaluateAnswer(req: EvaluationRequest): Promise<Evaluation
   const prompt = buildEvaluationPrompt(req);
   const errors: Error[] = [];
 
-  // Build the attempt list: primary + fallbacks
   const attempts: Array<{
     provider: 'gemini' | 'groq';
     model: string;
@@ -124,7 +114,6 @@ export async function evaluateAnswer(req: EvaluationRequest): Promise<Evaluation
     })),
   ];
 
-  // If force-failure mode, skip the primary
   const startIndex = isForceFailure() ? 1 : 0;
 
   for (let i = startIndex; i < attempts.length; i++) {
@@ -175,12 +164,10 @@ export async function evaluateAnswer(req: EvaluationRequest): Promise<Evaluation
         continue; // Try next fallback
       }
 
-      // Non-transient error — do not fallback
       throw error;
     }
   }
 
-  // All attempts failed
   const errorSummary = errors.map((e) => e.message).join('; ');
   throw new Error(`[evaluate-answer] All evaluation models failed. Errors: ${errorSummary}`);
 }

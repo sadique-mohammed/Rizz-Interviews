@@ -52,7 +52,6 @@ export async function POST(
 
     const { message, isHintRequest } = validation.data;
 
-    // 1. Enforce DB existence, ownership, and strict expiry
     const dbSession = await getInterviewSessionForAccess(userId, sessionId);
     if (!dbSession || dbSession.status !== 'in_progress') {
       return NextResponse.json(
@@ -61,7 +60,6 @@ export async function POST(
       );
     }
 
-    // 2. Fetch Redis state (now guaranteed to be legally in_progress by DB)
     const state = await getInterviewState(sessionId);
     if (!state || state.status !== 'in_progress') {
       return NextResponse.json({ error: 'Interview state is not active' }, { status: 400 });
@@ -72,7 +70,6 @@ export async function POST(
       return NextResponse.json({ error: 'No active question found' }, { status: 400 });
     }
 
-    // 2. Prepare ChatRequest
     const transcriptWindow = getTranscriptWindow(state, 15);
 
     const chatReq: ChatRequest = {
@@ -96,11 +93,8 @@ export async function POST(
       transcriptWindow,
     };
 
-    // 3. Call AI
     const aiResponse = await generateInterviewChat(chatReq);
 
-    // 4. Update Redis State
-    // Append messages
     const userMsg = {
       id: crypto.randomUUID(),
       role: 'user' as const,
@@ -121,7 +115,6 @@ export async function POST(
 
     applyChatMessages(state, [userMsg, aiMsg]);
 
-    // Update hints if dispensed
     if (aiResponse.newHintIndex !== undefined) {
       applyActiveQuestionState(state, {
         hintIndex: aiResponse.newHintIndex,
@@ -131,7 +124,6 @@ export async function POST(
 
     await updateInterviewState(sessionId, state);
 
-    // 5. Return response
     return NextResponse.json(aiResponse);
   } catch (error) {
     console.error('Chat endpoint error:', error);

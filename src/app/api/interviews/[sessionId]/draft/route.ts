@@ -35,7 +35,6 @@ export async function PUT(
 
     const { code, language, explanation } = validation.data;
 
-    // Enforce DB existence, ownership, and strict expiry
     const dbSession = await getInterviewSessionForAccess(userId, sessionId);
     if (!dbSession || dbSession.status !== 'in_progress') {
       return NextResponse.json(
@@ -44,13 +43,11 @@ export async function PUT(
       );
     }
 
-    // Verify state in Redis (now guaranteed to be legally in_progress by DB)
     const state = await getInterviewState(sessionId);
     if (!state || state.status !== 'in_progress') {
       return NextResponse.json({ error: 'Session not found or not active' }, { status: 400 });
     }
 
-    // Update draft fields in Redis
     applyActiveQuestionState(state, {
       draftCode: code,
       draftLanguage: language,

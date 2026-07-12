@@ -49,8 +49,6 @@ const WEBDEV_LANGUAGES = [
   { value: 'typescript', label: 'TypeScript' },
 ];
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 interface InterviewCanvasProps {
   state: RedisInterviewState;
 }
@@ -59,8 +57,6 @@ interface LanguageOption {
   value: string;
   label: string;
 }
-
-// ─── Typing Indicator ────────────────────────────────────────────────────────
 
 function TypingIndicator() {
   return (
@@ -90,8 +86,6 @@ function TypingIndicator() {
     </div>
   );
 }
-
-// ─── Question Panel ──────────────────────────────────────────────────────────
 
 interface QuestionPanelProps {
   question: RedisQuestionSlot;
@@ -145,8 +139,6 @@ const QuestionPanel = React.memo(function QuestionPanel({ question }: QuestionPa
     </div>
   );
 });
-
-// ─── Editor Pane ─────────────────────────────────────────────────────────────
 
 interface EditorPaneProps {
   requiresCode: boolean;
@@ -258,7 +250,6 @@ const EditorPane = React.memo(function EditorPane({
         />
       </div>
 
-      {/* Submit bar — hint button + submit button side by side */}
       <div className='flex shrink-0 items-center justify-between border-t border-gray-200/80 bg-gray-50/50 px-5 py-3'>
         <button
           onClick={onAskHint}
@@ -283,8 +274,6 @@ const EditorPane = React.memo(function EditorPane({
     </div>
   );
 });
-
-// ─── AI Chat Panel ────────────────────────────────────────────────────────────
 
 interface AIChatPanelProps {
   messages: RedisChatMessage[];
@@ -312,7 +301,6 @@ const AIChatPanel = React.memo(function AIChatPanel({
 
   return (
     <div className='flex flex-col h-full surface-muted border-l border-gray-100'>
-      {/* Header */}
       <div className='flex items-center gap-2 border-b border-gray-200 px-4 py-3 bg-white shrink-0'>
         <Bot className='h-4 w-4 text-brand' />
         <span className='text-sm font-semibold text-gray-900'>AI Interviewer</span>
@@ -322,7 +310,6 @@ const AIChatPanel = React.memo(function AIChatPanel({
         </span>
       </div>
 
-      {/* Messages */}
       <div className='flex-1 overflow-y-auto px-3 py-3 space-y-3'>
         {messages.map((msg, i) =>
           msg.role === 'ai' ? (
@@ -359,7 +346,6 @@ const AIChatPanel = React.memo(function AIChatPanel({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
       <div className='border-t border-gray-200 bg-white px-3 py-2.5 flex items-center gap-2 shrink-0'>
         <input
           type='text'
@@ -382,8 +368,6 @@ const AIChatPanel = React.memo(function AIChatPanel({
   );
 });
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-
 export default function InterviewCanvas({ state }: InterviewCanvasProps) {
   const router = useRouter();
 
@@ -393,7 +377,6 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
   const requiresCode = true; // Web Dev and DSA both expect code in our simplified model
   const languages = domain === 'DSA' ? DSA_LANGUAGES : WEBDEV_LANGUAGES;
 
-  // ── Editor state (hydrated from localStorage on refresh) ──
   const storageKeyBase = `nexus_draft_${sessionId}_${currentQuestionIndex}`;
 
   const [language, setLanguage] = React.useState(() => {
@@ -408,7 +391,6 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
       languages.forEach((l) => (initial[l.value] = question.starterCode?.[l.value] ?? ''));
     }
 
-    // Overlay saved draft code if present from server fallback
     const savedCode = state.activeQuestionState.draftCode;
     const savedLang = state.activeQuestionState.draftLanguage;
     if (savedCode !== null && savedCode !== undefined && savedLang) {
@@ -423,7 +405,6 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
 
   const [isHydrated, setIsHydrated] = React.useState(false);
 
-  // Hydrate from localStorage after SSR
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const localLang =
@@ -441,7 +422,6 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
           const parsed = JSON.parse(localMap);
           setCodeMap((prev) => ({ ...prev, ...parsed }));
         } catch (e) {
-          // Ignore parse errors
         }
       }
 
@@ -452,7 +432,6 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
     setIsHydrated(true);
   }, [storageKeyBase, languages]);
 
-  // Initialize timer relative to session startedAt + duration
   const [timeLeft, setTimeLeft] = React.useState(() => {
     const expires = new Date(state.expiresAt).getTime();
     const now = Date.now();
@@ -461,14 +440,12 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [validationError, setValidationError] = React.useState('');
 
-  // ── Chat state ──
   const [messages, setMessages] = React.useState<RedisChatMessage[]>(state.chatMessages);
   const [chatInput, setChatInput] = React.useState('');
   const [isAiTyping, setIsAiTyping] = React.useState(false);
   const [hintIndex, setHintIndex] = React.useState(state.activeQuestionState.hintIndex);
   const messagesEndRef = React.useRef<HTMLDivElement | null>(null);
 
-  // ── Transition state (shown after answer evaluation) ──
   const [hasSubmitted, setHasSubmitted] = React.useState(false);
   const [hasNextQuestion, setHasNextQuestion] = React.useState(false);
   const [lastAttemptId, setLastAttemptId] = React.useState<string | null>(null);
@@ -481,7 +458,6 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
   const intervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
   const draftTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Debounced server draft save ──
   React.useEffect(() => {
     if (hasSubmitted) return;
 
@@ -503,13 +479,11 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
     };
   }, [codeMap, language, explanation, sessionId, hasSubmitted, storageKeyBase]);
 
-  // ── Sync messages from server on refresh ──
   React.useEffect(() => {
     setMessages(state.chatMessages);
     setHintIndex(state.activeQuestionState.hintIndex);
   }, [state.chatMessages, state.activeQuestionState.hintIndex]);
 
-  // ── Timer ──
   React.useEffect(() => {
     intervalRef.current = setInterval(() => {
       setTimeLeft((prev) => {
@@ -525,12 +499,10 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
     };
   }, []);
 
-  // ── Scroll chat to bottom on new message or typing state change ──
   React.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isAiTyping]);
 
-  // ── Handlers ──
   const handleLanguageChange = React.useCallback(
     (newLang: string) => {
       setLanguage(newLang);
@@ -567,7 +539,6 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
     [storageKeyBase],
   );
 
-  // ── Send a chat message ──
   const sendChatMessage = React.useCallback(
     async (text: string, isHintRequest = false) => {
       if (!text.trim() && !isHintRequest) return;
@@ -625,7 +596,6 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
     setChatInput('');
   }, [chatInput, sendChatMessage]);
 
-  // ── Ask for hint → injects into chat ──
   const handleAskHint = React.useCallback(() => {
     sendChatMessage('', true);
   }, [sendChatMessage]);
@@ -666,7 +636,6 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
 
       if (!res.ok) {
         if (res.status === 409) {
-          // Already ended (e.g. by auto-expiry in DB)
           router.push('/history');
           return;
         }
@@ -743,7 +712,6 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
 
         setIsSubmitting(false);
 
-        // Track the evaluation result for the transition UI
         setHasSubmitted(true);
         setHasNextQuestion(data.hasNextQuestion ?? false);
         setLastAttemptId(data.attemptId ?? null);
@@ -770,18 +738,15 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
     ],
   );
 
-  // ── Auto-End/Submit when time runs out ──
   React.useEffect(() => {
     if (timeLeft === 0) {
       if (!hasSubmitted && !isSubmitting && !hasAttemptedAutoSubmit) {
         setHasAttemptedAutoSubmit(true);
-        // Not submitted yet — force submit which will then auto-end
         const t = setTimeout(() => {
           handleSubmit(true);
         }, 0);
         return () => clearTimeout(t);
       } else if (hasSubmitted || (hasAttemptedAutoSubmit && !isSubmitting)) {
-        // Already submitted (or attempted to submit and failed) — just end the interview
         const t = setTimeout(() => {
           handleEnd();
         }, 0);
@@ -790,7 +755,6 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
     }
   }, [timeLeft, hasSubmitted, isSubmitting, handleSubmit, handleEnd, hasAttemptedAutoSubmit]);
 
-  // ── Advance to the next question ──
   const handleNextQuestion = React.useCallback(async () => {
     setIsAdvancing(true);
     try {
@@ -818,7 +782,6 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
         return;
       }
 
-      // Reset local state for the new question
       setHasSubmitted(false);
       setHasNextQuestion(false);
       setLastAttemptId(null);
@@ -827,7 +790,6 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
       setValidationError('');
       setIsAdvancing(false);
 
-      // Refresh the page to get the new question from Redis
       router.refresh();
     } catch (error) {
       console.error('Next question error:', error);
@@ -907,7 +869,6 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
           </Panel>
         </Group>
 
-        {/* Transition glassmorphism overlay */}
         {hasSubmitted && (
           <div className='absolute inset-0 z-20 flex items-center justify-center p-8 bg-black/5 backdrop-blur-sm pointer-events-auto'>
             <div className='max-w-md w-full surface-brand rounded-3xl p-8 text-center space-y-6 animate-fade-in-up'>

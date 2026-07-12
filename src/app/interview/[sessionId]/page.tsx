@@ -17,7 +17,6 @@ export default async function InterviewPage({ params }: PageProps) {
 
   if (!userId) redirect('/auth');
 
-  // Enforce DB existence, ownership, and strict expiry
   const dbSession = await getInterviewSessionForAccess(userId, sessionId);
   if (!dbSession) {
     redirect('/dashboard');
@@ -27,7 +26,6 @@ export default async function InterviewPage({ params }: PageProps) {
     redirect(`/history/${sessionId}`);
   }
 
-  // Verify state in Redis (now guaranteed to be legally in_progress by DB)
   const state = await getInterviewState(sessionId);
 
   if (!state) {

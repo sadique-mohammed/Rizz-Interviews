@@ -29,7 +29,6 @@ export default function EmailSignup() {
 
   return (
     <section id='contact' className='py-24 px-6 md:px-12 relative overflow-hidden'>
-      {/* Background with subtle glow */}
       <div className='absolute inset-0 bg-gray-50/50' />
       <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl h-[400px] bg-brand/10 blur-[120px] rounded-full pointer-events-none' />
 

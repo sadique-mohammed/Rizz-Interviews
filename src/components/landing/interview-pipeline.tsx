@@ -14,8 +14,6 @@ import {
 } from 'lucide-react';
 import SectionHeader from './section-header';
 
-// ─── Step Data ──────────────────────────────────────────────────────────────
-
 type PipelineStepData = {
   icon: React.ComponentType<{ className?: string }>;
   title: string;
@@ -78,8 +76,6 @@ const METRICS = [
   { label: 'Avg Score', value: '8.5/10' },
 ];
 
-// ─── Component ──────────────────────────────────────────────────────────────
-
 export default function InterviewPipeline() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -104,7 +100,6 @@ export default function InterviewPipeline() {
 
   return (
     <section id='how-it-works' className='py-12 px-6 md:px-12 bg-white relative overflow-hidden'>
-      {/* Subtle grid background — matches Features section */}
       <div
         className='absolute inset-0 opacity-20'
         style={{
@@ -124,9 +119,7 @@ export default function InterviewPipeline() {
           center
         />
 
-        {/* Pipeline container */}
         <div ref={sectionRef} className={`mx-auto max-w-2xl ${visible ? 'pipeline-visible' : ''}`}>
-          {/* Status bar */}
           <div
             className='surface-brand rounded-xl px-5 py-3.5 flex items-center justify-between pipeline-step'
             style={{ animationDelay: '0ms' }}
@@ -145,7 +138,6 @@ export default function InterviewPipeline() {
             </span>
           </div>
 
-          {/* Metric pills */}
           <div
             className='grid grid-cols-3 gap-3 mt-4 pipeline-step'
             style={{ animationDelay: '100ms' }}
@@ -163,9 +155,7 @@ export default function InterviewPipeline() {
             ))}
           </div>
 
-          {/* Pipeline steps */}
           <div className='relative mt-10'>
-            {/* Connector line */}
             <div
               className='pipeline-line absolute left-[17px] top-[36px] bottom-[36px] w-[2px] hidden md:block z-0'
               style={{
@@ -191,8 +181,6 @@ export default function InterviewPipeline() {
   );
 }
 
-// ─── Step Card ──────────────────────────────────────────────────────────────
-
 function PipelineStepCard({
   step,
   delay,
@@ -209,13 +197,11 @@ function PipelineStepCard({
       className='pipeline-step flex items-center gap-4 md:gap-6 relative cursor-pointer group'
       style={{ animationDelay: `${delay}ms` }}
     >
-      {/* Icon (Left Column) */}
       <div className='relative z-20 flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full bg-white ring-[4px] ring-white shadow-sm border border-gray-100 md:flex'>
         <div className='absolute inset-0 rounded-full bg-brand/10' />
         <Icon className='relative z-10 h-4 w-4 text-brand' />
       </div>
 
-      {/* Card (Right Column) */}
       <div className='flex-1 surface-brand-soft rounded-xl p-4 transition-all duration-300 hover:border-brand/30 hover:bg-brand/5 hover:shadow-sm flex items-center gap-4'>
         <div className='flex-1 min-w-0'>
           <div className='flex items-center gap-2 flex-wrap'>
@@ -229,7 +215,6 @@ function PipelineStepCard({
           <p className='mt-1 text-xs text-gray-500 leading-relaxed'>{step.description}</p>
         </div>
 
-        {/* Checkmark */}
         <div className='pipeline-check shrink-0' style={{ animationDelay: `${checkDelay}ms` }}>
           <CheckCircle2 className='h-5 w-5 text-brand-secondary' />
         </div>

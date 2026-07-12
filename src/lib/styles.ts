@@ -3,7 +3,6 @@
  * Used by: interview canvas, history list, history detail, dashboard cards.
  */
 
-/** Tailwind classes for difficulty badge (border + bg + text) */
 export function getDifficultyBadgeClass(difficulty: string): string {
   switch (difficulty.toLowerCase()) {
     case 'easy':
@@ -17,21 +16,18 @@ export function getDifficultyBadgeClass(difficulty: string): string {
   }
 }
 
-/** Timer text color class based on remaining seconds */
 export function timerColor(seconds: number): string {
   if (seconds <= 60) return 'text-destructive font-bold';
   if (seconds <= 300) return 'text-brand-secondary font-bold';
   return 'text-gray-700 font-semibold';
 }
 
-/** Timer progress bar background class based on remaining seconds */
 export function progressColor(seconds: number): string {
   if (seconds <= 60) return 'bg-destructive';
   if (seconds <= 300) return 'bg-brand-secondary';
   return 'bg-brand';
 }
 
-/** Tailwind classes for status badge (border + bg + text) */
 export function getStatusBadgeClass(status: string): string {
   switch (status.toLowerCase()) {
     case 'completed':
@@ -44,7 +40,6 @@ export function getStatusBadgeClass(status: string): string {
   }
 }
 
-/** Formatted text for status label */
 export function getStatusLabel(status: string): string {
   switch (status.toLowerCase()) {
     case 'completed':

@@ -84,7 +84,6 @@ export async function fetchAdaptiveBuffers(
   currentScore: number,
   seenIds: string[],
 ): Promise<{ harder?: BufferSlot; easier?: BufferSlot; same_topic?: BufferSlot }> {
-  // Option B: Bulk Fallback Strategy
   const baseCond =
     seenIds.length > 0
       ? and(eq(questionBank.domain, domain), notInArray(questionBank.id, seenIds))
@@ -95,7 +94,6 @@ export async function fetchAdaptiveBuffers(
       .select()
       .from(questionBank)
       .where(and(baseCond, condition))
-      // TODO: O(N) Random sort on large tables. Consider pre-caching or indexed lookup if questionBank grows >10k rows.
       .orderBy(sql`random()`)
       .limit(1);
     if (!row) return undefined;
@@ -110,10 +108,8 @@ export async function fetchAdaptiveBuffers(
 
   const buffers = { harder, easier, same_topic };
 
-  // Bulk Fallback for missing buffers
   const missingCount = (!harder ? 1 : 0) + (!easier ? 1 : 0) + (!same_topic ? 1 : 0);
   if (missingCount > 0) {
-    // Exclude the ones we just fetched in the specific queries
     const newlyFetchedIds = [
       harder?.questionBankId,
       easier?.questionBankId,
@@ -130,7 +126,6 @@ export async function fetchAdaptiveBuffers(
       .select()
       .from(questionBank)
       .where(bulkBaseCond) // ANY question in domain
-      // TODO: O(N) Random sort on large tables. Consider pre-caching or indexed lookup if questionBank grows >10k rows.
       .orderBy(sql`random()`)
       .limit(missingCount);
 

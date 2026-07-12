@@ -6,10 +6,6 @@ import { AITransientError, AISchemaError } from './types';
 import type { EvaluationResult } from './types';
 import { validateEvaluationShape } from './validation';
 
-// ---------------------------------------------------------------------------
-// Client singleton
-// ---------------------------------------------------------------------------
-
 let _client: Groq | null = null;
 
 function getClient(): Groq {
@@ -18,10 +14,6 @@ function getClient(): Groq {
   }
   return _client;
 }
-
-// ---------------------------------------------------------------------------
-// Groq — Chat (primary for interview conversation)
-// ---------------------------------------------------------------------------
 
 /**
  * Call Groq for interview chat. Returns plain text response.
@@ -62,7 +54,6 @@ export async function callGroqForChat(
   } catch (error) {
     if (error instanceof AITransientError) throw error;
 
-    // Check for rate-limit or server errors
     if (isGroqTransientError(error)) {
       throw new AITransientError(
         `Groq chat rate-limited or server error: ${error instanceof Error ? error.message : String(error)}`,
@@ -80,10 +71,6 @@ export async function callGroqForChat(
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Groq — Evaluation (fallback for Gemini)
-// ---------------------------------------------------------------------------
 
 /**
  * Call Groq for answer evaluation. Expects JSON response.
@@ -160,10 +147,6 @@ export async function callGroqForEvaluation(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function rejectAfterTimeout(ms: number, model: string): Promise<never> {
   return new Promise((_, reject) =>
     setTimeout(() => reject(new AITransientError(`Timeout after ${ms}ms`, 'groq', model)), ms),
@@ -177,11 +160,9 @@ function rejectAfterTimeout(ms: number, model: string): Promise<never> {
 function isGroqTransientError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false;
 
-  // Groq SDK wraps HTTP errors with a status property
   const status = (error as { status?: number }).status;
   if (status === 429 || (status && status >= 500)) return true;
 
-  // Network errors
   const code = (error as { code?: string }).code;
   if (code === 'ECONNREFUSED' || code === 'ENOTFOUND' || code === 'ETIMEDOUT') return true;
 

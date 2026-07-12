@@ -18,7 +18,6 @@ export async function PATCH(req: NextRequest, context: RouteContext): Promise<Ne
 
     const { sessionId } = await context.params;
 
-    // Verify the session belongs to the user and is in_progress
     const [session] = await db
       .select({ id: interviews.id, status: interviews.status })
       .from(interviews)
@@ -38,7 +37,6 @@ export async function PATCH(req: NextRequest, context: RouteContext): Promise<Ne
       .set({ status: 'abandoned', endedAt: new Date() })
       .where(eq(interviews.id, sessionId));
 
-    // Clear Redis active session
     await deleteInterviewState(sessionId, userId);
 
     return NextResponse.json({ success: true }, { status: 200 });
