@@ -7,18 +7,23 @@ Table users {
   created_at timestamp default now()
   updated_at timestamp default now()
   last_sign_in_at timestamp
+  streak_data jsonb
 }
 
 Table interviews {
   id uuid [primary key]
-  user_id varchar(255) [ref: > users.id] // references clerk_id
-  domain varchar(50) // DSA, Web Dev
-  difficulty varchar(20) // easy, medium, hard
-  duration int // in minutes
-  started_at timestamp default now()
+  user_id varchar(255) [not null, ref: > users.id] // references clerk_id
+  domain varchar(50) [not null] // DSA, Web Dev
+  difficulty varchar(20) [not null] // easy, medium, hard
+  duration int [not null] // in minutes
+  started_at timestamp [not null, default: `now()`]
   ended_at timestamp // null if in-progress
-  status varchar(20) default 'in_progress' // in_progress, completed, abandoned
+  status varchar(20) [default: 'in_progress'] // in_progress, completed, abandoned
   total_score int // nullable until completed
+
+  Indexes {
+    (user_id) [unique, name: 'interviews_one_active_per_user_idx', note: 'where status = in_progress']
+  }
 }
 
 Table questions {
@@ -65,6 +70,10 @@ Table question_bank {
   interviewer_notes text [not null]
   created_at timestamp [not null, default: `now()`]
   updated_at timestamp [not null, default: `now()`]
+
+  Indexes {
+    (domain, difficulty_score) [name: 'domain_difficulty_idx']
+  }
 }
 
 Table question_bank_tags {
@@ -76,8 +85,9 @@ Table question_bank_tags {
 
 Table recordings {
   id uuid [primary key]
-  interview_id uuid [ref: > interviews.id]
+  interview_id uuid [not null, ref: > interviews.id]
   video_url text
   transcript_url text
+  recording_status varchar(20) [default: 'pending']
   created_at timestamp default now()
 }

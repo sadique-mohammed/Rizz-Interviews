@@ -2,17 +2,25 @@
 
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import { useSignIn } from '@clerk/nextjs';
+import { useAuth, useSignIn } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 export default function DemoLoginButton({ className }: { className?: string }) {
   const [isLoading, setIsLoading] = useState(false);
+  const { isSignedIn } = useAuth();
   const { signIn, setActive, isLoaded } = useSignIn();
   const router = useRouter();
 
   const handleDemoLogin = async () => {
     if (!isLoaded) return;
+
+    // If user is already signed in, just redirect — don't create a new demo account
+    if (isSignedIn) {
+      router.push('/dashboard');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const res = await fetch('/api/demo-login', { method: 'POST' });
