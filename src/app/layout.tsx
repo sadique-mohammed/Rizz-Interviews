@@ -21,13 +21,13 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
-  title: 'Nexus - AI-Powered Interview Preparation Platform',
+  title: 'RizzInterviews - AI-Powered Interview Preparation Platform',
   description:
-    'Nexus – your personal AI-powered interview and career prep dashboard. Track progress, manage sessions, and stay ahead with an all-in-one platform.',
-  applicationName: 'Nexus',
+    'RizzInterviews – your personal AI-powered interview and career prep dashboard. Track progress, manage sessions, and stay ahead with an all-in-one platform.',
+  applicationName: 'RizzInterviews',
   authors: [{ name: 'Sadique', url: 'https://github.com/sadique-mohammed' }],
   keywords: [
-    'Nexus',
+    'RizzInterviews',
     'Interview Prep',
     'Next.js',
     'TypeScript',
@@ -45,24 +45,24 @@ export const metadata: Metadata = {
     apple: '/favicon.svg',
   },
   openGraph: {
-    title: 'Nexus - AI-Powered Interview Preparation',
+    title: 'RizzInterviews - AI-Powered Interview Preparation',
     description:
       'Master technical interviews with AI-powered practice sessions. Track your progress and ace your next interview.',
     type: 'website',
     locale: 'en_US',
-    siteName: 'Nexus',
+    siteName: 'RizzInterviews',
     images: [
       {
         url: '/interview.png',
         width: 800,
         height: 450,
-        alt: 'Nexus AI Interview Platform',
+        alt: 'RizzInterviews Interview Platform',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Nexus - AI-Powered Interview Preparation',
+    title: 'RizzInterviews - AI-Powered Interview Preparation',
     description: 'Master technical interviews with AI-powered practice sessions.',
     images: ['/interview.png'],
   },

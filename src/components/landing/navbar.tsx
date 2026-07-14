@@ -12,12 +12,12 @@ export default function Navbar() {
           <Link href='/' className='font-bold text-lg tracking-tight text-gray-900'>
             <Image
               src='/favicon.svg'
-              alt='Nexus Logo'
+              alt='RizzInterviews Logo'
               width={32}
               height={32}
               className='inline-block mr-2'
             />
-            Nexus AI
+            RizzInterviews
           </Link>
 
           <div className='hidden md:flex items-center gap-6'>

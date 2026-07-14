@@ -388,7 +388,7 @@ const RealInterviewQuestions = ({
                     </div>
                     <div className='h-9 flex items-center'>
                       <p className='text-sm font-semibold tracking-wide text-brand-dark leading-none'>
-                        Nexus AI &mdash; Question #{idx + 1}
+                        RizzInterviews &mdash; Question #{idx + 1}
                       </p>
                     </div>
                   </div>
@@ -536,7 +536,7 @@ const RealInterviewQuestions = ({
                     {attempt.aiFeedback && (
                       <div className='surface-brand-soft rounded-lg p-4'>
                         <p className='text-sm font-medium text-brand-dark mb-1'>
-                          Nexus AI Feedback
+                          RizzInterviews Feedback
                         </p>
                         <p className='text-sm text-slate-700 whitespace-pre-line'>
                           {attempt.aiFeedback}

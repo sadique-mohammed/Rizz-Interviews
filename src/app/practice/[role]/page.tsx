@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ role: str
   }
 
   return {
-    title: `Free AI Mock Interview for ${role.title}s | Nexus`,
+    title: `Free AI Mock Interview for ${role.title}s | RizzInterviews`,
     description: `Practice your ${role.title} interview with our AI. ${role.description}`,
     openGraph: {
       title: `AI Mock Interview for ${role.title}s`,

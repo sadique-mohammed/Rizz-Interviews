@@ -147,7 +147,7 @@ function HeroCard() {
                   </div>
                   <div className='flex flex-col'>
                     <span className='text-[9px] font-bold text-gray-900 uppercase tracking-wider'>
-                      Nexus AI
+                      RizzInterviews
                     </span>
                     <span className='text-[10px] text-gray-600 leading-snug mt-1'>
                       Elegant! Swapping the children before recursing is highly efficient.

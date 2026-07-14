@@ -66,7 +66,7 @@ function TypingIndicator() {
           <Bot className='h-3 w-3 text-brand' />
         </div>
         <div>
-          <span className='mb-1 block text-[10px] font-semibold text-brand'>Nexus AI</span>
+          <span className='mb-1 block text-[10px] font-semibold text-brand'>RizzInterviews</span>
           <div className='flex items-center gap-1 rounded-lg rounded-tl-none border border-brand/15 bg-brand/8 px-3 py-2.5'>
             <span
               className='h-1.5 w-1.5 animate-bounce rounded-full bg-brand/70'
@@ -319,7 +319,7 @@ const AIChatPanel = React.memo(function AIChatPanel({
                   <Bot className='h-3 w-3 text-brand' />
                 </div>
                 <div className='flex flex-col items-start flex-1 min-w-0'>
-                  <span className='mb-1 block text-[10px] font-semibold text-brand'>Nexus AI</span>
+                  <span className='mb-1 block text-[10px] font-semibold text-brand'>RizzInterviews</span>
                   <div className='w-fit max-w-full rounded-lg rounded-tl-none border border-brand/15 bg-brand/8 px-3 py-2 text-sm leading-relaxed text-gray-800 break-words whitespace-pre-wrap'>
                     {msg.text}
                   </div>
@@ -377,7 +377,7 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
   const requiresCode = true; // Web Dev and DSA both expect code in our simplified model
   const languages = domain === 'DSA' ? DSA_LANGUAGES : WEBDEV_LANGUAGES;
 
-  const storageKeyBase = `nexus_draft_${sessionId}_${currentQuestionIndex}`;
+  const storageKeyBase = `rizz_draft_${sessionId}_${currentQuestionIndex}`;
 
   const [language, setLanguage] = React.useState(() => {
     const saved = state.activeQuestionState.draftLanguage;
@@ -409,7 +409,7 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
     if (typeof window !== 'undefined') {
       const localLang =
         localStorage.getItem(`${storageKeyBase}_lang`) ||
-        localStorage.getItem(`nexus_preferred_lang_${sessionId}`);
+        localStorage.getItem(`rizz_preferred_lang_${sessionId}`);
       const localMap = localStorage.getItem(`${storageKeyBase}_codeMap`);
       const localExpl = localStorage.getItem(`${storageKeyBase}_expl`);
 
@@ -508,7 +508,7 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
       setValidationError('');
       if (typeof window !== 'undefined') {
         localStorage.setItem(`${storageKeyBase}_lang`, newLang);
-        localStorage.setItem(`nexus_preferred_lang_${sessionId}`, newLang);
+        localStorage.setItem(`rizz_preferred_lang_${sessionId}`, newLang);
       }
     },
     [storageKeyBase, sessionId],

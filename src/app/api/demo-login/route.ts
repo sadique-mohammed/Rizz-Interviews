@@ -40,7 +40,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const client = await clerkClient();
 
     const randomId = crypto.randomUUID().split('-')[0];
-    const demoEmail = `guest-${randomId}@demo.nexus-ai.com`;
+    const demoEmail = `guest-${randomId}@demo.rizzinterviews.in`;
     const demoPassword = `Demo${crypto.randomUUID()}!`;
 
     const user = await client.users.createUser({

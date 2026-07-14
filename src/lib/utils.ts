@@ -27,9 +27,9 @@ export function cleanupOrphanedStorage(activeSessionId: string | null) {
     if (!key) continue;
 
     if (
-      key.startsWith('nexus_draft_') ||
-      key.startsWith('nexus_preferred_lang_') ||
-      key.startsWith('nexus_session_')
+      key.startsWith('rizz_draft_') ||
+      key.startsWith('rizz_preferred_lang_') ||
+      key.startsWith('rizz_session_')
     ) {
       if (activeSessionId && key.includes(activeSessionId)) {
         continue;

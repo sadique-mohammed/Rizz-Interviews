@@ -32,8 +32,8 @@ export default function Navbar() {
               href='/'
               className='font-bold text-lg tracking-tight text-gray-900 flex items-center'
             >
-              <Image src='/favicon.svg' alt='Nexus Logo' width={32} height={32} className='mr-2' />
-              Nexus AI
+              <Image src='/favicon.svg' alt='RizzInterviews Logo' width={32} height={32} className='mr-2' />
+              RizzInterviews
             </Link>
           </div>
 

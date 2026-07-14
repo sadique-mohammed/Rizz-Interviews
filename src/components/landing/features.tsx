@@ -141,14 +141,14 @@ function DemoCard({
             <div className='h-9 w-9 rounded-md bg-gradient-to-br from-brand/20 to-brand/10 flex items-center justify-center'>
               <Image
                 src='/favicon.svg'
-                alt='Nexus AI'
+                alt='RizzInterviews'
                 width={24}
                 height={24}
                 className='absolute'
               />
             </div>
             <div className='flex-1'>
-              <div className='text-sm font-medium text-gray-900'>Nexus AI Interviewer</div>
+              <div className='text-sm font-medium text-gray-900'>RizzInterviews Interviewer</div>
               <div className='text-xs text-gray-500'>Ready to begin your session</div>
             </div>
             <div className='h-6 w-6 rounded-full bg-brand-light/20 flex items-center justify-center'>
@@ -174,7 +174,7 @@ function DemoCard({
               <Bot className='h-3.5 w-3.5 text-brand' />
             </div>
             <div className='flex flex-col gap-1'>
-              <span className='text-xs font-semibold text-gray-900'>Nexus AI</span>
+              <span className='text-xs font-semibold text-gray-900'>RizzInterviews</span>
               <p className='text-[11px] text-gray-600 leading-relaxed'>
                 Great job finding the base case. Your time complexity is{' '}
                 <span className='font-mono text-brand bg-brand/10 px-1 rounded font-semibold'>

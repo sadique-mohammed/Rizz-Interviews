@@ -11,8 +11,8 @@ export default function Footer() {
       <div className='mx-auto max-w-7xl py-12 px-6 md:px-12'>
         <div className='flex flex-col md:flex-row items-center md:items-start justify-between gap-6'>
           <div className='text-center md:text-left'>
-            <div className='font-bold text-lg text-gradient'>Nexus AI</div>
-            <p className='mt-2 text-sm text-neutral-400'>© 2025 Nexus AI. All rights reserved.</p>
+            <div className='font-bold text-lg text-gradient'>RizzInterviews</div>
+            <p className='mt-2 text-sm text-neutral-400'>© 2026 RizzInterviews. All rights reserved.</p>
           </div>
           <div className='flex items-center gap-6'>
             {[

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document summarizes all optimizations applied to the Nexus AI frontend based on Vercel React Best Practices and Web Interface Guidelines.
+This document summarizes all optimizations applied to the RizzInterviews frontend based on Vercel React Best Practices and Web Interface Guidelines.
 
 ## ✅ Completed Optimizations
 

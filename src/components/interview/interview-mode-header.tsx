@@ -75,8 +75,8 @@ export default function InterviewModeHeader({
             href='/dashboard'
             className='flex items-center gap-2 text-gray-900 transition-opacity hover:opacity-80'
           >
-            <Image src='/favicon.svg' alt='Nexus' width={24} height={24} />
-            <span className='hidden text-sm font-semibold sm:inline'>Nexus AI</span>
+            <Image src='/favicon.svg' alt='RizzInterviews' width={24} height={24} />
+            <span className='hidden text-sm font-semibold sm:inline'>RizzInterviews</span>
           </Link>
           <div className='h-5 w-px bg-gray-200' />
           <div className='flex items-center gap-2'>

@@ -48,7 +48,7 @@ export default async function DashboardPage() {
           <div className='mb-8 flex flex-col xl:flex-row xl:items-center justify-between gap-6'>
             <div className='flex flex-col gap-3'>
               <h2 className='text-2xl font-bold text-gray-900 shrink-0'>
-                {user?.name ? `Welcome back, ${user.name}!` : 'Welcome to Nexus!'}
+                {user?.name ? `Welcome back, ${user.name}!` : 'Welcome to RizzInterviews!'}
               </h2>
               <p className='text-gray-600'>
                 Your journey to a better tech interview starts here.

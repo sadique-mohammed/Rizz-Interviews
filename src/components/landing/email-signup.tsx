@@ -41,7 +41,7 @@ export default function EmailSignup() {
             Ready to ace your next interview?
           </h2>
           <p className='mt-5 text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed'>
-            Join thousands of developers who trust Nexus AI for seamless, adaptive interview
+            Join thousands of developers who trust RizzInterviews for seamless, adaptive interview
             preparation. Free practice sessions available now.
           </p>
 
