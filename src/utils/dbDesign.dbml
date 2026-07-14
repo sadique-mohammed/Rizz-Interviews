@@ -21,7 +21,7 @@ Table interviews {
   status varchar(20) [default: 'in_progress'] // in_progress, completed, abandoned
   total_score int // nullable until completed
 
-  Indexes {
+  indexes {
     (user_id) [unique, name: 'interviews_one_active_per_user_idx', note: 'where status = in_progress']
   }
 }
@@ -71,7 +71,7 @@ Table question_bank {
   created_at timestamp [not null, default: `now()`]
   updated_at timestamp [not null, default: `now()`]
 
-  Indexes {
+  indexes {
     (domain, difficulty_score) [name: 'domain_difficulty_idx']
   }
 }
