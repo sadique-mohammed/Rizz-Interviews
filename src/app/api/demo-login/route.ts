@@ -3,6 +3,8 @@ import { clerkClient } from '@clerk/nextjs/server';
 import crypto from 'crypto';
 import { Ratelimit } from '@upstash/ratelimit';
 import { redis } from '@/lib/redis';
+import { db } from '@/db';
+import { users } from '@/db/schema';
 
 const ratelimit = new Ratelimit({
   redis,
@@ -49,6 +51,23 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       skipPasswordChecks: true,
       skipPasswordRequirement: true,
     });
+
+    // Explicitly sync to DB so we don't rely entirely on webhooks (especially for local dev)
+    try {
+      await db
+        .insert(users)
+        .values({
+          id: user.id,
+          name: 'Guest User',
+          email: demoEmail,
+          authProvider: 'clerk',
+          updatedAt: new Date(),
+        })
+        .onConflictDoNothing();
+    } catch (dbError) {
+      console.error('Failed to sync demo user to local DB:', dbError);
+      // We continue since the webhook might still catch it
+    }
 
     const token = await client.signInTokens.createSignInToken({
       userId: user.id,
