@@ -117,7 +117,7 @@ function HeroCard() {
                 <span className='h-1.5 w-1.5 rounded-full bg-brand-light animate-ping' />
                 Live
               </span>
-              <span className='text-xs text-gray-500'>AI Interview • Web Dev</span>
+              <span className='text-xs text-gray-500'>AI Interview • DSA</span>
             </div>
             <div className='text-xs text-gray-500'>30:42</div>
           </div>
