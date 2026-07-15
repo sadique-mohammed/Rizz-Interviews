@@ -34,7 +34,7 @@ export default function Hero() {
           >
             <div className='flex flex-row items-center gap-3 w-full sm:w-auto'>
               <Link
-                href='/dashboard'
+                href='/auth/sign-up'
                 className='flex-1 sm:flex-none w-full inline-flex items-center justify-center rounded-xl px-6 sm:px-10 py-2 text-sm font-semibold btn-invert hover:shadow-lg transition-all duration-200'
               >
                 Get Started

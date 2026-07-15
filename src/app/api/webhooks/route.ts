@@ -165,10 +165,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (eventType === 'user.deleted') {
       const { id: clerkId } = evt.data as { id: string };
 
-      console.log(`[Webhook] User deleted in Clerk: ${clerkId} - Keeping data for records`);
+      // Free up the email address so they can sign up again later, 
+      // while preserving their old data under the old ID.
+      await db.execute(
+        sql`UPDATE users SET email = email || '_deleted_' || extract(epoch from now()) WHERE id = ${clerkId}`
+      );
+
+      console.log(`[Webhook] User deleted in Clerk: ${clerkId} - Email freed, data preserved`);
 
       return NextResponse.json(
-        { success: true, message: 'User deletion acknowledged, data preserved' },
+        { success: true, message: 'User deletion acknowledged, email freed' },
         { status: 200 },
       );
     }
@@ -183,12 +189,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     console.error('[Webhook] Error processing webhook:', {
       message: error.message,
       stack: error.stack,
+      cause: (error as any).cause,
     });
+    
+    console.dir(err, { depth: null });
 
     return NextResponse.json(
       {
         error: 'Webhook processing failed',
         message: error.message,
+        cause: (error as any).cause?.message || 'Check server logs for detailed cause',
       },
       { status: 500 },
     );

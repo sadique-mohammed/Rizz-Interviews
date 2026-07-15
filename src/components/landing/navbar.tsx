@@ -35,7 +35,13 @@ export default function Navbar() {
           <div className='flex items-center gap-3'>
             <DemoLoginButton className='hidden md:inline-flex' />
             <Link
-              href='/dashboard'
+              href='/auth/sign-in'
+              className='hidden md:inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold text-gray-900 hover:text-brand transition-all duration-200'
+            >
+              Log In
+            </Link>
+            <Link
+              href='/auth/sign-up'
               className='inline-flex items-center justify-center rounded-xl px-10 py-2 text-sm font-semibold btn-invert transition-all duration-200'
             >
               Get Started
