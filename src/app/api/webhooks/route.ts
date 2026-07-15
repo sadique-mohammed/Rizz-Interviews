@@ -2,7 +2,7 @@ import { verifyWebhook } from '@clerk/nextjs/webhooks';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { users } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import type { UserInsert } from '@/types/user';
 
