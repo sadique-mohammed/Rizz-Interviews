@@ -9,13 +9,23 @@ const isPublicRoute = createRouteMatcher([
   '/sitemap.xml',
   '/robots.txt',
   '/google3e15185c8da980d1.html',
+  '/privacy',
+  '/terms',
 ]);
 
-export default clerkMiddleware(async (auth, req) => {
-  if (!isPublicRoute(req)) {
-    await auth.protect();
+export default clerkMiddleware(
+  async (auth, req) => {
+    if (!isPublicRoute(req)) {
+      await auth.protect();
+    }
+  },
+  {
+    authorizedParties: [
+      "https://rizzinterviews.in",
+      "https://www.rizzinterviews.in",
+    ],
   }
-});
+);
 
 export const config = {
   matcher: [

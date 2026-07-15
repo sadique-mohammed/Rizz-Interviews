@@ -19,6 +19,8 @@ export default function Footer() {
               { href: '#features', label: 'Features' },
               { href: '#how', label: 'How it Works' },
               { href: '#contact', label: 'Contact' },
+              { href: '/privacy', label: 'Privacy' },
+              { href: '/terms', label: 'Terms' },
             ].map((l) => (
               <a
                 key={l.href}
