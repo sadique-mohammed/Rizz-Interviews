@@ -282,6 +282,8 @@ interface AIChatPanelProps {
   onSend: () => void;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   isAiTyping: boolean;
+  showEditor: boolean;
+  onToggleEditor: () => void;
 }
 
 const AIChatPanel = React.memo(function AIChatPanel({
@@ -291,6 +293,8 @@ const AIChatPanel = React.memo(function AIChatPanel({
   onSend,
   messagesEndRef,
   isAiTyping,
+  showEditor,
+  onToggleEditor,
 }: AIChatPanelProps) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -304,10 +308,18 @@ const AIChatPanel = React.memo(function AIChatPanel({
       <div className='flex items-center gap-2 border-b border-gray-200 px-4 py-3 bg-white shrink-0'>
         <Bot className='h-4 w-4 text-brand' />
         <span className='text-sm font-semibold text-gray-900'>AI Interviewer</span>
-        <span className='ml-auto inline-flex items-center gap-1.5 rounded-full bg-brand-light/20 px-2 py-0.5 micro-label-brand'>
-          <span className='h-1.5 w-1.5 rounded-full bg-brand-light animate-pulse' />
-          live
-        </span>
+        <div className='ml-auto flex items-center gap-3'>
+          <span className='inline-flex items-center gap-1.5 rounded-full bg-brand-light/20 px-2 py-0.5 micro-label-brand'>
+            <span className='h-1.5 w-1.5 rounded-full bg-brand-light animate-pulse' />
+            live
+          </span>
+          <button
+            onClick={onToggleEditor}
+            className='btn-brand-soft flex items-center justify-center rounded-md px-2.5 py-1 text-[11px] font-semibold transition-colors'
+          >
+            {showEditor ? 'Hide Editor' : 'Code Editor'}
+          </button>
+        </div>
       </div>
 
       <div className='flex-1 overflow-y-auto px-3 py-3 space-y-3'>
@@ -370,6 +382,7 @@ const AIChatPanel = React.memo(function AIChatPanel({
 
 export default function InterviewCanvas({ state }: InterviewCanvasProps) {
   const router = useRouter();
+  const [showEditor, setShowEditor] = React.useState(false);
 
   const { sessionId, domain, difficulty, duration, questionSlots, currentQuestionIndex } = state;
   const question = questionSlots[currentQuestionIndex];
@@ -788,6 +801,7 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
       setExplanation('');
       setValidationError('');
       setIsAdvancing(false);
+      setShowEditor(false);
 
       router.refresh();
     } catch (error) {
@@ -830,7 +844,7 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
             <div className='h-8 w-0.5 rounded-full bg-gray-300 transition-colors group-hover:bg-white group-active:bg-white' />
           </Separator>
 
-          <Panel defaultSize={35} minSize={20} id='chat-pane'>
+          <Panel defaultSize={showEditor ? 35 : 70} minSize={20} id='chat-pane'>
             <AIChatPanel
               messages={messages}
               chatInput={chatInput}
@@ -838,34 +852,40 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
               onSend={handleChatSend}
               messagesEndRef={messagesEndRef}
               isAiTyping={isAiTyping}
+              showEditor={showEditor}
+              onToggleEditor={() => setShowEditor(!showEditor)}
             />
           </Panel>
 
-          <Separator className='group relative flex w-1.5 cursor-col-resize items-center justify-center bg-gray-100 transition-colors hover:bg-brand active:bg-brand-dark'>
-            <div className='h-8 w-0.5 rounded-full bg-gray-300 transition-colors group-hover:bg-white group-active:bg-white' />
-          </Separator>
+          {showEditor && (
+            <>
+              <Separator className='group relative flex w-1.5 cursor-col-resize items-center justify-center bg-gray-100 transition-colors hover:bg-brand active:bg-brand-dark'>
+                <div className='h-8 w-0.5 rounded-full bg-gray-300 transition-colors group-hover:bg-white group-active:bg-white' />
+              </Separator>
 
-          <Panel defaultSize={35} minSize={30} id='editor-pane'>
-            <div
-              className={`h-full w-full transition-all duration-500 bg-white ${hasSubmitted ? 'opacity-40 blur-sm pointer-events-none' : ''}`}
-            >
-              <EditorPane
-                requiresCode={requiresCode}
-                languages={languages}
-                language={language}
-                onLanguageChange={handleLanguageChange}
-                code={currentCode}
-                onCodeChange={handleCodeChange}
-                explanation={explanation}
-                onExplanationChange={handleExplanationChange}
-                validationError={validationError}
-                isSubmitting={isSubmitting}
-                timeLeft={timeLeft}
-                onSubmit={() => handleSubmit(false)}
-                onAskHint={handleAskHint}
-              />
-            </div>
-          </Panel>
+              <Panel defaultSize={35} minSize={30} id='editor-pane'>
+                <div
+                  className={`h-full w-full transition-all duration-500 bg-white ${hasSubmitted ? 'opacity-40 blur-sm pointer-events-none' : ''}`}
+                >
+                  <EditorPane
+                    requiresCode={requiresCode}
+                    languages={languages}
+                    language={language}
+                    onLanguageChange={handleLanguageChange}
+                    code={currentCode}
+                    onCodeChange={handleCodeChange}
+                    explanation={explanation}
+                    onExplanationChange={handleExplanationChange}
+                    validationError={validationError}
+                    isSubmitting={isSubmitting}
+                    timeLeft={timeLeft}
+                    onSubmit={() => handleSubmit(false)}
+                    onAskHint={handleAskHint}
+                  />
+                </div>
+              </Panel>
+            </>
+          )}
         </Group>
 
         {hasSubmitted && (
