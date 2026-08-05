@@ -284,6 +284,7 @@ interface AIChatPanelProps {
   isAiTyping: boolean;
   showEditor: boolean;
   onToggleEditor: () => void;
+  hideEditorToggle?: boolean;
 }
 
 const AIChatPanel = React.memo(function AIChatPanel({
@@ -295,6 +296,7 @@ const AIChatPanel = React.memo(function AIChatPanel({
   isAiTyping,
   showEditor,
   onToggleEditor,
+  hideEditorToggle,
 }: AIChatPanelProps) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -313,12 +315,14 @@ const AIChatPanel = React.memo(function AIChatPanel({
             <span className='h-1.5 w-1.5 rounded-full bg-brand-light animate-pulse' />
             live
           </span>
-          <button
-            onClick={onToggleEditor}
-            className='btn-brand-soft flex items-center justify-center rounded-md px-2.5 py-1 text-[11px] font-semibold transition-colors'
-          >
-            {showEditor ? 'Hide Editor' : 'Code Editor'}
-          </button>
+          {!hideEditorToggle && (
+            <button
+              onClick={onToggleEditor}
+              className='btn-brand-soft flex items-center justify-center rounded-md px-2.5 py-1 text-[11px] font-semibold transition-colors'
+            >
+              {showEditor ? 'Hide Editor' : 'Code Editor'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -831,62 +835,131 @@ export default function InterviewCanvas({ state }: InterviewCanvasProps) {
       />
 
       <div className='flex-1 min-h-0 relative'>
-        <Group orientation='horizontal' className='h-full w-full'>
-          <Panel defaultSize={30} minSize={20} id='question-pane'>
-            <div
-              className={`h-full w-full transition-all duration-500 bg-white ${hasSubmitted ? 'opacity-40 blur-sm pointer-events-none' : ''}`}
-            >
-              <QuestionPanel question={question} />
-            </div>
-          </Panel>
+        <div className='hidden md:flex h-full w-full'>
+          <Group orientation='horizontal' className='h-full w-full'>
+            <Panel defaultSize={30} minSize={20} id='question-pane'>
+              <div
+                className={`h-full w-full transition-all duration-500 bg-white ${hasSubmitted ? 'opacity-40 blur-sm pointer-events-none' : ''}`}
+              >
+                <QuestionPanel question={question} />
+              </div>
+            </Panel>
 
-          <Separator className='group relative flex w-1.5 cursor-col-resize items-center justify-center bg-gray-100 transition-colors hover:bg-brand active:bg-brand-dark'>
-            <div className='h-8 w-0.5 rounded-full bg-gray-300 transition-colors group-hover:bg-white group-active:bg-white' />
-          </Separator>
+            <Separator className='group relative flex w-1.5 cursor-col-resize items-center justify-center bg-gray-100 transition-colors hover:bg-brand active:bg-brand-dark'>
+              <div className='h-8 w-0.5 rounded-full bg-gray-300 transition-colors group-hover:bg-white group-active:bg-white' />
+            </Separator>
 
-          <Panel defaultSize={showEditor ? 35 : 70} minSize={20} id='chat-pane'>
-            <AIChatPanel
-              messages={messages}
-              chatInput={chatInput}
-              onChatInputChange={setChatInput}
-              onSend={handleChatSend}
-              messagesEndRef={messagesEndRef}
-              isAiTyping={isAiTyping}
-              showEditor={showEditor}
-              onToggleEditor={() => setShowEditor(!showEditor)}
-            />
-          </Panel>
+            <Panel defaultSize={showEditor ? 35 : 70} minSize={20} id='chat-pane'>
+              <AIChatPanel
+                messages={messages}
+                chatInput={chatInput}
+                onChatInputChange={setChatInput}
+                onSend={handleChatSend}
+                messagesEndRef={messagesEndRef}
+                isAiTyping={isAiTyping}
+                showEditor={showEditor}
+                onToggleEditor={() => setShowEditor(!showEditor)}
+              />
+            </Panel>
 
-          {showEditor && (
-            <>
-              <Separator className='group relative flex w-1.5 cursor-col-resize items-center justify-center bg-gray-100 transition-colors hover:bg-brand active:bg-brand-dark'>
-                <div className='h-8 w-0.5 rounded-full bg-gray-300 transition-colors group-hover:bg-white group-active:bg-white' />
-              </Separator>
+            {showEditor && (
+              <>
+                <Separator className='group relative flex w-1.5 cursor-col-resize items-center justify-center bg-gray-100 transition-colors hover:bg-brand active:bg-brand-dark'>
+                  <div className='h-8 w-0.5 rounded-full bg-gray-300 transition-colors group-hover:bg-white group-active:bg-white' />
+                </Separator>
 
-              <Panel defaultSize={35} minSize={30} id='editor-pane'>
-                <div
-                  className={`h-full w-full transition-all duration-500 bg-white ${hasSubmitted ? 'opacity-40 blur-sm pointer-events-none' : ''}`}
+                <Panel defaultSize={35} minSize={30} id='editor-pane'>
+                  <div
+                    className={`h-full w-full transition-all duration-500 bg-white ${hasSubmitted ? 'opacity-40 blur-sm pointer-events-none' : ''}`}
+                  >
+                    <EditorPane
+                      requiresCode={requiresCode}
+                      languages={languages}
+                      language={language}
+                      onLanguageChange={handleLanguageChange}
+                      code={currentCode}
+                      onCodeChange={handleCodeChange}
+                      explanation={explanation}
+                      onExplanationChange={handleExplanationChange}
+                      validationError={validationError}
+                      isSubmitting={isSubmitting}
+                      timeLeft={timeLeft}
+                      onSubmit={() => handleSubmit(false)}
+                      onAskHint={handleAskHint}
+                    />
+                  </div>
+                </Panel>
+              </>
+            )}
+          </Group>
+        </div>
+
+        <div className='flex md:hidden h-full w-full flex-col'>
+          <Tabs defaultValue='question' className='flex-1 flex flex-col min-h-0 bg-white'>
+            <div className='flex-none p-2 border-b border-gray-100 bg-gray-50/50 z-10'>
+              <TabsList className='relative flex max-w-full overflow-x-auto no-scrollbar p-1 bg-input/50 h-auto w-full gap-1 items-start flex-row tracking-normal leading-5 rounded-lg'>
+                <TabsTrigger
+                  value='question'
+                  className='flex-1 isolate cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium text-gray-600 transition-all duration-200 hover:text-gray-900 hover:bg-white/50 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900'
                 >
-                  <EditorPane
-                    requiresCode={requiresCode}
-                    languages={languages}
-                    language={language}
-                    onLanguageChange={handleLanguageChange}
-                    code={currentCode}
-                    onCodeChange={handleCodeChange}
-                    explanation={explanation}
-                    onExplanationChange={handleExplanationChange}
-                    validationError={validationError}
-                    isSubmitting={isSubmitting}
-                    timeLeft={timeLeft}
-                    onSubmit={() => handleSubmit(false)}
-                    onAskHint={handleAskHint}
-                  />
-                </div>
-              </Panel>
-            </>
-          )}
-        </Group>
+                  Question
+                </TabsTrigger>
+                <TabsTrigger
+                  value='chat'
+                  className='flex-1 isolate cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium text-gray-600 transition-all duration-200 hover:text-gray-900 hover:bg-white/50 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900'
+                >
+                  Interviewer
+                </TabsTrigger>
+                <TabsTrigger
+                  value='editor'
+                  className='flex-1 isolate cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium text-gray-600 transition-all duration-200 hover:text-gray-900 hover:bg-white/50 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900'
+                >
+                  Editor
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value='question' className='flex-1 min-h-0 m-0 p-0 border-none outline-none data-[state=inactive]:hidden overflow-y-auto bg-white'>
+              <div className={`h-full w-full transition-all duration-500 bg-white ${hasSubmitted ? 'opacity-40 blur-sm pointer-events-none' : ''}`}>
+                <QuestionPanel question={question} />
+              </div>
+            </TabsContent>
+
+            <TabsContent value='chat' className='flex-1 min-h-0 m-0 p-0 border-none outline-none data-[state=inactive]:hidden bg-white'>
+              <AIChatPanel
+                messages={messages}
+                chatInput={chatInput}
+                onChatInputChange={setChatInput}
+                onSend={handleChatSend}
+                messagesEndRef={messagesEndRef}
+                isAiTyping={isAiTyping}
+                showEditor={showEditor}
+                onToggleEditor={() => setShowEditor(!showEditor)}
+                hideEditorToggle={true}
+              />
+            </TabsContent>
+
+            <TabsContent value='editor' className='flex-1 min-h-0 m-0 p-0 border-none outline-none data-[state=inactive]:hidden bg-white'>
+              <div className={`h-full w-full transition-all duration-500 bg-white ${hasSubmitted ? 'opacity-40 blur-sm pointer-events-none' : ''}`}>
+                <EditorPane
+                  requiresCode={requiresCode}
+                  languages={languages}
+                  language={language}
+                  onLanguageChange={handleLanguageChange}
+                  code={currentCode}
+                  onCodeChange={handleCodeChange}
+                  explanation={explanation}
+                  onExplanationChange={handleExplanationChange}
+                  validationError={validationError}
+                  isSubmitting={isSubmitting}
+                  timeLeft={timeLeft}
+                  onSubmit={() => handleSubmit(false)}
+                  onAskHint={handleAskHint}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
 
         {hasSubmitted && (
           <div className='absolute inset-0 z-20 flex items-center justify-center p-8 bg-black/5 backdrop-blur-sm pointer-events-auto'>
