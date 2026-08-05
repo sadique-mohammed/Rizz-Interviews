@@ -47,7 +47,7 @@ export default function Hero() {
               </a>
             </div>
             <div className='w-full sm:w-auto flex'>
-              <DemoLoginButton className='w-full sm:w-auto px-6 sm:px-10' />
+              {/* <DemoLoginButton className='w-full sm:w-auto px-6 sm:px-10' /> */}
             </div>
           </div>
 

@@ -12,7 +12,7 @@ const createInterviewSchema = z.object({
   difficulty: z.enum(['easy', 'medium', 'hard']),
   duration: z.coerce
     .number()
-    .pipe(z.union([z.literal(1), z.literal(15), z.literal(30), z.literal(45)])),
+    .pipe(z.union([z.literal(15), z.literal(30), z.literal(45)])),
 });
 
 import { Ratelimit } from '@upstash/ratelimit';
