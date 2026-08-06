@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Panel, Group, Separator } from 'react-resizable-panels';
+import ReactMarkdown from 'react-markdown';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -336,8 +337,31 @@ const AIChatPanel = React.memo(function AIChatPanel({
                 </div>
                 <div className='flex flex-col items-start flex-1 min-w-0'>
                   <span className='mb-1 block text-[10px] font-semibold text-brand'>RizzInterviews</span>
-                  <div className='w-fit max-w-full rounded-lg rounded-tl-none border border-brand/15 bg-brand/8 px-3 py-2 text-sm leading-relaxed text-gray-800 break-words whitespace-pre-wrap'>
-                    {msg.text}
+                  <div className='w-fit max-w-full rounded-lg rounded-tl-none border border-brand/15 bg-brand/8 px-3 py-2 text-sm leading-relaxed text-gray-800 break-words'>
+                    <ReactMarkdown
+                      components={{
+                        p: ({ node, ...props }) => <p className='mb-2 last:mb-0' {...props} />,
+                        ul: ({ node, ...props }) => <ul className='list-disc pl-4 mb-2 last:mb-0 space-y-1' {...props} />,
+                        ol: ({ node, ...props }) => <ol className='list-decimal pl-4 mb-2 last:mb-0 space-y-1' {...props} />,
+                        li: ({ node, ...props }) => <li {...props} />,
+                        code: ({ node, className, children, ...props }) => {
+                          const match = /language-(\w+)/.exec(className || '');
+                          return !match ? (
+                            <code className='bg-brand/10 text-brand-dark px-1 py-0.5 rounded text-xs font-mono' {...props}>
+                              {children}
+                            </code>
+                          ) : (
+                            <pre className='bg-gray-100 p-2.5 rounded-md overflow-x-auto text-xs font-mono my-2 border border-gray-200 text-gray-800'>
+                              <code className={className} {...props}>
+                                {children}
+                              </code>
+                            </pre>
+                          );
+                        }
+                      }}
+                    >
+                      {msg.text}
+                    </ReactMarkdown>
                   </div>
                 </div>
               </div>
